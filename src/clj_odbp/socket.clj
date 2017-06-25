@@ -1,6 +1,7 @@
 (ns clj-odbp.socket
   (:require [clojure.java.io :as io]
-            [clj-odbp.serializer :as s])
+            [clj-odbp.serializer :as s]
+            [clj-odbp.deserialize :as d])
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
@@ -20,7 +21,7 @@
         data (ByteArrayOutputStream. )
         buffer (DataOutputStream. data)]
     (-> buffer
-        (s/read-int reader)) 
+        (d/read-int reader)) 
     sock))
 
 (defn connect
