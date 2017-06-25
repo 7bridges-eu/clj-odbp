@@ -5,14 +5,18 @@
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
-(def ^:const current-protocol-version 36)
+(def ^:const supported-protocol-version 36)
 
 (defn- create-socket
   "Connect to the OrientDB server and check the version"
   [host port]
   (let [sock (Socket. host port)
         reader (DataInputStream. (.getInputStream sock))
-        version (.readShort reader)] 
+        version (.readShort reader)]
+    (when (> version supported-protocol-version)
+      (throw (Exception. 
+              (str "Unsupported binary protocol version "
+                   version "."))))
     sock))
 
 (defn read-response
