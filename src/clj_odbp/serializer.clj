@@ -1,12 +1,6 @@
 (ns clj-odbp.serializer
   (import [java.io DataOutputStream]))
 
-;; (def ^:const write-map
-;;   {:byte write-byte
-;;    :string write-string
-;;    :short write-short
-;;    :bool write-boolean
-;;    :int write-int})
 
 (defn write-byte
   "Writes a single byte and then returns the stream."
@@ -43,12 +37,24 @@
     (.writeByte out 0))
   out)
 
-;; (defn serialize
-;;   [^DataOutputStream out message]
-;;   (reduce-kv
-;;    (fn [o k v]
-;;      (prn k v)
-;;      (let [f (get write-map k)]
-;;        (apply f [o v])))
-;;    out
-;;    message))
+(defn- validate-message
+  [codec message]
+  (when-not (every?
+             #(contains? codec (first %))
+             message)
+    (throw (Exception. "The message doesn't respect the codec."))))
+
+(defn encode
+  [^DataOutputStream stream codec message]
+  (validate-message codec message)
+  (doall (map
+          (fn [field]
+            (let [field-name (first field)
+                  value (second field)
+                  function (get codec field-name)]
+              (try
+                (apply function [stream value])
+                (catch Exception e 
+                  (throw (Exception. (str (.getMessage e) " writing " field-name))))))) 
+          message))
+  stream)
