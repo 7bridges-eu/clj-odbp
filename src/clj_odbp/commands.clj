@@ -3,7 +3,7 @@
            [clj-odbp.deserialize :as d])
   (import [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
 
-(def ^:const connect-request-spec
+(def connect-request-spec
   {:command s/write-byte
    :session s/write-int
    :driver-name s/write-string
@@ -17,8 +17,9 @@
    :username s/write-string
    :password s/write-string})
 
-(def ^:const connect-response-spec
+(def connect-response-spec
   {:status d/byte-type
+   :response-session d/int-type
    :session-id d/int-type
    :token d/bytes-type})
 

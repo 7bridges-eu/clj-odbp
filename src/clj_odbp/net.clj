@@ -1,8 +1,6 @@
 (ns clj-odbp.net
-  (:require [clojure.java.io :as io]
-            [clj-odbp.serializer :as s]
-            [clj-odbp.deserialize :as d])
-  (:import [java.io DataInputStream DataOutputStream ByteArrayOutputStream]
+  (:require [clojure.java.io :as io])
+  (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
 (def ^:const supported-protocol-version 36)
@@ -20,14 +18,14 @@
     socket))
 
 (defn write-request
-  [^Socket socket ^ByteArrayOutputStream request]
-  (let [out (.getOutputStream socket)]
-    (.writeTo request socket))
+  [^Socket socket command & args]
+  (let [out (.getOutputStream socket)
+        request (apply command args)]
+    (.writeTo request out)
+    (.flush out))
   socket)
 
 (defn read-response
-  [socket]
-  (let [reader (DataInputStream. (.getInputStream socket))]
-    (-> buffer
-        (d/read-int reader)) 
-    socket))
+  [^Socket socket command]
+  (let [in (DataInputStream. (.getInputStream socket))]
+    (command in)))

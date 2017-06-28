@@ -38,20 +38,20 @@
   out)
 
 (defn- validate-message
-  [codec message]
+  [spec message]
   (when-not (every?
-             #(contains? codec (first %))
+             #(contains? spec (first %))
              message)
-    (throw (Exception. "The message doesn't respect the codec."))))
+    (throw (Exception. "The message doesn't respect the spec."))))
 
 (defn encode
-  [^DataOutputStream stream codec message]
-  (validate-message codec message)
+  [^DataOutputStream stream spec message]
+  (validate-message spec message)
   (doall (map
           (fn [field]
             (let [field-name (first field)
                   value (second field)
-                  function (get codec field-name)]
+                  function (get spec field-name)]
               (try
                 (apply function [stream value])
                 (catch Exception e 

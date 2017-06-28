@@ -31,8 +31,7 @@
   "Read a sequence of bytes from the input stream."
   [^DataInputStream in]
   (let [len (int-type in)
-        buffer (byte-array len)]
-    (println (str "bytes len: " len))
+        buffer (byte-array len)] 
     (.read in buffer 0 len)
     (vec buffer)))
 
@@ -51,9 +50,9 @@
     (vec (repeat n (string-type in)))))
 
 (defn decode
-  [^DataInputStream in codec] 
+  [^DataInputStream in spec] 
   (reduce-kv
-   (fn [result key f]
-     (assoc result key (apply f [in])))
+   (fn [result key f] 
+     (assoc result key (f in)))
    {}
-   codec))
+   spec))
