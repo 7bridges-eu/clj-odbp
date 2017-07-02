@@ -34,11 +34,8 @@
 (defn decode
   [^DataInputStream in spec] 
   (reduce-kv
-   (fn [result field-name f]
-     (try
-       (assoc result field-name (f in))
-       (catch Exception e 
-         (throw (Exception. (str (.getMessage e) " reading " field-name))))))
+   (fn [result field-name f] 
+     (assoc result field-name (f in)))
    {}
    spec))
 

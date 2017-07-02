@@ -30,13 +30,15 @@
 (defn bytes-type
   "Read a sequence of bytes from the input stream."
   [^DataInputStream in]
-  (let [len (int-type in)
-        buffer (byte-array len)] 
-    (.read in buffer 0 len)
-    (vec buffer)))
+  (let [len (int-type in)]
+    (if (> len 0)
+      (let [buffer (byte-array len)]
+        (.read in buffer 0 len)
+        (vec buffer))
+      [])))
 
 (defn string-type
-  "Read a string from the input stream."
+  "Read a string from the input stream. Format is (length:int)[bytes]"
   [^DataInputStream in]
   (let [len (int-type in)
         buffer (byte-array len)]
@@ -44,18 +46,19 @@
     (apply str (map char buffer))))
 
 (defn strings-type
-  "Read a set of strings from the input stream."
+  "Read a set of strings from the input stream. Format is (elements:int)[strings]"
   [^DataInputStream in]
-  (let [n (short-type in)]
-    (vec (repeat n (string-type in)))))
+  (let [n (int-type in)]
+    (vec (repeatedly n
+                     #(string-type in)))))
 
 (defn array-of
-  "Read an array composed by defined type(s)."
+  "Read an array composed by defined type(s). Format is (elements:short)[values]"
   [functions]
   (fn [^DataInputStream in]
-    (let [n (int-type in)]
+    (let [n (short-type in)]
       (vec
-       (repeat n
-               (mapv (fn [f] 
-                       (apply f [in]))
-                     functions))))))
+       (repeatedly n
+                   #(mapv (fn [f] 
+                            (apply f [in]))
+                          functions))))))

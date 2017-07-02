@@ -1,11 +1,12 @@
 (ns clj-odbp.commands
-  (require [clj-odbp.specs :as specs]))
+  (require [clj-odbp.specs :as specs])
+  (import [java.io DataInputStream]))
 
 (defn connect-request
   [username password] 
   (specs/encode
    specs/connect-request
-   [[:command 3]
+   [[:command 2]
     [:session -1]
     [:driver-name "clj-odbp"]
     [:driver-version "0.0.1"]
