@@ -1,10 +1,9 @@
 (ns clj-odbp.specs
-  (require [clj-odbp.serializer :as s]
-           [clj-odbp.deserialize :as d])
-  (import [java.io
-           ByteArrayOutputStream
-           DataOutputStream
-           DataInputStream]))
+  (require
+   [clj-odbp.serialize :as s]
+   [clj-odbp.deserialize :as d])
+  (import
+   [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
 
 (defn- validate-message
   [spec message]
