@@ -46,13 +46,16 @@
 (defn strings-type
   "Read a set of strings from the input stream."
   [^DataInputStream in]
-  (let [n (int-type in)]
+  (let [n (short-type in)]
     (vec (repeat n (string-type in)))))
 
-(defn decode
-  [^DataInputStream in spec] 
-  (reduce-kv
-   (fn [result key f] 
-     (assoc result key (f in)))
-   {}
-   spec))
+(defn array-of
+  "Read an array composed by defined type(s)."
+  [functions]
+  (fn [^DataInputStream in]
+    (let [n (int-type in)]
+      (vec
+       (repeat n
+               (mapv (fn [f] 
+                       (apply f [in]))
+                     functions))))))
