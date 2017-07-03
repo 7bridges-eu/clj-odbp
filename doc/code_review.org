@@ -1,0 +1,17 @@
+#+STARTUP: showall
+#+TITLE: Code review
+
+* clj-odbp.deserialize
+- line 33: consider using [[http://clojuredocs.org/clojure.core/if-let][if-let]]
+- will a multi-method be a better implementation of the dispatch strategy?
+
+* clj-odbp.serialize
+- will a multi-method be a better implementation of the dispatch strategy?
+- style: use “Write” instead of “Writes” in doc strings
+- style: always terminate first sentence of comments with a full stop
+
+* clj-odbp.net
+- style: always terminate first sentence of comments with a full stop
+
+* clj-odbp.specs
+- line 26: consider using [[https://github.com/MichaelDrogalis/dire][dire]] to decouple function logic and error handling
