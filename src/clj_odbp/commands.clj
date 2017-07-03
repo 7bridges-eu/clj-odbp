@@ -3,6 +3,15 @@
            [clj-odbp.net :as net])
   (import [java.io DataInputStream]))
 
+(defmacro defcommand
+  [command-name args request-handler response-handler]
+  `(defn ~command-name
+     [~@args]
+     (with-open [s# (net/create-socket)]
+       (-> s#
+           (net/write-request ~request-handler ~@args)
+           (net/read-response ~response-handler)))))
+
 ;; REQUEST_CONNECT
 (defn- connect-request
   [username password] 
@@ -27,12 +36,10 @@
    in
    specs/connect-response))
 
-(defn connect
+(defcommand connect
   [username password]
-  (with-open [socket (net/create-socket)]
-    (-> socket
-        (net/write-request connect-request username password)
-        (net/read-response connect-response))))
+  connect-request
+  connect-response)
 
 ;; REQUEST_DB_OPEN
 (defn- connect-db-request
@@ -59,12 +66,10 @@
    in
    specs/connect-db-response))
 
-(defn connect-db
+(defcommand connect-db
   [db-name username password]
-  (with-open [socket (net/create-socket)]
-    (-> socket
-        (net/write-request connect-db-request db-name username password)
-        (net/read-response connect-db-response))))
+  connect-db-request
+  connect-db-response)
 
 ;; REQUEST_SHUTDOWN
 (defn- shutdown-request
@@ -79,8 +84,7 @@
   [^DataInputStream in]
   {})
 
-(defn shutdown
-  [socket username password]
-  (-> socket
-      (net/write-request shutdown-request username password)
-      (net/read-response shutdown-response)))
+(defcommand shutdown
+  [username password]
+  shutdown-request
+  shutdown-response)

@@ -1,4 +1,4 @@
-(ns clj-odbp.serialize 
+(ns clj-odbp.serialize
   (import [java.io DataOutputStream]))
 
 (defn bool-type
@@ -10,33 +10,33 @@
   out)
 
 (defn byte-type
-  "Write a single byte and then return the stream."
+  "Writes a single byte and then returns the stream."
   [^DataOutputStream out ^Byte value]
   (.writeByte out value)
   out)
 
 (defn short-type
-  "Write a Short and return the stream."
+  "Writes a Short and return the stream."
   [^DataOutputStream out ^Short value]
-  (.writehort out value)
+  (.writeShort out value)
   out)
 
 (defn int-type
-  "Write an Int and return the stream."
+  "Writes an Int and return the stream."
   [^DataOutputStream out ^Integer value]
   (.writeInt out value)
   out)
 
 (defn long-type
-  "Write a Long and return the stream."
+  "Writes a Long and return the stream."
   [^DataOutputStream out ^Long value]
   (.writeLong out value))
 
 (defn string-type
-  "Write a String and return the stream."
+  "Writes a String and return the stream."
   [^DataOutputStream out ^String value]
   (let [chars (.getBytes value)
-        size (count chars)] 
+        size (count chars)]
     (.writeInt out size)
     (.write out chars 0 size)
     out))
