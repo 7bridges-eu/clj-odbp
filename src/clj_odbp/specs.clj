@@ -38,6 +38,7 @@
    {}
    spec))
 
+;; REQUEST_CONNECT
 (def connect-request
   {:command s/byte-type
    :session s/int-type
@@ -58,7 +59,8 @@
    :session-id d/int-type
    :token d/bytes-type})
 
-(def db-open-request
+;; REQUEST_DB_OPEN
+(def connect-db-request
   {:command s/byte-type
    :session s/int-type
    :driver-name s/string-type
@@ -73,7 +75,7 @@
    :username s/string-type
    :password s/string-type})
 
-(def db-open-response
+(def connect-db-response
   {:status d/byte-type
    :response-session d/int-type
    :session-id d/int-type
@@ -81,3 +83,10 @@
    :clusters (d/array-of [d/string-type d/short-type])
    :cluster-config d/bytes-type
    :orient-db-relase d/string-type})
+
+;; REQUEST_SHUTDOWN
+(def shutdown-request
+  {:command s/byte-type
+   :sessio-id s/int-type
+   :username s/string-type
+   :password s/string-type})

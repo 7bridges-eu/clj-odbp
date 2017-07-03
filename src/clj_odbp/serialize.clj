@@ -2,7 +2,7 @@
   (import [java.io DataOutputStream]))
 
 (defn bool-type
-  "Write a boolean in form of a byte (0/1) and returns the stream."
+  "Write a boolean in form of a byte (0/1) and return the stream."
   [^DataOutputStream out ^Boolean value]
   (if value
     (.writeByte out 1)
@@ -10,30 +10,30 @@
   out)
 
 (defn byte-type
-  "Writes a single byte and then returns the stream."
+  "Write a single byte and then return the stream."
   [^DataOutputStream out ^Byte value]
   (.writeByte out value)
   out)
 
 (defn short-type
-  "Writes a Short and returns the stream."
+  "Write a Short and return the stream."
   [^DataOutputStream out ^Short value]
-  (.writeShort out value)
+  (.writehort out value)
   out)
 
 (defn int-type
-  "Writes an Int and returns the stream."
+  "Write an Int and return the stream."
   [^DataOutputStream out ^Integer value]
   (.writeInt out value)
   out)
 
 (defn long-type
-  "Writes a Long and returns the stream."
+  "Write a Long and return the stream."
   [^DataOutputStream out ^Long value]
   (.writeLong out value))
 
 (defn string-type
-  "Writes a String and returns the stream."
+  "Write a String and return the stream."
   [^DataOutputStream out ^String value]
   (let [chars (.getBytes value)
         size (count chars)] 
@@ -42,7 +42,7 @@
     out))
 
 (defn strings-type
-  "Write a vector of strings and returns the stream"
+  "Write a vector of strings and return the stream."
   [^DataOutputStream out v] 
   (let [size (count v)] 
     (.writeInt out size)

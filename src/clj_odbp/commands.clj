@@ -1,8 +1,10 @@
 (ns clj-odbp.commands
-  (require [clj-odbp.specs :as specs])
+  (require [clj-odbp.specs :as specs]
+           [clj-odbp.net :as net])
   (import [java.io DataInputStream]))
 
-(defn connect-request
+;; REQUEST_CONNECT
+(defn- connect-request
   [username password] 
   (specs/encode
    specs/connect-request
@@ -19,16 +21,24 @@
     [:username username]
     [:password password]]))
 
-(defn connect-response
+(defn- connect-response
   [^DataInputStream in]
   (specs/decode
    in
    specs/connect-response))
 
-(defn db-open-request
-  [db-name username password] 
+(defn connect
+  [username password]
+  (with-open [socket (net/create-socket)]
+    (-> socket
+        (net/write-request connect-request username password)
+        (net/read-response connect-response))))
+
+;; REQUEST_DB_OPEN
+(defn- connect-db-request
+  [db-name username password]
   (specs/encode 
-   specs/db-open-request
+   specs/connect-db-request
    [[:command 3]
     [:session -1]
     [:driver-name "clj-odbp"]
@@ -36,15 +46,41 @@
     [:protocol-version 36]
     [:client-id ""]
     [:serialization "ORecordSerializerBinary"]
-    [:token-session true]
+    [:token-session false]
     [:support-push true]
     [:collect-stats true]
     [:database-name db-name]
     [:username username]
     [:password password]]))
 
-(defn db-open-response
+(defn- connect-db-response
   [^DataInputStream in]
   (specs/decode
    in
-   specs/db-open-response))
+   specs/connect-db-response))
+
+(defn connect-db
+  [db-name username password]
+  (with-open [socket (net/create-socket)]
+    (-> socket
+        (net/write-request connect-db-request db-name username password)
+        (net/read-response connect-db-response))))
+
+;; REQUEST_SHUTDOWN
+(defn- shutdown-request
+  [username password]
+  (specs/encode
+   specs/shutdown-request
+   [[:command 1]
+    [:username username]
+    [:password password]]))
+
+(defn- shutdown-response
+  [^DataInputStream in]
+  {})
+
+(defn shutdown
+  [socket username password]
+  (-> socket
+      (net/write-request shutdown-request username password)
+      (net/read-response shutdown-response)))

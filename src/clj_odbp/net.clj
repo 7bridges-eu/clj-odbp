@@ -4,11 +4,20 @@
            [java.net Socket]))
 
 (def ^:const supported-protocol-version 36)
+(def config
+  (atom {:host "localhost"
+         :port 2424}))
+
+(defn configure-connection
+  [host port]
+  (swap! config assoc :host host)
+  (swap! config assoc :port port))
 
 (defn create-socket
-  "Connect to the OrientDB server and check the version"
-  [host port]
-  (let [socket (Socket. host port)
+  "Connect to the OrientDB server and check the version."
+  []
+  (let [{:keys [host port]} @config
+        socket (Socket. host port)
         reader (DataInputStream. (.getInputStream socket))
         version (.readShort reader)]
     (when (> version supported-protocol-version)

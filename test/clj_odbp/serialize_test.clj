@@ -29,7 +29,7 @@
              (provide-output s/long-type -1) => [-1 -1 -1 -1
                                                  -1 -1 -1 -1])
        (fact "Long - positive should return eight bytes"
-             (provite-output s/long-type 10) => [0 0 0 0
+             (provide-output s/long-type 10) => [0 0 0 0
                                                  0 0 0 10])
        (fact "String - 'abcd' should return eight bytes"
              (provide-output s/string-type "abcd") => [0 0 0 4
