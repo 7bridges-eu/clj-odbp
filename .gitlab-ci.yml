@@ -1,8 +1,0 @@
-before_script:
-  - export LEIN_ROOT=1
-  - PATH=$PATH:.
-  - lein deps
-
-test: 
-  script: 
-    - lein midje
