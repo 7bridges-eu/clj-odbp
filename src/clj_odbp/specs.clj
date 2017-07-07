@@ -17,17 +17,12 @@
   (let [out (ByteArrayOutputStream.)
         stream (DataOutputStream. out)]
     (validate-message spec message)
-    (doall
-     (map
-      (fn [field]
-        (let [field-name (first field)
-              value (second field)
-              function (get spec field-name)]
-          (try
-            (apply function [stream value])
-            (catch Exception e 
-              (throw (Exception. (str (.getMessage e) " writing " field-name))))))) 
-      message))
+    (doseq [[field-name value] message
+            :let [function (get spec field-name)]]
+      (try
+        (apply function [stream value])
+        (catch Exception e 
+          (throw (Exception. (str (.getMessage e) " writing " field-name))))))
     out))
 
 (defn decode
