@@ -82,6 +82,13 @@
 ;; REQUEST_SHUTDOWN
 (def shutdown-request
   {:command s/byte-type
-   :sessio-id s/int-type
+   :session-id s/int-type
    :username s/string-type
    :password s/string-type})
+
+;; REQUEST_COMMAND
+;; (mode:byte)(command-payload-length:int)(class-name:string)(command-payload)
+(def command-response
+  {:command s/byte-type
+   :session-id s/int-type
+   :token s/bytes-type})

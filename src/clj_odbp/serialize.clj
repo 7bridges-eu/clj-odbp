@@ -32,20 +32,30 @@
   [^DataOutputStream out ^Long value]
   (.writeLong out value))
 
+(defn bytes-type
+  "Writes a vector of bytes and then returns the stream."
+  [^DataOutputStream out value]
+  (let [size (count value)]
+    (if (> size 0)
+      (do
+        (int-type out size)
+        (doseq [byte value]
+          (byte-type out byte)))
+      (int-type -1)))
+  out)
+
 (defn string-type
   "Writes a String and return the stream."
   [^DataOutputStream out ^String value]
-  (let [chars (.getBytes value)
-        size (count chars)]
-    (.writeInt out size)
-    (.write out chars 0 size)
+  (let [chars (.getBytes value)]
+    (bytes-type out chars)
     out))
 
 (defn strings-type
   "Write a vector of strings and return the stream."
-  [^DataOutputStream out v] 
-  (let [size (count v)] 
+  [^DataOutputStream out values]
+  (let [size (count values)]
     (.writeInt out size)
-    (doall
-     (map #(string-type out %) v))
+    (doseq [value values]
+      (string-type out value))
     out))

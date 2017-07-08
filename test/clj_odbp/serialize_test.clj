@@ -17,6 +17,9 @@
              (provide-output s/bool-type true) => [1])
        (fact "Byte - 10 should return a byte 10"
              (provide-output s/byte-type 10) => [10])
+       (fact "Bytes - [10 20 30] should return an int and three bytes"
+             (provide-output s/bytes-type [10 20 30]) => [0 0 0 3
+                                                          10 20 30])
        (fact "Short - negative should return two bytes"
              (provide-output s/short-type -1) => [-1 -1])
        (fact "Short - positive should return two bytes"
@@ -33,7 +36,7 @@
                                                  0 0 0 10])
        (fact "String - 'abcd' should return eight bytes"
              (provide-output s/string-type "abcd") => [0 0 0 4
-                                                       97 98 99 100])
+                                                       97 98 99 100]) 
        (fact "Strings - ['abcd' 'efgh'] should return twenty bytes"
              (provide-output s/strings-type '["abcd" "efgh"])
              => [0 0 0 2
