@@ -1,37 +1,7 @@
 (ns clj-odbp.specs.db
   (require
    [clj-odbp.serialize :as s]
-   [clj-odbp.deserialize :as d])
-  (import
-   [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
-
-(defn- validate-message
-  [spec message]
-  (when-not (every?
-             #(contains? spec (first %))
-             message)
-    (throw (Exception. "The message doesn't respect the spec."))))
-
-(defn encode
-  [spec message] 
-  (let [out (ByteArrayOutputStream.)
-        stream (DataOutputStream. out)]
-    (validate-message spec message)
-    (doseq [[field-name value] message
-            :let [function (get spec field-name)]]
-      (try
-        (apply function [stream value])
-        (catch Exception e 
-          (throw (Exception. (str (.getMessage e) " writing " field-name))))))
-    out))
-
-(defn decode
-  [^DataInputStream in spec] 
-  (reduce-kv
-   (fn [result field-name f] 
-     (assoc result field-name (f in)))
-   {}
-   spec))
+   [clj-odbp.deserialize :as d]))
 
 ;; REQUEST_CONNECT
 (def connect-request

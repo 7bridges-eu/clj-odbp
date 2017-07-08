@@ -1,5 +1,6 @@
 (ns clj-odbp.serialize
-  (import [java.io DataOutputStream]))
+  (import
+   [java.io ByteArrayOutputStream DataOutputStream]))
 
 (defn bool-type
   "Write a boolean in form of a byte (0/1) and return the stream."
