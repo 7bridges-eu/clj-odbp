@@ -9,7 +9,7 @@
   [username password] 
   (encode
    specs/connect-request
-   [[:command 2]
+   [[:operation 2]
     [:session -1]
     [:driver-name "clj-odbp"]
     [:driver-version "0.0.1"]
@@ -33,7 +33,7 @@
   [db-name username password]
   (encode 
    specs/connect-db-request
-   [[:command 3]
+   [[:operation 3]
     [:session -1]
     [:driver-name "clj-odbp"]
     [:driver-version "0.0.1"]
@@ -58,7 +58,7 @@
   [username password]
   (encode
    specs/shutdown-request
-   [[:command 1]
+   [[:operation 1]
     [:username username]
     [:password password]]))
 
