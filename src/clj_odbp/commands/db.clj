@@ -1,5 +1,5 @@
-(ns clj-odbp.commands
-  (require [clj-odbp.specs :as specs]
+(ns clj-odbp.commands.db
+  (require [clj-odbp.specs.db :as specs]
            [clj-odbp.net :as net])
   (import [java.io DataInputStream]))
 

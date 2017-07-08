@@ -1,4 +1,4 @@
-(ns clj-odbp.specs
+(ns clj-odbp.specs.db
   (require
    [clj-odbp.serialize :as s]
    [clj-odbp.deserialize :as d])
