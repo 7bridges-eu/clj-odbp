@@ -15,8 +15,7 @@
    :load-tombstone s/bool-type})
 
 (def record-load-response
-  {:status d/byte-type
-   :session-id d/int-type
+  {:session-id d/int-type
    :payload-status d/byte-type
    :record-type d/byte-type
    :record-version d/int-type

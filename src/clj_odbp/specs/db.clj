@@ -19,8 +19,7 @@
    :password s/string-type})
 
 (def connect-response
-  {:status d/byte-type
-   :response-session d/int-type
+  {:response-session d/int-type
    :session-id d/int-type
    :token d/bytes-type})
 
@@ -41,10 +40,9 @@
    :password s/string-type})
 
 (def connect-db-response
-  {:status d/byte-type
-   :response-session d/int-type
+  {:response-session d/int-type
    :session-id d/int-type
-   :token d/bytes-type 
+   :token d/bytes-type
    :clusters (d/array-of [d/string-type d/short-type])
    :cluster-config d/bytes-type
    :orient-db-relase d/string-type})
@@ -55,10 +53,3 @@
    :session-id s/int-type
    :username s/string-type
    :password s/string-type})
-
-;; REQUEST_COMMAND
-;; (mode:byte)(command-payload-length:int)(class-name:string)(command-payload)
-(def command-response
-  {:operation s/byte-type
-   :session-id s/int-type
-   :token s/bytes-type})

@@ -5,7 +5,7 @@
 
 ;; REQUEST_CONNECT
 (defn connect-request
-  [username password] 
+  [username password]
   (encode
    specs/connect-request
    [[:operation 2]
@@ -30,7 +30,7 @@
 ;; REQUEST_DB_OPEN
 (defn connect-db-request
   [db-name username password]
-  (encode 
+  (encode
    specs/connect-db-request
    [[:operation 3]
     [:session -1]
