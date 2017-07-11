@@ -58,6 +58,7 @@
   (encode
    specs/shutdown-request
    [[:operation 1]
+    [:session-id -1]
     [:username username]
     [:password password]]))
 
