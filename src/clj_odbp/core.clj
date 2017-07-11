@@ -1,6 +1,7 @@
 (ns clj-odbp.core
   (require [clj-odbp.utils :refer [defcommand]]
-           [clj-odbp.commands.db :as db]))
+           [clj-odbp.commands.db :as db]
+           [clj-odbp.commands.record :as record]))
 
 (defcommand connect-server
   [username password]
@@ -16,3 +17,8 @@
   [db-name username password]
   db/connect-db-request
   db/connect-db-response)
+
+(defcommand record-load
+  [session-id record-id record-position]
+  record/record-load-request
+  record/record-load-response)

@@ -1,7 +1,6 @@
 (ns clj-odbp.commands.db
   (require [clj-odbp.specs.db :as specs]
-           [clj-odbp.utils :refer [encode decode]]
-           [clj-odbp.net :as net])
+           [clj-odbp.utils :refer [encode decode]])
   (import [java.io DataInputStream]))
 
 ;; REQUEST_CONNECT
