@@ -1,5 +1,6 @@
 (ns clj-odbp.net
-  (:require [clojure.java.io :as io])
+  (:require [clj-odbp.deserialize :as d]
+            [clojure.java.io :as io])
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))
 
@@ -21,7 +22,7 @@
         reader (DataInputStream. (.getInputStream socket))
         version (.readShort reader)]
     (when (> version supported-protocol-version)
-      (throw (Exception. 
+      (throw (Exception.
               (str "Unsupported binary protocol version "
                    version "."))))
     socket))
@@ -36,5 +37,8 @@
 
 (defn read-response
   [^Socket socket command]
-  (let [in (DataInputStream. (.getInputStream socket))]
-    (command in)))
+  (let [in (DataInputStream. (.getInputStream socket))
+        status (.readByte in)]
+    (if (= 0 status)
+      (command in)
+      (d/handle-exception in))))

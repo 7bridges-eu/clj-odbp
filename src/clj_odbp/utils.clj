@@ -1,6 +1,6 @@
 (ns clj-odbp.utils
-  (require [clj-odbp.net :as net])
-  (import [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
+  (:require [clj-odbp.net :as net])
+  (:import [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
 
 (defn- validate-message
   [spec message]
