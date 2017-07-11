@@ -1,41 +1,11 @@
-(ns clj-odbp.specs
+(ns clj-odbp.specs.db
   (require
    [clj-odbp.serialize :as s]
-   [clj-odbp.deserialize :as d])
-  (import
-   [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
-
-(defn- validate-message
-  [spec message]
-  (when-not (every?
-             #(contains? spec (first %))
-             message)
-    (throw (Exception. "The message doesn't respect the spec."))))
-
-(defn encode
-  [spec message] 
-  (let [out (ByteArrayOutputStream.)
-        stream (DataOutputStream. out)]
-    (validate-message spec message)
-    (doseq [[field-name value] message
-            :let [function (get spec field-name)]]
-      (try
-        (apply function [stream value])
-        (catch Exception e 
-          (throw (Exception. (str (.getMessage e) " writing " field-name))))))
-    out))
-
-(defn decode
-  [^DataInputStream in spec] 
-  (reduce-kv
-   (fn [result field-name f] 
-     (assoc result field-name (f in)))
-   {}
-   spec))
+   [clj-odbp.deserialize :as d]))
 
 ;; REQUEST_CONNECT
 (def connect-request
-  {:command s/byte-type
+  {:operation s/byte-type
    :session s/int-type
    :driver-name s/string-type
    :driver-version s/string-type
@@ -56,7 +26,7 @@
 
 ;; REQUEST_DB_OPEN
 (def connect-db-request
-  {:command s/byte-type
+  {:operation s/byte-type
    :session s/int-type
    :driver-name s/string-type
    :driver-version s/string-type
@@ -81,7 +51,7 @@
 
 ;; REQUEST_SHUTDOWN
 (def shutdown-request
-  {:command s/byte-type
+  {:operation s/byte-type
    :session-id s/int-type
    :username s/string-type
    :password s/string-type})
@@ -89,6 +59,6 @@
 ;; REQUEST_COMMAND
 ;; (mode:byte)(command-payload-length:int)(class-name:string)(command-payload)
 (def command-response
-  {:command s/byte-type
+  {:operation s/byte-type
    :session-id s/int-type
    :token s/bytes-type})

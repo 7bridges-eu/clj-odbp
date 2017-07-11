@@ -1,5 +1,6 @@
 (ns clj-odbp.serialize
-  (import [java.io DataOutputStream]))
+  (import
+   [java.io ByteArrayOutputStream DataOutputStream]))
 
 (defn bool-type
   "Write a boolean in form of a byte (0/1) and return the stream."
@@ -41,7 +42,7 @@
         (int-type out size)
         (doseq [byte value]
           (byte-type out byte)))
-      (int-type -1)))
+      (int-type out -1)))
   out)
 
 (defn string-type
@@ -55,7 +56,7 @@
   "Write a vector of strings and return the stream."
   [^DataOutputStream out values]
   (let [size (count values)]
-    (.writeInt out size)
+    (int-type out size)
     (doseq [value values]
       (string-type out value))
     out))
