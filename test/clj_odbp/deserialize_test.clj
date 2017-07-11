@@ -48,7 +48,7 @@
                                                        ["cd" 3]]))
        (fact
         "deserialize-exception should return a vector of strings:
-         [\"error 1\" \"error 2\"]"
+         ['error 1' 'error 2']"
         (let [in (let [ex-class (.getBytes "error")
                        ex-message (.getBytes "test")]
                    (provide-input (concat [1]
