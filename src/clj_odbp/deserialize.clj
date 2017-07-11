@@ -63,22 +63,22 @@
                             (apply f [in]))
                           functions))))))
 
-(defn- deserialize-exception
+(defn deserialize-exception
   "De-serialize OrientDB exception from DataInputStream `in`."
   [in]
   (loop [delimiter (byte-type in)
          acc []]
-    (if (not= delimiter 0)
+    (if (= delimiter 0)
+      acc
       (do
         (let [ex-class (string-type in)
               ex-message (string-type in)]
-          (recur (byte-type in) (conj acc (str ex-class ": " ex-message)))))
-      acc)))
+          (recur (byte-type in) (conj acc (str ex-class ": " ex-message))))))))
 
-(defn- format-stacktrace
-  "Reduce a vector of strings `v` to a single white-spaced separated string."
+(defn format-stacktrace
+  "Reduce a vector of strings `v` to a single '\n'-separated string."
   [v]
-  (reduce str (interpose " " v)))
+  (reduce str (interpose "\n" v)))
 
 (defn handle-exception
   "De-serialize an OrientDB exception in DataInputStream `in` and throw it."
