@@ -84,3 +84,12 @@
 (def db-size-response
   {:session-id d/int-type
    :size d/long-type})
+
+;; REQUEST_DB_COUNTRECORDS
+(def db-countrecords-request
+  {:operation s/byte-type
+   :session-id s/int-type})
+
+(def db-countrecords-response
+  {:session-id d/int-type
+   :count d/long-type})

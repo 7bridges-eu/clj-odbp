@@ -121,3 +121,17 @@
   (decode
    in
    specs/db-size-response))
+
+;; REQUEST_DB_COUNTRECORDS
+(defn db-countrecords-request
+  [session-id]
+  (encode
+   specs/db-countrecords-request
+   [[:operation 9]
+    [:session-id session-id]]))
+
+(defn db-countrecords-response
+  [^DataInputStream in]
+  (decode
+   in
+   specs/db-countrecords-response))

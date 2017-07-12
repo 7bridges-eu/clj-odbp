@@ -45,3 +45,8 @@
   [session-id]
   db/db-size-request
   db/db-size-response)
+
+(defcommand db-countrecords
+  [session-id]
+  db/db-countrecords-request
+  db/db-countrecords-response)
