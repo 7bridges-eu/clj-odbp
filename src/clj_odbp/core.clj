@@ -40,3 +40,8 @@
   [session-id db-name]
   db/db-drop-request
   db/db-drop-response)
+
+(defcommand db-size
+  [session-id]
+  db/db-size-request
+  db/db-size-response)

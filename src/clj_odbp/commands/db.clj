@@ -107,3 +107,17 @@
 (defn db-drop-response
   [^DataInputStream in]
   {})
+
+;; REQUEST_DB_SIZE
+(defn db-size-request
+  [session-id]
+  (encode
+   specs/db-size-request
+   [[:operation 8]
+    [:session-id session-id]]))
+
+(defn db-size-response
+  [^DataInputStream in]
+  (decode
+   in
+   specs/db-size-response))
