@@ -75,3 +75,12 @@
    :session-id s/int-type
    :database-name s/string-type
    :storage-type s/string-type})
+
+;; REQUEST_DB_SIZE
+(def db-size-request
+  {:operation s/byte-type
+   :session-id s/int-type})
+
+(def db-size-response
+  {:session-id d/int-type
+   :size d/long-type})
