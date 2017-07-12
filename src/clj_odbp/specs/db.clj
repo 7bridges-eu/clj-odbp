@@ -57,3 +57,14 @@
 ;; REQUEST_DB_CLOSE
 (def db-close-request
   {:operation s/byte-type})
+
+;; REQUEST_DB_EXIST
+(def db-exist-request
+  {:operation s/byte-type
+   :session-id s/int-type
+   :database-name s/string-type
+   :server-storage-type s/string-type})
+
+(def db-exist-response
+  {:session-id d/int-type
+   :result d/bool-type})

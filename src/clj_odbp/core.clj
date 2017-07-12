@@ -30,3 +30,8 @@
   [session-id record-id record-position]
   record/record-load-request
   record/record-load-response)
+
+(defcommand db-exist
+  [session-id db-name]
+  db/db-exist-request
+  db/db-exist-response)
