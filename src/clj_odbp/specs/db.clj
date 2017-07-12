@@ -53,3 +53,7 @@
    :session-id s/int-type
    :username s/string-type
    :password s/string-type})
+
+;; REQUEST_DB_CLOSE
+(def db-close-request
+  {:operation s/byte-type})

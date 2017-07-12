@@ -65,3 +65,14 @@
 (defn shutdown-response
   [^DataInputStream in]
   {})
+
+;; REQUEST_DB_CLOSE
+(defn db-close-request
+  []
+  (encode
+   specs/db-close-request
+   [[:operation 5]]))
+
+(defn db-close-response
+  [^DataInputStream in]
+  {})

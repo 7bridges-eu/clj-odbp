@@ -1,5 +1,6 @@
 (ns clj-odbp.core
-  (require [clj-odbp.utils :refer [defcommand]]
+  (require [clj-odbp.net :as net]
+           [clj-odbp.utils :refer [defcommand]]
            [clj-odbp.commands.db :as db]
            [clj-odbp.commands.record :as record]))
 
@@ -17,6 +18,13 @@
   [db-name username password]
   db/connect-db-request
   db/connect-db-response)
+
+(defn db-close
+  []
+  (with-open [socket (net/create-socket)]
+    (-> socket
+        (net/write-request db/db-close-request))
+    {}))
 
 (defcommand record-load
   [session-id record-id record-position]
