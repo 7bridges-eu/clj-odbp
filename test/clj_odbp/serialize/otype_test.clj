@@ -1,12 +1,12 @@
-(ns clj-odbp.serialize-test
-  (:require [clj-odbp.serialize :as s]
+(ns clj-odbp.serialize.otype-test
+  (:require [clj-odbp.serialize.otype :as s]
             [midje.sweet :refer :all])
   (import [java.io DataOutputStream ByteArrayOutputStream]))
 
 (defn- provide-output
   [f values]
   (let [buffer (ByteArrayOutputStream.)
-        out (DataOutputStream. buffer)] 
+        out (DataOutputStream. buffer)]
     (apply f out [values])
     (vec (.toByteArray buffer))))
 
@@ -36,10 +36,9 @@
                                                  0 0 0 10])
        (fact "String - 'abcd' should return eight bytes"
              (provide-output s/string-type "abcd") => [0 0 0 4
-                                                       97 98 99 100]) 
+                                                       97 98 99 100])
        (fact "Strings - ['abcd' 'efgh'] should return twenty bytes"
              (provide-output s/strings-type '["abcd" "efgh"])
              => [0 0 0 2
                  0 0 0 4 97 98 99 100
                  0 0 0 4 101 102 103 104]))
-

@@ -1,7 +1,7 @@
 (ns clj-odbp.commands.record
-  (require [clj-odbp.specs.record :as specs]
-           [clj-odbp.utils :refer [encode decode]])
-  (import [java.io DataInputStream]))
+  (:require [clj-odbp.specs.record :as specs]
+            [clj-odbp.utils :refer [encode decode]])
+  (:import [java.io DataInputStream]))
 
 (defn record-load-request
   [session-id id position]

@@ -1,5 +1,5 @@
 (ns clj-odbp.net
-  (:require [clj-odbp.deserialize :as d]
+  (:require [clj-odbp.deserialize.otype :as d]
             [clojure.java.io :as io])
   (:import [java.io DataInputStream DataOutputStream]
            [java.net Socket]))

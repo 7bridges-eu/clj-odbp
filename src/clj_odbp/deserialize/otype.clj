@@ -1,4 +1,4 @@
-(ns clj-odbp.deserialize
+(ns clj-odbp.deserialize.otype
   (import [java.io DataInputStream]))
 
 (defn bool-type

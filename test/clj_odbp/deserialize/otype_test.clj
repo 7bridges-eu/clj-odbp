@@ -1,5 +1,5 @@
-(ns clj-odbp.deserialize-test
-  (:require [clj-odbp.deserialize :as d]
+(ns clj-odbp.deserialize.otype-test
+  (:require [clj-odbp.deserialize.otype :as d]
             [midje.sweet :refer :all])
   (:import [java.io ByteArrayInputStream DataInputStream]))
 

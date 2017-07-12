@@ -1,4 +1,4 @@
-(ns clj-odbp.serialize
+(ns clj-odbp.serialize.otype
   (import
    [java.io ByteArrayOutputStream DataOutputStream]))
 

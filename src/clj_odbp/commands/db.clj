@@ -1,8 +1,8 @@
 (ns clj-odbp.commands.db
-  (require [clj-odbp.constants :as consts]
-           [clj-odbp.specs.db :as specs]
-           [clj-odbp.utils :refer [encode decode]])
-  (import [java.io DataInputStream]))
+  (:require [clj-odbp.constants :as consts]
+            [clj-odbp.specs.db :as specs]
+            [clj-odbp.utils :refer [encode decode]])
+  (:import [java.io DataInputStream]))
 
 ;; REQUEST_CONNECT
 (defn connect-request

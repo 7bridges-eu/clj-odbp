@@ -1,8 +1,8 @@
 (ns clj-odbp.core
-  (require [clj-odbp.net :as net]
-           [clj-odbp.utils :refer [defcommand]]
-           [clj-odbp.commands.db :as db]
-           [clj-odbp.commands.record :as record]))
+  (:require [clj-odbp.net :as net]
+            [clj-odbp.utils :refer [defcommand]]
+            [clj-odbp.commands.db :as db]
+            [clj-odbp.commands.record :as record]))
 
 (defcommand connect-server
   [username password]
