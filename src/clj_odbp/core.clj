@@ -35,3 +35,8 @@
   [session-id db-name]
   db/db-exist-request
   db/db-exist-response)
+
+(defcommand db-drop
+  [session-id db-name]
+  db/db-drop-request
+  db/db-drop-response)

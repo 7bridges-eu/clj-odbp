@@ -16,7 +16,7 @@
     [:protocol-version 36]
     [:client-id ""]
     [:serialization "ORecordSerializerBinary"]
-    [:token-session true]
+    [:token-session false]
     [:support-push true]
     [:collect-stats true]
     [:username username]
@@ -93,3 +93,17 @@
   (decode
    in
    specs/db-exist-response))
+
+;; REQUEST_DB_DROP
+(defn db-drop-request
+  [session-id db-name]
+  (encode
+   specs/db-drop-request
+   [[:operation 7]
+    [:session-id session-id]
+    [:database-name db-name]
+    [:storage-type consts/storage-type-plocal]]))
+
+(defn db-drop-response
+  [^DataInputStream in]
+  {})

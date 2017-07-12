@@ -68,3 +68,10 @@
 (def db-exist-response
   {:session-id d/int-type
    :result d/bool-type})
+
+;; REQUEST_DB_DROP
+(def db-drop-request
+  {:operation s/byte-type
+   :session-id s/int-type
+   :database-name s/string-type
+   :storage-type s/string-type})
