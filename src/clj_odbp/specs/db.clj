@@ -93,3 +93,12 @@
 (def db-countrecords-response
   {:session-id d/int-type
    :count d/long-type})
+
+;; REQUEST_DB_RELOAD
+(def db-reload-request
+  {:operation s/byte-type
+   :session-id s/int-type})
+
+(def db-reload-response
+  {:session-id d/int-type
+   :clusters (d/array-of [d/string-type d/short-type])})

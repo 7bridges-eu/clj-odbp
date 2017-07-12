@@ -135,3 +135,17 @@
   (decode
    in
    specs/db-countrecords-response))
+
+;; REQUEST_DB_RELOAD
+(defn db-reload-request
+  [session-id]
+  (encode
+   specs/db-reload-request
+   [[:operation 73]
+    [:session-id session-id]]))
+
+(defn db-reload-response
+  [^DataInputStream in]
+  (decode
+   in
+   specs/db-reload-response))

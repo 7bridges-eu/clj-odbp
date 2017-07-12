@@ -50,3 +50,8 @@
   [session-id]
   db/db-countrecords-request
   db/db-countrecords-response)
+
+(defcommand db-reload
+  [session-id]
+  db/db-reload-request
+  db/db-reload-response)
