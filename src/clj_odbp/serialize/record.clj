@@ -1,5 +1,7 @@
 (ns clj-odbp.serialize.record
-  (:require [clj-odbp.types :as types])
+  (:require
+   [clj-odbp.types :as types]
+   [clojure.data.json :as json])
   (:import
    [java.text DateFormat SimpleDateFormat]
    [java.util Date]))
@@ -15,6 +17,10 @@
 (defn class-type
   [value]
   (str value "@"))
+
+(defn keyword-type
+  [value]
+  (name value))
 
 (defn string-type
   [value]
@@ -68,7 +74,7 @@
 
 (defn map-type
   [value]
-  )
+  (json/write-str value))
 
 (defn rid-bag-type
   [value]
@@ -76,6 +82,11 @@
 
 (defprotocol Serialization
   (serialize [value]))
+
+(extend-type clojure.lang.Keyword
+  Serialization
+  (serialize [value]
+    (keyword-type value)))
 
 (extend-type java.lang.String
   Serialization
@@ -121,3 +132,8 @@
   Serialization
   (serialize [value]
     (bool-type value)))
+
+(extend-type clojure.lang.PersistentArrayMap
+  Serialization
+  (serialize [value]
+    (map-type value)))
