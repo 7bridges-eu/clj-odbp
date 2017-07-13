@@ -52,54 +52,6 @@
   [value]
   value)
 
-(defprotocol OrientType
-  (serialize [value]))
-
-(extend-type java.lang.String
-  OrientType
-  (serialize [value]
-    (string-type value)))
-
-(extend-type java.lang.Integer
-  OrientType
-  (serialize [value]
-    (integer-type value)))
-
-(extend-type java.lang.Long
-  OrientType
-  (serialize [value]
-    (long-type value)))
-
-(extend-type java.lang.Short
-  OrientType
-  (serialize [value]
-    (short-type value)))
-
-(extend-type java.lang.Byte
-  OrientType
-  (serialize [value]
-    (byte-type value)))
-
-(extend-type java.lang.Float
-  OrientType
-  (serialize [value]
-    (float-type value)))
-
-(extend-type java.lang.Double
-  OrientType
-  (serialize [value]
-    (double-type value)))
-
-(extend-type java.math.BigDecimal
-  OrientType
-  (serialize [value]
-    (big-decimal-type value)))
-
-(extend-type java.lang.Boolean
-  OrientType
-  (serialize [value]
-    (bool-type value)))
-
 (defn embedded-document-type
   [value]
   (str "(" value ")"))
@@ -121,3 +73,51 @@
 (defn rid-bag-type
   [value]
   )
+
+(defprotocol Serialization
+  (serialize [value]))
+
+(extend-type java.lang.String
+  Serialization
+  (serialize [value]
+    (string-type value)))
+
+(extend-type java.lang.Integer
+  Serialization
+  (serialize [value]
+    (integer-type value)))
+
+(extend-type java.lang.Long
+  Serialization
+  (serialize [value]
+    (long-type value)))
+
+(extend-type java.lang.Short
+  Serialization
+  (serialize [value]
+    (short-type value)))
+
+(extend-type java.lang.Byte
+  Serialization
+  (serialize [value]
+    (byte-type value)))
+
+(extend-type java.lang.Float
+  Serialization
+  (serialize [value]
+    (float-type value)))
+
+(extend-type java.lang.Double
+  Serialization
+  (serialize [value]
+    (double-type value)))
+
+(extend-type java.math.BigDecimal
+  Serialization
+  (serialize [value]
+    (big-decimal-type value)))
+
+(extend-type java.lang.Boolean
+  Serialization
+  (serialize [value]
+    (bool-type value)))
