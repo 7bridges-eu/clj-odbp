@@ -32,3 +32,11 @@
 
 (defn orient-date-time [value]
   (->OrientDateTime value))
+
+(deftype OrientRecordId [value]
+  OrientType
+  (serialize [this]
+    (str "#" value)))
+
+(defn orient-record-id [value]
+  (->OrientRecordId value))
