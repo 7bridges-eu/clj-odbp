@@ -6,6 +6,9 @@
    [java.text DateFormat SimpleDateFormat]
    [java.util Date]))
 
+(defprotocol Serialization
+  (serialize [value]))
+
 (defn class-type
   [value]
   (str value "@"))
@@ -67,9 +70,6 @@
   (let [serialized (for [k (keys value)]
                      (str (name k) ":" (serialize (get value k))))]
     (apply str (interpose "," serialized))))
-
-(defprotocol Serialization
-  (serialize [value]))
 
 (extend-type clojure.lang.Keyword
   Serialization
