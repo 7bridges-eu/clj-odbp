@@ -1,4 +1,5 @@
 (ns clj-odbp.types
+  (:require [clojure.data.json :as json])
   (:import
    [java.text DateFormat SimpleDateFormat]
    [java.util Date]))
@@ -43,3 +44,17 @@
 
 (defn orient-record-id [value]
   (->OrientRecordId value))
+
+(deftype OrientEmbeddedDocument [value]
+  OrientType
+  (serialize [this]
+    (str "(" (json/write-str value) ")")))
+
+(defn orient-embedded-document [value]
+  (->OrientEmbeddedDocument value))
+
+(deftype OrientRidBag [value]
+  )
+
+(defn orient-rid-bag [value]
+  (->OrientRidBag value))

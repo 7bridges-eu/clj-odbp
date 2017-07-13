@@ -58,10 +58,6 @@
   [value]
   value)
 
-(defn embedded-document-type
-  [value]
-  (str "(" value ")"))
-
 (defn list-type
   [value]
   (let [comma-separated (apply str (interpose "," value))]
@@ -75,10 +71,6 @@
 (defn map-type
   [value]
   (json/write-str value))
-
-(defn rid-bag-type
-  [value]
-  )
 
 (defprotocol Serialization
   (serialize [value]))
@@ -132,6 +124,21 @@
   Serialization
   (serialize [value]
     (bool-type value)))
+
+(extend-type clojure.lang.PersistentList
+  Serialization
+  (serialize [value]
+    (list-type value)))
+
+(extend-type clojure.lang.PersistentVector
+  Serialization
+  (serialize [value]
+    (list-type value)))
+
+(extend-type clojure.lang.PersistentHashSet
+  Serialization
+  (serialize [value]
+    (set-type value)))
 
 (extend-type clojure.lang.PersistentArrayMap
   Serialization
