@@ -6,14 +6,6 @@
    [java.text DateFormat SimpleDateFormat]
    [java.util Date]))
 
-;; See: http://orientdb.com/docs/last/Record-CSV-Serialization.html
-
-;; Example of record to be CSV serialized:
-;; {"Location" {:name "Bar" :description "Bar Mario" :cost 12.50}}
-
-;; Possible solution: parse record recursively, processing elements by
-;; dispatching based on type
-
 (defn class-type
   [value]
   (str value "@"))
@@ -24,7 +16,7 @@
 
 (defn string-type
   [value]
-  (str "\"" value "\""))
+  (str "\\\"" value "\\\""))
 
 (defn integer-type
   [value]
@@ -60,17 +52,21 @@
 
 (defn list-type
   [value]
-  (let [comma-separated (apply str (interpose "," value))]
+  (let [serialized (map serialize value)
+        comma-separated (apply str (interpose "," serialized))]
     (str "[" comma-separated "]")))
 
 (defn set-type
   [value]
-  (let [comma-separated (apply str (interpose "," value))]
+  (let [serialized (map serialize value)
+        comma-separated (apply str (interpose "," serialized))]
     (str "<" comma-separated ">")))
 
 (defn map-type
   [value]
-  (json/write-str value))
+  (let [serialized (for [k (keys value)]
+                     (str (name k) ":" (serialize (get value k))))]
+    (apply str (interpose "," serialized))))
 
 (defprotocol Serialization
   (serialize [value]))
@@ -144,3 +140,10 @@
   Serialization
   (serialize [value]
     (map-type value)))
+
+(defn serialize-record [record]
+  (let [class-keyword (first (keys record))
+        orient-class (class-type class-keyword)
+        values (get record class-keyword)
+        orient-values (serialize values)]
+    (str orient-class orient-values)))
