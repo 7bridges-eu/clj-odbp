@@ -8,7 +8,10 @@
 
 (deftype OrientBase64 [value]
   OrientType
-  (serialize [this] value))
+  (serialize [this]
+    (let [bytes (.getBytes value)
+          bytes-to-string (apply str bytes)]
+      (str "_" bytes-to-string "_"))))
 
 (defn orient-base64 [value]
   (->OrientBase64 value))
