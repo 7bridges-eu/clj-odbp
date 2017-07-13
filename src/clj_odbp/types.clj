@@ -53,6 +53,14 @@
 (defn orient-embedded-document [value]
   (->OrientEmbeddedDocument value))
 
+(deftype OrientMap [value]
+  OrientType
+  (serialize [this]
+    (json/write-str value)))
+
+(defn orient-map [value]
+  (->OrientMap value))
+
 (deftype OrientRidBag [value]
   )
 
