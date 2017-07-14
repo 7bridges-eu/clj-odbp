@@ -1,10 +1,8 @@
 (ns clj-odbp.serialize.record
-  (:require
-   [clj-odbp.types :as types]
-   [clojure.data.json :as json])
-  (:import
-   [java.text DateFormat SimpleDateFormat]
-   [java.util Date]))
+  (:require [clj-odbp.types :as types]
+            [clojure.data.json :as json])
+  (:import [java.text DateFormat SimpleDateFormat]
+           [java.util Date]))
 
 (defprotocol Serialization
   (serialize [value]))
