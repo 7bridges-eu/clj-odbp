@@ -57,6 +57,6 @@
   record/record-load-response)
 
 (defcommand record-create
-  [session-id record-content record-type]
+  [session-id record-content]
   record/record-create-request
   record/record-create-response)
