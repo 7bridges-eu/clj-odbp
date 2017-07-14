@@ -30,7 +30,7 @@
    specs/record-create-request
    [[:operation 31]
     [:session-id session-id]
-    [:cluster-id (short 0)]
+    [:cluster-id (short -1)]
     [:record-content (.getBytes (serialize-record record-content))]
     [:record-type (byte \d)]
     [:mode 0]]))
