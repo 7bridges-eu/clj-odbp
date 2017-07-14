@@ -62,7 +62,9 @@
   (->OrientMap value))
 
 (deftype OrientRidBag [value]
-  )
+  OrientType
+  (serialize [this]
+    (str "content:" value)))
 
 (defn orient-rid-bag [value]
   (->OrientRidBag value))

@@ -42,4 +42,7 @@
              "({\"name\":\"Test\",\"value\":1})")
        (fact "OrientMap - map-test should return '{'name':'Test','value':1}'"
              (.serialize (t/orient-map map-test)) =>
-             "{\"name\":\"Test\",\"value\":1}"))
+             "{\"name\":\"Test\",\"value\":1}")
+       (fact "OrientRidBag - base64-test should return 'content:dGVzdA=='"
+             (.serialize (t/orient-rid-bag base64-test)) =>
+             "content:dGVzdA=="))
