@@ -7,6 +7,17 @@
 (defprotocol Serialization
   (serialize [value]))
 
+(defn serialize-by-type [value]
+  (condp = (type value)
+    clj_odbp.types.OrientBase64 (.serialize value)
+    clj_odbp.types.OrientDate (.serialize value)
+    clj_odbp.types.OrientDateTime (.serialize value)
+    clj_odbp.types.OrientRecordId (.serialize value)
+    clj_odbp.types.OrientEmbeddedDocument (.serialize value)
+    clj_odbp.types.OrientMap (.serialize value)
+    clj_odbp.types.OrientRidBag (.serialize value)
+    (serialize value)))
+
 (defn class-type
   [value]
   (str value "@"))
@@ -53,20 +64,20 @@
 
 (defn list-type
   [value]
-  (let [serialized (map serialize value)
+  (let [serialized (map serialize-by-type value)
         comma-separated (apply str (interpose "," serialized))]
     (str "[" comma-separated "]")))
 
 (defn set-type
   [value]
-  (let [serialized (map serialize value)
+  (let [serialized (map serialize-by-type value)
         comma-separated (apply str (interpose "," serialized))]
     (str "<" comma-separated ">")))
 
 (defn map-type
   [value]
   (let [serialized (for [k (keys value)]
-                     (str (name k) ":" (serialize (get value k))))]
+                     (str (name k) ":" (serialize-by-type (get value k))))]
     (apply str (interpose "," serialized))))
 
 (extend-type clojure.lang.Keyword
@@ -143,5 +154,5 @@
   (let [class-keyword (first (keys record))
         orient-class (class-type class-keyword)
         values (get record class-keyword)
-        orient-values (serialize values)]
+        orient-values (serialize-by-type values)]
     (str orient-class orient-values)))
