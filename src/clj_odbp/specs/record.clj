@@ -19,3 +19,18 @@
    :record-type d/byte-type
    :record-version d/int-type
    :record-content d/bytes-type})
+
+;; REQUEST_RECORD_CREATE
+(def record-create-request
+  {:operation s/byte-type
+   :session-id s/int-type
+   :cluster-id s/short-type
+   :record-content s/bytes-type
+   :record-type s/byte-type
+   :mode s/byte-type})
+
+(def record-create-response
+  {:session-id d/int-type
+   :cluster-id d/short-type
+   :cluster-position d/long-type
+   :record-version d/int-type})
