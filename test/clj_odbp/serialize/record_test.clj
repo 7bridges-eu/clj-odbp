@@ -10,7 +10,7 @@
        (fact "Keyword - keyword :test should return 'test'"
              (r/keyword-type :test) => "test")
        (fact "String - string 'test' should return 'test'
-              with escaped double-quotes."
+              with escaped double-quotes"
              (r/string-type "test") => "\\\"test\\\"")
        (fact "Integer - integer 1 should return '1'"
              (r/integer-type (int 1)) => "1")
