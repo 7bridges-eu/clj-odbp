@@ -8,14 +8,8 @@
   (serialize [value]))
 
 (defn serialize-by-type [value]
-  (condp = (type value)
-    clj_odbp.types.OrientBase64 (.serialize value)
-    clj_odbp.types.OrientDate (.serialize value)
-    clj_odbp.types.OrientDateTime (.serialize value)
-    clj_odbp.types.OrientRecordId (.serialize value)
-    clj_odbp.types.OrientEmbeddedDocument (.serialize value)
-    clj_odbp.types.OrientMap (.serialize value)
-    clj_odbp.types.OrientRidBag (.serialize value)
+  (if (satisfies? types/OrientType value)
+    (.serialize value)
     (serialize value)))
 
 (defn class-type
