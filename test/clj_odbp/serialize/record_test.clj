@@ -30,7 +30,7 @@
              (r/bool-type true) => true)
        (fact "List - list (1 2) should return '[1,2]'"
              (r/list-type (list (int 1) (int 2))) => "[1,2]")
-       (fact "Set - set #{1 2} should return '<1,2>"
+       (fact "Set - set #{1 2} should return '&lt;1,2&gt;'"
              (r/set-type #{(int 1) (int 2)}) => "<1,2>")
        (fact "Map - map {:test 1 :cost 2.50} should return 'test:1,cost:2.5f'"
              (r/map-type {:test (int 1) :cost (float 2.50)}) =>
