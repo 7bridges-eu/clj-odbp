@@ -9,7 +9,8 @@
              (r/class-type "test") => "test@")
        (fact "Keyword - keyword :test should return 'test'"
              (r/keyword-type :test) => "test")
-       (fact "String - string 'test' should return '\"test\"'"
+       (fact "String - string 'test' should return 'test'
+              with escaped double-quotes."
              (r/string-type "test") => "\\\"test\\\"")
        (fact "Integer - integer 1 should return '1'"
              (r/integer-type (int 1)) => "1")
@@ -36,6 +37,6 @@
              "test:1,cost:2.5f")
        (fact "Serialize record - serialize of
               {'Location' {:name 'Bar' :cost 12.50}} should return
-              'Location@name:\"Bar\",cost:12.5d'"
+              'Location@name:'Bar',cost:12.5d'"
              (r/serialize-record test-record) =>
              "Location@name:\\\"Bar\\\",cost:12.5d"))
