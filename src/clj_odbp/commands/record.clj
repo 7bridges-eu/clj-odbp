@@ -9,7 +9,6 @@
    specs/record-load-request
    [[:operation 30]
     [:session-id session-id]
-    ;;    [:token []]
     [:cluster-id id]
     [:cluster-position position]
     [:fetch-plan "*:0"]
