@@ -2,25 +2,29 @@
   (:require [instaparse.core :as i]))
 
 (i/defparser record-parser
-  "RECORD = token [token]+
-    token = [<class>] key value <COMMA?>
+  "RECORD = token [<COMMA> token]*
+    token = [<class>] key value?
     key = [<'\"'>] (ALPHA) [<'\"'>] <':'>
-    <value> = string | number | rid | binary | list | set | map
+    <value> = bool | string | number | rid | ridbag | binary | list | set | map
     class = ALPHA <'@'>
-    map = <'{'> (key value) [<COMMA> (key value)]* <'}'>
+    map = <'{'> (key value?) [<COMMA> (key value)]* <'}'>
     set = <'<'> value [<COMMA> value]* <'>'>
     list = <'['> value [<COMMA> value]* <']'>
-    binary = <'_'> (ALPHA | DIGITS) <'_'>
+    binary = <'_'> (BASE64) <'_'>
+    ridbag = <'%'> (BASE64) <';'>
     rid = ('#' DIGITS ':' DIGITS)
     string = <'\"'> ALPHA (SPACES ALPHA)? <'\"'>
-    number = (int | long | float | double) SPACES
-    double = (DIGITS \".\" DIGITS) <\"d\">
-    float = (DIGITS \".\" DIGITS) <\"f\">
-    long = (DIGITS) <\"l\">
+    number = (byte | int | long | float | double) SPACES
+    double = (DIGITS '.' DIGITS) <\"d\">
+    float = (DIGITS '.' DIGITS) <\"f\">
+    long = (DIGITS) <'l'>
     int = DIGITS
-    <COMMA> = [','|';']
+    byte = DIGITS <'b'>
+    bool = 'true' | 'false'
+    <COMMA> = ','
     <SPACES> = \" \"*
-    <ALPHA> = #'[a-zA-Z0-9]+'
+    <BASE64> = #'[A-Za-z0-9+/=]'+
+    <ALPHA> = #'\\w+'
     <DIGITS> = #'[0-9]+'")
 
 (defn- to-float [& args]
@@ -41,22 +45,35 @@
        (apply str)
        (Long/valueOf)))
 
-(defn to-map [& args]
+(defn- to-byte [& args]
+  (->> args
+       vec
+       (apply str)
+       (Byte/valueOf)))
+
+(defn- to-map [& args]
   (apply sorted-map (vec args)))
 
 (defn- to-record [& args]
-  (reduce {} #(assoc (first %) (second %)) args))
+  (reduce (fn [m v]
+            (assoc m (first v) (second v)))
+          {}
+          args))
 
 (def transform-options
-  {:number identity
+  {:RECORD to-record
+   :number identity
    :string identity
    :float to-float
    :double to-double
    :long to-long
    :int read-string
+   :byte to-byte
+   :bool #(= "true" %)
    :key keyword
    :rid str
    :binary str
+   :ridbag str
    :token (comp vec list)
    :map to-map
    :list (comp vec list)
