@@ -22,6 +22,9 @@
 (def date-time-test
   (format-date "dd/MM/YYYY hh:mm:ss" "14/07/2017 10:30:00"))
 
+(def date-test-result (str (.getTime date-test) "a"))
+(def date-time-test-result (str (.getTime date-time-test) "t"))
+
 (def embedded-doc-test {:name "Test" :value 1})
 (def map-test {:name "Test" :value 1})
 
@@ -30,10 +33,10 @@
              (.serialize (t/orient-base64 base64-test)) =>
              "_1007186122100656161_")
        (fact "OrientDate - date-test should return '1499983200000a'"
-             (.serialize (t/orient-date date-test)) => "1499983200000a")
+             (.serialize (t/orient-date date-test)) => date-test-result)
        (fact "OrientDateTime - date-test should return '1483349400000t'"
              (.serialize (t/orient-date-time date-time-test)) =>
-             "1483349400000t")
+             date-time-test-result)
        (fact "OrientRecordId - '33:0' should return '#33:0'"
              (.serialize (t/orient-record-id "33:0")) => "#33:0")
        (fact "OrientEmbeddedDocument - embedded-doc-test should return
