@@ -64,3 +64,21 @@
   (decode
    in
    specs/record-update-response))
+
+;; REQUEST_RECORD_DELETE
+(defn record-delete-request
+  [session-id cluster-id cluster-position]
+  (encode
+   specs/record-delete-request
+   [[:operation 33]
+    [:session-id session-id]
+    [:cluster-id cluster-id]
+    [:cluster-position cluster-position]
+    [:record-version -1]
+    [:mode 0]]))
+
+(defn record-delete-response
+  [^DataInputStream in]
+  (decode
+   in
+   specs/record-delete-response))
