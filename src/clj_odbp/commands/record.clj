@@ -26,14 +26,15 @@
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request
   [session-id record-content]
-  (encode
-   specs/record-create-request
-   [[:operation 31]
-    [:session-id session-id]
-    [:cluster-id (short -1)]
-    [:record-content (.getBytes (serialize-record record-content))]
-    [:record-type (byte \d)]
-    [:mode 0]]))
+  (let [record-bytes (.getBytes (serialize-record record-content))]
+    (encode
+     specs/record-create-request
+     [[:operation 31]
+      [:session-id session-id]
+      [:cluster-id -1]
+      [:record-content record-bytes]
+      [:record-type (byte 100)]
+      [:mode 0]])))
 
 (defn record-create-response
   [^DataInputStream in]
