@@ -42,7 +42,7 @@
   {:response-session d/int-type
    :session-id d/int-type
    :token d/bytes-type
-   :clusters (d/array-of [d/string-type d/short-type])
+   :clusters (d/array-of d/short-type [d/string-type d/short-type])
    :cluster-config d/bytes-type
    :orient-db-relase d/string-type})
 
@@ -100,4 +100,4 @@
 
 (def db-reload-response
   {:session-id d/int-type
-   :clusters (d/array-of [d/string-type d/short-type])})
+   :clusters (d/array-of d/short-type [d/string-type d/short-type])})
