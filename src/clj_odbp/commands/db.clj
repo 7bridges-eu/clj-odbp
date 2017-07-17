@@ -70,8 +70,8 @@
 ;; REQUEST_DB_CREATE
 (defn db-create-request
   [session-id db-name
-   & {:keys [db-type storage-type backup-path]
-      :or {db-type "graph" storage-type "plocal" backup-path ""}}]
+   {:keys [db-type storage-type backup-path]
+    :or {db-type "graph" storage-type "plocal" backup-path ""}}]
   (encode
    specs/db-create-request
    [[:operation 4]

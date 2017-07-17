@@ -20,7 +20,7 @@
   db/db-open-response)
 
 (defcommand db-create
-  [session-id db-name]
+  [session-id db-name & opts]
   db/db-create-request
   db/db-create-response)
 
