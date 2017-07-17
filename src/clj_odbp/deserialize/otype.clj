@@ -54,9 +54,9 @@
 
 (defn array-of
   "Read an array composed by defined type(s). Format is (elements:short)[values]"
-  [functions]
+  [type-fn functions]
   (fn [^DataInputStream in]
-    (let [n (short-type in)]
+    (let [n (type-fn in)]
       (vec
        (repeatedly n
                    #(mapv (fn [f]

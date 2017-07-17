@@ -60,3 +60,8 @@
   [session-id record-content]
   record/record-create-request
   record/record-create-response)
+
+(defcommand record-update
+  [session-id cluster-id cluster-position record-content]
+  record/record-update-request
+  record/record-update-response)

@@ -33,4 +33,26 @@
   {:session-id d/int-type
    :cluster-id d/short-type
    :cluster-position d/long-type
-   :record-version d/int-type})
+   :record-version d/int-type
+   :collection-changes (d/array-of d/int-type [d/long-type d/long-type
+                                               d/long-type d/long-type
+                                               d/int-type])})
+
+;; REQUEST_RECORD_UPDATE
+(def record-update-request
+  {:operation s/byte-type
+   :session-id s/int-type
+   :cluster-id s/short-type
+   :cluster-position s/long-type
+   :update-content s/bool-type
+   :record-content s/bytes-type
+   :record-version s/int-type
+   :record-type s/byte-type
+   :mode s/byte-type})
+
+(def record-update-response
+  {:session-id d/int-type
+   :record-version d/int-type
+   :collection-changes (d/array-of d/int-type [d/long-type d/long-type
+                                               d/long-type d/long-type
+                                               d/int-type])})
