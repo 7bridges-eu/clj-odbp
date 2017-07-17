@@ -22,7 +22,7 @@
 
 (defn string-type
   [value]
-  (str "\\\"" value "\\\""))
+  (str "\"" value "\""))
 
 (defn integer-type
   [value]
