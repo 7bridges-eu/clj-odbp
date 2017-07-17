@@ -26,11 +26,6 @@
         (net/write-request db/db-close-request))
     {}))
 
-(defcommand record-load
-  [session-id record-id record-position]
-  record/record-load-request
-  record/record-load-response)
-
 (defcommand db-exist
   [session-id db-name]
   db/db-exist-request
@@ -55,3 +50,13 @@
   [session-id]
   db/db-reload-request
   db/db-reload-response)
+
+(defcommand record-load
+  [session-id record-id record-position]
+  record/record-load-request
+  record/record-load-response)
+
+(defcommand record-create
+  [session-id record-content]
+  record/record-create-request
+  record/record-create-response)
