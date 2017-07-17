@@ -36,5 +36,5 @@
      [~@args]
      (with-open [s# (net/create-socket)]
        (-> s#
-           (net/write-request ~request-handler ~@args)
+           (net/write-request ~request-handler ~@(remove '#{&} args))
            (net/read-response ~response-handler)))))

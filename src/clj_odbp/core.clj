@@ -14,10 +14,15 @@
   db/shutdown-request
   db/shutdown-response)
 
-(defcommand connect-db
+(defcommand db-open
   [db-name username password]
-  db/connect-db-request
-  db/connect-db-response)
+  db/db-open-request
+  db/db-open-response)
+
+(defcommand db-create
+  [session-id db-name & opts]
+  db/db-create-request
+  db/db-create-response)
 
 (defn db-close
   []

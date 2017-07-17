@@ -4,55 +4,6 @@
             [clj-odbp.utils :refer [encode decode]])
   (:import [java.io DataInputStream]))
 
-;; REQUEST_CONNECT
-(defn connect-request
-  [username password]
-  (encode
-   specs/connect-request
-   [[:operation 2]
-    [:session -1]
-    [:driver-name "clj-odbp"]
-    [:driver-version "0.0.1"]
-    [:protocol-version 36]
-    [:client-id ""]
-    [:serialization "ORecordDocument2csv"]
-    [:token-session false]
-    [:support-push true]
-    [:collect-stats true]
-    [:username username]
-    [:password password]]))
-
-(defn connect-response
-  [^DataInputStream in]
-  (decode
-   in
-   specs/connect-response))
-
-;; REQUEST_DB_OPEN
-(defn connect-db-request
-  [db-name username password]
-  (encode
-   specs/connect-db-request
-   [[:operation 3]
-    [:session -1]
-    [:driver-name "clj-odbp"]
-    [:driver-version "0.0.1"]
-    [:protocol-version 36]
-    [:client-id ""]
-    [:serialization "ORecordDocument2csv"]
-    [:token-session false]
-    [:support-push true]
-    [:collect-stats true]
-    [:database-name db-name]
-    [:username username]
-    [:password password]]))
-
-(defn connect-db-response
-  [^DataInputStream in]
-  (decode
-   in
-   specs/connect-db-response))
-
 ;; REQUEST_SHUTDOWN
 (defn shutdown-request
   [username password]
@@ -64,6 +15,73 @@
     [:password password]]))
 
 (defn shutdown-response
+  [^DataInputStream in]
+  {})
+
+;; REQUEST_CONNECT
+(defn connect-request
+  [username password]
+  (encode
+   specs/connect-request
+   [[:operation 2]
+    [:session-id -1]
+    [:driver-name "clj-odbp"]
+    [:driver-version "0.0.1"]
+    [:protocol-version 36]
+    [:client-id ""]
+    [:serialization "ORecordDocument2csv"]
+    [:token-session false]
+    [:support-push false]
+    [:collect-stats false]
+    [:username username]
+    [:password password]]))
+
+(defn connect-response
+  [^DataInputStream in]
+  (decode
+   in
+   specs/connect-response))
+
+;; REQUEST_DB_OPEN
+(defn db-open-request
+  [db-name username password]
+  (encode
+   specs/db-open-request
+   [[:operation 3]
+    [:session-id -1]
+    [:driver-name "clj-odbp"]
+    [:driver-version "0.0.1"]
+    [:protocol-version 36]
+    [:client-id ""]
+    [:serialization "ORecordDocument2csv"]
+    [:token-session false]
+    [:support-push false]
+    [:collect-stats false]
+    [:database-name db-name]
+    [:username username]
+    [:password password]]))
+
+(defn db-open-response
+  [^DataInputStream in]
+  (decode
+   in
+   specs/db-open-response))
+
+;; REQUEST_DB_CREATE
+(defn db-create-request
+  [session-id db-name
+   {:keys [db-type storage-type backup-path]
+    :or {db-type "graph" storage-type "plocal" backup-path ""}}]
+  (encode
+   specs/db-create-request
+   [[:operation 4]
+    [:session-id session-id]
+    [:database-name db-name]
+    [:database-type db-type]
+    [:storage-type storage-type]
+    [:backup-path backup-path]]))
+
+(defn db-create-response
   [^DataInputStream in]
   {})
 
