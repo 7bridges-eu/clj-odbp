@@ -56,3 +56,16 @@
    :collection-changes (d/array-of d/int-type [d/long-type d/long-type
                                                d/long-type d/long-type
                                                d/int-type])})
+
+;; REQUEST_RECORD_DELETE
+(def record-delete-request
+  {:operation s/byte-type
+   :session-id s/int-type
+   :cluster-id s/short-type
+   :cluster-position s/long-type
+   :record-version s/int-type
+   :mode s/byte-type})
+
+(def record-delete-response
+  {:session-id d/int-type
+   :deleted d/bool-type})

@@ -65,3 +65,8 @@
   [session-id cluster-id cluster-position record-content]
   record/record-update-request
   record/record-update-response)
+
+(defcommand record-delete
+  [session-id cluster-id cluster-position]
+  record/record-delete-request
+  record/record-delete-response)
