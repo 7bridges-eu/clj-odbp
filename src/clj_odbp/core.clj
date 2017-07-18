@@ -14,10 +14,15 @@
   db/shutdown-request
   db/shutdown-response)
 
-(defcommand connect-db
+(defcommand db-open
   [db-name username password]
-  db/connect-db-request
-  db/connect-db-response)
+  db/db-open-request
+  db/db-open-response)
+
+(defcommand db-create
+  [session-id db-name & opts]
+  db/db-create-request
+  db/db-create-response)
 
 (defn db-close
   []
@@ -25,11 +30,6 @@
     (-> socket
         (net/write-request db/db-close-request))
     {}))
-
-(defcommand record-load
-  [session-id record-id record-position]
-  record/record-load-request
-  record/record-load-response)
 
 (defcommand db-exist
   [session-id db-name]
@@ -55,3 +55,23 @@
   [session-id]
   db/db-reload-request
   db/db-reload-response)
+
+(defcommand record-load
+  [session-id record-id record-position]
+  record/record-load-request
+  record/record-load-response)
+
+(defcommand record-create
+  [session-id record-content]
+  record/record-create-request
+  record/record-create-response)
+
+(defcommand record-update
+  [session-id cluster-id cluster-position record-content]
+  record/record-update-request
+  record/record-update-response)
+
+(defcommand record-delete
+  [session-id cluster-id cluster-position]
+  record/record-delete-request
+  record/record-delete-response)

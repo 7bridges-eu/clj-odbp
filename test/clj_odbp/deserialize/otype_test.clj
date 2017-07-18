@@ -38,14 +38,13 @@
                                              0 0 0 4 101 102 103 104])) => ["abcd" "efgh"])
        (fact
         "Array of - should return a vector of vectors: [['ab' 2] ['cd' 3]]"
-        (let [f (d/array-of [d/string-type d/short-type])]
+        (let [f (d/array-of d/short-type [d/string-type d/short-type])]
           (f (provide-input [0 2
                              0 0 0 2 97 98 0 2
                              0 0 0 2 99 100 0 3])) => [["ab" 2]
                                                        ["cd" 3]]))
        (fact
-        "deserialize-exception should return a vector of strings:
-         ['error 1' 'error 2']"
+        "deserialize-exception should return a vector of strings: ['error 1' 'error 2']"
         (let [in (let [ex-class (.getBytes "error")
                        ex-message (.getBytes "test")]
                    (provide-input (concat [1]

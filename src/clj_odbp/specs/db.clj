@@ -2,10 +2,17 @@
   (:require [clj-odbp.serialize.otype :as s]
             [clj-odbp.deserialize.otype :as d]))
 
+;; REQUEST_SHUTDOWN
+(def shutdown-request
+  {:operation s/byte-type
+   :session-id s/int-type
+   :username s/string-type
+   :password s/string-type})
+
 ;; REQUEST_CONNECT
 (def connect-request
   {:operation s/byte-type
-   :session s/int-type
+   :session-id s/int-type
    :driver-name s/string-type
    :driver-version s/string-type
    :protocol-version s/short-type
@@ -23,9 +30,9 @@
    :token d/bytes-type})
 
 ;; REQUEST_DB_OPEN
-(def connect-db-request
+(def db-open-request
   {:operation s/byte-type
-   :session s/int-type
+   :session-id s/int-type
    :driver-name s/string-type
    :driver-version s/string-type
    :protocol-version s/short-type
@@ -38,20 +45,22 @@
    :username s/string-type
    :password s/string-type})
 
-(def connect-db-response
+(def db-open-response
   {:response-session d/int-type
    :session-id d/int-type
    :token d/bytes-type
-   :clusters (d/array-of [d/string-type d/short-type])
+   :clusters (d/array-of d/short-type [d/string-type d/short-type])
    :cluster-config d/bytes-type
    :orient-db-relase d/string-type})
 
-;; REQUEST_SHUTDOWN
-(def shutdown-request
+;; REQUEST_DB_CREATE
+(def db-create-request
   {:operation s/byte-type
    :session-id s/int-type
-   :username s/string-type
-   :password s/string-type})
+   :database-name s/string-type
+   :database-type s/string-type
+   :storage-type s/string-type
+   :backup-path s/string-type})
 
 ;; REQUEST_DB_CLOSE
 (def db-close-request
@@ -100,4 +109,4 @@
 
 (def db-reload-response
   {:session-id d/int-type
-   :clusters (d/array-of [d/string-type d/short-type])})
+   :clusters (d/array-of d/short-type [d/string-type d/short-type])})

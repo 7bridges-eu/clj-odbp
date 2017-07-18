@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [instaparse "1.4.7"]
+                 [org.clojure/data.json "0.2.6"]
                  [midje "1.8.3"]
                  [midje-junit-formatter "0.1.0-SNAPSHOT"]]
   :plugins [[lein-midje "3.1.3"]
