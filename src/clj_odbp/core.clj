@@ -1,8 +1,11 @@
 (ns clj-odbp.core
-  (:require [clj-odbp.net :as net]
-            [clj-odbp.utils :refer [defcommand]]
-            [clj-odbp.commands.db :as db]
-            [clj-odbp.commands.record :as record]))
+  (:require [clj-odbp
+             [net :as net]
+             [utils :refer [defcommand]]]
+            [clj-odbp.commands
+             [command :as command]
+             [db :as db]
+             [record :as record]]))
 
 (defcommand connect-server
   [username password]
@@ -75,3 +78,8 @@
   [session-id cluster-id cluster-position]
   record/record-delete-request
   record/record-delete-response)
+
+(defcommand select-command
+  [session-id command & opts]
+  command/select-request
+  command/select-response)
