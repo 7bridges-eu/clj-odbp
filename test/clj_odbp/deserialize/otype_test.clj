@@ -10,9 +10,6 @@
        ByteArrayInputStream.
        DataInputStream.))
 
-(def di-test
-  )
-
 (facts "Deserialization of single types"
        (fact "Bool - should return false"
              (d/bool-type (provide-input [0])) => false)
