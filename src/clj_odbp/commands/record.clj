@@ -27,7 +27,7 @@
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request
   [session-id record-content]
-  (let [record-bytes (.getBytes (serialize-record record-content))]
+  (let [record-bytes (serialize-record record-content)]
     (encode
      specs/record-create-request
      [[:operation 31]
@@ -46,7 +46,7 @@
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
   [session-id cluster-id cluster-position record-content]
-  (let [record-bytes (.getBytes (serialize-record record-content))]
+  (let [record-bytes (serialize-record record-content)]
     (encode
      specs/record-update-request
      [[:operation 32]

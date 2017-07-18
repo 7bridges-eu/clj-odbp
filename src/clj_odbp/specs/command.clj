@@ -12,7 +12,7 @@
    :text s/string-type
    :non-text-limit s/int-type
    :fetch-plan s/string-type
-   :serialized-params s/bytes-type})
+   :serialized-params s/string-type})
 
 ;; REQUEST_COMMAND > SQL Command
 (def command-request

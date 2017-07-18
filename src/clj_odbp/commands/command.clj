@@ -37,7 +37,7 @@
     :or {non-text-limit 20 fetch-plan "*:0"}}]
   (let [query (first command)
         params (rest command)
-        serialized-params (.getBytes (serialize-params params))]
+        serialized-params (serialize-params params)]
     (encode
      specs/select-request
      [[:operation 41]
