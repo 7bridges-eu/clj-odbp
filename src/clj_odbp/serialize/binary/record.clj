@@ -1,12 +1,19 @@
 (ns clj-odbp.serialize.binary.record
-  (:require [clj-odbp.serialize.binary.types :as types]
-            [clj-odbp.serialize.binary.varint :as v])
-  (:import [java.lang Float]
-           [java.io ByteArrayOutputStream DataOutputStream]
+  (:require [clj-odbp.serialize.binary.varint :as v])
+  (:import [java.io ByteArrayOutputStream DataOutputStream]
+           [java.lang Float]
            [java.text SimpleDateFormat]))
 
 (defprotocol Serialization
   (serialize [value]))
+
+(defprotocol OrientType
+  (oserialize [this]))
+
+(defn serialize-by-type [value]
+  (if (satisfies? OrientType value)
+    (.oserialize value)
+    (serialize value)))
 
 (defn short-type
   [value]
@@ -111,33 +118,42 @@
 
 (defn coll-type
   [value]
-  (map serialize value))
+  (map serialize-by-type value))
 
 (defn map-type
   [value]
   (->> value
        vec
        flatten
-       (map serialize)))
+       (map serialize-by-type)))
 
-(extend-type clj_odbp.serialize.binary.types.OrientBinary
-  Serialization
-  (serialize [value]
+(deftype OrientBinary [value]
+  OrientType
+  (oserialize [this]
     (bytes-type value)))
 
-(extend-type clj_odbp.serialize.binary.types.OrientDate
-  Serialization
-  (serialize [this]
+(defn orient-binary [value]
+  (->OrientBinary value))
+
+(deftype OrientDate [value]
+  OrientType
+  (oserialize [this]
     (let [formatter (SimpleDateFormat. "dd/MM/yyyy")
           date (.value this)
           date-without-time (.parse formatter (.format formatter date))
           date->long (.getTime date-without-time)]
       (long-type (long (/ date->long 86400))))))
 
-(extend-type clj_odbp.serialize.binary.types.OrientDateTime
-  Serialization
-  (serialize [this]
+(defn orient-date [value]
+  (->OrientDate value))
+
+(deftype OrientDateTime [value]
+  OrientType
+  (oserialize [this]
     (long-type (.getTime (.value this)))))
+
+(defn orient-date-time [value]
+  (->OrientDateTime value))
 
 (defn serialize-header [])
 
