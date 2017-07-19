@@ -1,5 +1,5 @@
 ;;; Taken from: https://github.com/miner/varint
-(ns clj-odbp.serialize.varint)
+(ns clj-odbp.serialize.binary.varint)
 
 (defn varint
   "Return vector of longs (range: 0-255) according to varint encoding.
