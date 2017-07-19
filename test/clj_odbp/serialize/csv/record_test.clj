@@ -1,5 +1,5 @@
-(ns clj-odbp.serialize.record-test
-  (:require [clj-odbp.serialize.record :as r]
+(ns clj-odbp.serialize.csv.record-test
+  (:require [clj-odbp.serialize.csv.record :as r]
             [midje.sweet :refer :all]))
 
 (def test-record {"Location" {:name "Bar" :cost 12.50}})

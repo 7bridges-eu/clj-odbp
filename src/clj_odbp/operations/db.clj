@@ -1,4 +1,4 @@
-(ns clj-odbp.commands.db
+(ns clj-odbp.operations.db
   (:require [clj-odbp.constants :as consts]
             [clj-odbp.specs.db :as specs]
             [clj-odbp.utils :refer [encode decode]])

@@ -1,8 +1,8 @@
-(ns clj-odbp.commands.record
+(ns clj-odbp.operations.record
   (:require [clj-odbp.constants :as constants]
             [clj-odbp.specs.record :as specs]
             [clj-odbp.utils :refer [encode decode]]
-            [clj-odbp.serialize.record :refer [serialize-record]])
+            [clj-odbp.serialize.csv.record :refer [serialize-record]])
   (:import [java.io DataInputStream]))
 
 (defn record-load-request

@@ -1,4 +1,4 @@
-(ns clj-odbp.types
+(ns clj-odbp.serialize.csv.types
   (:require [clojure.data.json :as json])
   (:import
    [java.text DateFormat SimpleDateFormat]

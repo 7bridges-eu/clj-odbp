@@ -1,4 +1,4 @@
-(ns clj-odbp.deserialize.record
+(ns clj-odbp.deserialize.csv.record
   (:require [instaparse.core :as i]))
 
 (i/defparser record-parser
