@@ -29,6 +29,8 @@
        (fact "Bytes - should return a vector of bytes [10 20 30 40]"
              (d/bytes-type (provide-input [0 0 0 4
                                            10 20 30 40])) => [10 20 30 40])
+       (fact "String - should return a string 'a'"
+             (d/string-type (provide-input [0 0 0 1 97])) => "a")
        (fact "String - should return a string 'abcd'"
              (d/string-type (provide-input [0 0 0 4
                                             97 98 99 100])) => "abcd")

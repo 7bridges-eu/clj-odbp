@@ -34,6 +34,10 @@
        (fact "Long - positive should return eight bytes"
              (provide-output s/long-type 10) => [0 0 0 0
                                                  0 0 0 10])
+       (fact "String - '' should return 4 bytes"
+             (provide-output s/string-type "") => [-1 -1 -1 -1])
+       (fact "String - 'a' should return 5 bytes"
+             (provide-output s/string-type "a") => [0 0 0 1 97])
        (fact "String - 'abcd' should return eight bytes"
              (provide-output s/string-type "abcd") => [0 0 0 4
                                                        97 98 99 100])

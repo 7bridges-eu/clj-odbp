@@ -25,7 +25,7 @@
   {:operation s/byte-type
    :session-id s/int-type
    :cluster-id s/short-type
-   :record-content s/bytes-type
+   :record-content s/string-type
    :record-type s/byte-type
    :mode s/byte-type})
 
@@ -45,7 +45,7 @@
    :cluster-id s/short-type
    :cluster-position s/long-type
    :update-content s/bool-type
-   :record-content s/bytes-type
+   :record-content s/string-type
    :record-version s/int-type
    :record-type s/byte-type
    :mode s/byte-type})
