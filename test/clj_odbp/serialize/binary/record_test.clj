@@ -16,7 +16,7 @@
    (format-date "dd/MM/YYYY hh:mm:ss" "19/07/2017 10:30:00")))
 
 (def odate-result [156 247 163 8])
-(def odatetime-result [192 179 142 244 149 43])
+(def odatetime-result (r/long-type (.getTime (.value odatetime))))
 
 (facts "Serialization of single type"
        (fact "Short - short 1 should return [1]"
@@ -50,7 +50,7 @@
              '([4, 110, 97, 109, 101] [4, 116, 101, 115, 116]))
        (fact "OrientBinary - OrientBinary [116 101 115 116] should return [4 116 101 115 116]"
              (vec (.oserialize obinary)) => [4 116 101 115 116])
-       (fact "OrientDate - odate should return [156 247 163 8]"
+       (fact "OrientDate - odate should return odate-result"
              (vec (.oserialize odate)) => odate-result)
-       (fact "OrientDateTime - odatetime should return [192 179 142 244 149 43]"
+       (fact "OrientDateTime - odatetime should return odatetime-result"
              (vec (.oserialize odatetime)) => odatetime-result))
