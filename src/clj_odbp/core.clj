@@ -2,7 +2,7 @@
   (:require [clj-odbp
              [net :as net]
              [utils :refer [defcommand]]]
-            [clj-odbp.commands
+            [clj-odbp.operations
              [command :as command]
              [db :as db]
              [record :as record]]))

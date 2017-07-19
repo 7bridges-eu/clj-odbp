@@ -1,5 +1,5 @@
-(ns clj-odbp.deserialize.record-test
-  (:require [clj-odbp.deserialize.record :as record]
+(ns clj-odbp.deserialize.csv.record-test
+  (:require [clj-odbp.deserialize.csv.record :as record]
             [midje.sweet :refer :all])
   (:import [java.util Date]))
 

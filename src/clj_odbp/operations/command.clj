@@ -1,9 +1,9 @@
-(ns clj-odbp.commands.command
+(ns clj-odbp.operations.command
   (:require [clj-odbp
              [constants :as constants]
              [utils :refer [encode]]]
             [clj-odbp.specs.command :as specs]
-            [clj-odbp.types :as types])
+            [clj-odbp.serialize.csv.types :as types])
   (:import java.io.DataInputStream))
 
 (defn get-bytes-type-length [bytes-type]

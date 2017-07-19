@@ -1,5 +1,5 @@
-(ns clj-odbp.types-test
-  (:require [clj-odbp.types :as t]
+(ns clj-odbp.serialize.csv.types-test
+  (:require [clj-odbp.serialize.csv.types :as t]
             [midje.sweet :refer :all])
   (:import [java.text DateFormat SimpleDateFormat]
            [java.util Base64]
