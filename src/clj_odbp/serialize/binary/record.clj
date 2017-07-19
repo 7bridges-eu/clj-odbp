@@ -1,17 +1,12 @@
 (ns clj-odbp.serialize.binary.record
   (:require [clj-odbp.serialize.binary.types :as types]
-            [clj-odbp.serialize.varint :as v])
+            [clj-odbp.serialize.binary.varint :as v])
   (:import [java.lang Float]
            [java.io ByteArrayOutputStream DataOutputStream]
            [java.text SimpleDateFormat]))
 
 (defprotocol Serialization
   (serialize [value]))
-
-(defn serialize-by-type [value]
-  (if (satisfies? types/OrientType value)
-    (.serialize value)
-    (serialize value)))
 
 (defn short-type
   [value]
@@ -116,14 +111,14 @@
 
 (defn coll-type
   [value]
-  (map serialize-by-type value))
+  (map serialize value))
 
 (defn map-type
   [value]
   (->> value
        vec
        flatten
-       (map serialize-by-type)))
+       (map serialize)))
 
 (extend-type clj_odbp.serialize.binary.types.OrientBinary
   Serialization
