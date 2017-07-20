@@ -21,7 +21,7 @@
           date (.value this)
           date-without-time (.parse formatter (.format formatter date))
           date->long (.getTime date-without-time)]
-      (v/varint (long (/ date->long 86400))))))
+      (v/varint-unsigned (long (/ date->long 86400))))))
 
 (defn orient-date [value]
   (->OrientDate value))
@@ -29,7 +29,7 @@
 (deftype OrientDateTime [value]
   OrientType
   (serialize [this]
-    (v/varint (.getTime (.value this)))))
+    (v/varint-unsigned (.getTime (.value this)))))
 
 (defn orient-date-time [value]
   (->OrientDateTime value))

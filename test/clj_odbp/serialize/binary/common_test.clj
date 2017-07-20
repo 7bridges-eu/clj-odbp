@@ -4,6 +4,6 @@
   (:import [java.io ByteArrayOutputStream DataOutputStream]))
 
 (facts "Common binary serialization utilities"
-       (fact "Bytes - bytes [116 101 115 116] should return [4 116 101 115 116]"
+       (fact "Bytes - bytes [116 101 115 116] should return [8 116 101 115 116]"
              (vec (c/bytes-type (byte-array [116 101 115 116]))) =>
-             [4 116 101 115 116]))
+             [8 116 101 115 116]))

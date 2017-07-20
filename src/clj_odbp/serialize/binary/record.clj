@@ -17,7 +17,7 @@
 
 (defn short-type
   [value]
-  (v/varint value))
+  (v/varint-unsigned value))
 
 (extend-type java.lang.Short
   Serialization
@@ -26,7 +26,7 @@
 
 (defn integer-type
   [value]
-  (v/varint value))
+  (v/varint-unsigned value))
 
 (extend-type java.lang.Integer
   Serialization
@@ -35,7 +35,7 @@
 
 (defn long-type
   [value]
-  (v/varint value))
+  (v/varint-unsigned value))
 
 (extend-type java.lang.Long
   Serialization
@@ -136,13 +136,15 @@
   (serialize [value]
     (map-type value)))
 
+;; (serialization-version:byte)(class-name:string)(header:byte[])(data:byte[])
+
 (defn serialize-header
   []
   )
 
 (defn serialize-data
-  []
-  )
+  [data]
+  (serialize-by-type data))
 
 (defn serialize-record [record]
   (serialize-header)
