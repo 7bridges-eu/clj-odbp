@@ -1,6 +1,7 @@
 (ns clj-odbp.serialize.binary.record
   (:require [clj-odbp.serialize.binary.common :as c]
-            [clj-odbp.serialize.binary.varint :as v])
+            [clj-odbp.serialize.binary.varint :as v]
+            [clojure.string :as string])
   (:import [java.io ByteArrayOutputStream DataOutputStream]
            [java.text SimpleDateFormat]))
 
@@ -345,9 +346,9 @@
   (serialize [this]
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
-          precision (re-find #"[0-9]+" (clojure.string/replace value "." ""))
+          precision (re-find #"[0-9]+" (string/replace value "." ""))
           value-size (v/varint-unsigned (count precision))
-          decimals (second (clojure.string/split (str value) #"[.]"))
+          decimals (second (string/split (str value) #"[.]"))
           scale (v/varint-unsigned (count decimals))
           serialized-value (serialize value)]
       (.write dos scale 0 (count scale))
@@ -355,15 +356,13 @@
       (.write dos serialized-value 0 (count serialized-value))
       (.toByteArray bos))))
 
-;; (serialization-version:byte)(class-name:string)(header:byte[])(data:byte[])
-
-;; (field:field-definition)+
-;; field-definition -> (field-type:varint)(field-contents:byte[])
-;; field-content -> (field-name:string)(pointer-to-data-structure:int32)
-;;                  (data-type:byte)
 (defn serialize-header
   [record-values data]
-  )
+  (let [record-keys (map serialize (keys record-values))
+        indexes (take (count data) (iterate inc 1))
+        indexes-v (vec (map serialize indexes))
+        data-map (zipmap indexes-v data)]
+    (into [] (zipmap record-keys (take-nth 2 data-map)))))
 
 (defn serialize-data
   [data]
@@ -378,8 +377,10 @@
         record-values (get record class)
         data (serialize-data record-values)
         header (serialize-header record-values data)]
-    (.write dos version 0 (count version))
-    (.write dos class 0 (count class))
-    (.write dos header 0 (count header))
-    (.write dos data 0 (count data))
-    (.toByteArray bos)))
+    header
+    ;; (.write dos version 0 (count version))
+    ;; (.write dos class 0 (count class))
+    ;; (.write dos header 0 (count header))
+    ;; (.write dos data 0 (count data))
+    ;; (.toByteArray bos)
+    ))
