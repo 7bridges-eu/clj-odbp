@@ -329,7 +329,7 @@
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
           size (v/varint-unsigned (count value))
-          key-values (first (for [[k v] data]
+          key-values (first (for [[k v] value]
                               (serialize-key-value k v)))]
       (.write dos size 0 (count size))
       (.toByteArray bos))))
