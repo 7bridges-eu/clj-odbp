@@ -377,10 +377,8 @@
         record-values (get record class)
         data (serialize-data record-values)
         header (serialize-header record-values data)]
-    header
-    ;; (.write dos version 0 (count version))
-    ;; (.write dos class 0 (count class))
-    ;; (.write dos header 0 (count header))
-    ;; (.write dos data 0 (count data))
-    ;; (.toByteArray bos)
-    ))
+    (.write dos version 0 (count version))
+    (.write dos class 0 (count class))
+    (.write dos header 0 (count header))
+    (.write dos data 0 (count data))
+    (.toByteArray bos)))
