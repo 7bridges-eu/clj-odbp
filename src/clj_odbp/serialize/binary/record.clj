@@ -308,18 +308,18 @@
   [value]
   (->OrientLinkSet value))
 
-;; (key-type:byte)(key-value:byte[])(link:LINK)
 (defn serialize-key-value
   [k v]
-  (let [bos (ByteArrayOutputStream.)
-        dos (DataOutputStream. bos)
-        key-type (getDataType k)
-        key-value (serialize k)
-        link (serialize v)]
-    (.write dos key-type 0 (count key-type))
-    (.write dos key-value 0 (count key-value))
-    (.write dos link 0 (count link))
-    (.toByteArray bos)))
+  (if-not (map? v)
+    (let [bos (ByteArrayOutputStream.)
+          dos (DataOutputStream. bos)
+          key-type (getDataType k)
+          key-value (serialize k)
+          link (serialize v)]
+      (.writeByte dos key-type)
+      (.write dos key-value 0 (count key-value))
+      (.write dos link 0 (count link))
+      (.toByteArray bos))))
 
 (deftype OrientLinkMap [value]
   OrientType
@@ -329,7 +329,8 @@
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
           size (v/varint-unsigned (count value))
-          ]
+          key-values (first (for [[k v] data]
+                              (serialize-key-value k v)))]
       (.write dos size 0 (count size))
       (.toByteArray bos))))
 
