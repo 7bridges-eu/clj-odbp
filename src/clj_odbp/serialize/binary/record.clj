@@ -1,5 +1,7 @@
 (ns clj-odbp.serialize.binary.record
-  (:require [clj-odbp.serialize.binary.varint :as v])
+  (:require [clj-odbp.serialize.binary.common :as c]
+            [clj-odbp.serialize.binary.otypes :as otypes]
+            [clj-odbp.serialize.binary.varint :as v])
   (:import [java.io ByteArrayOutputStream DataOutputStream]
            [java.lang Float]
            [java.text SimpleDateFormat]))
@@ -7,12 +9,9 @@
 (defprotocol Serialization
   (serialize [value]))
 
-(defprotocol OrientType
-  (oserialize [this]))
-
 (defn serialize-by-type [value]
-  (if (satisfies? OrientType value)
-    (.oserialize value)
+  (if (satisfies? otypes/OrientType value)
+    (.serialize value)
     (serialize value)))
 
 (defn short-type
@@ -86,21 +85,10 @@
   (serialize [value]
     (double-type value)))
 
-(defn bytes-type
-  [value]
-  (let [bos (ByteArrayOutputStream.)
-        dos (DataOutputStream. bos)
-        size (count value)
-        size-varint (byte-array (integer-type size))
-        size-varint-len (count size-varint)]
-    (.write dos size-varint 0 size-varint-len)
-    (.write dos value 0 size)
-    (.toByteArray bos)))
-
 (defn string-type
   [value]
   (let [bytes (.getBytes value)]
-    (bytes-type bytes)))
+    (c/bytes-type bytes)))
 
 (extend-type java.lang.String
   Serialization
@@ -126,34 +114,6 @@
        vec
        flatten
        (map serialize-by-type)))
-
-(deftype OrientBinary [value]
-  OrientType
-  (oserialize [this]
-    (bytes-type value)))
-
-(defn orient-binary [value]
-  (->OrientBinary value))
-
-(deftype OrientDate [value]
-  OrientType
-  (oserialize [this]
-    (let [formatter (SimpleDateFormat. "dd/MM/yyyy")
-          date (.value this)
-          date-without-time (.parse formatter (.format formatter date))
-          date->long (.getTime date-without-time)]
-      (long-type (long (/ date->long 86400))))))
-
-(defn orient-date [value]
-  (->OrientDate value))
-
-(deftype OrientDateTime [value]
-  OrientType
-  (oserialize [this]
-    (long-type (.getTime (.value this)))))
-
-(defn orient-date-time [value]
-  (->OrientDateTime value))
 
 (defn serialize-header [])
 
