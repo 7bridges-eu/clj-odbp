@@ -9,7 +9,8 @@
 (defprotocol Serialization
   (serialize [value]))
 
-(defn serialize-by-type [value]
+(defn serialize-by-type
+  [value]
   (if (satisfies? otypes/OrientType value)
     (.serialize value)
     (serialize value)))
@@ -108,6 +109,21 @@
   [value]
   (map serialize-by-type value))
 
+(extend-type clojure.lang.PersistentList
+  Serialization
+  (serialize [value]
+    (coll-type value)))
+
+(extend-type clojure.lang.PersistentVector
+  Serialization
+  (serialize [value]
+    (coll-type value)))
+
+(extend-type clojure.lang.PersistentHashSet
+  Serialization
+  (serialize [value]
+    (coll-type value)))
+
 (defn map-type
   [value]
   (->> value
@@ -115,9 +131,18 @@
        flatten
        (map serialize-by-type)))
 
-(defn serialize-header [])
+(extend-type clojure.lang.PersistentArrayMap
+  Serialization
+  (serialize [value]
+    (map-type value)))
 
-(defn serialize-data [])
+(defn serialize-header
+  []
+  )
+
+(defn serialize-data
+  []
+  )
 
 (defn serialize-record [record]
   (serialize-header)
