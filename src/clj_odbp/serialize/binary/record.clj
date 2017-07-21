@@ -401,7 +401,7 @@
      ))
 
 (defn serialize-field [serialized-class record-map data]
-  (let [fields (mapcat vector m)]
+  (let [fields (mapcat vector record-map)]
     (vec
      (for [f fields]
        {:field-name (name (first f))
