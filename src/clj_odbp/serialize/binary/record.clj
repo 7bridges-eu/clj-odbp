@@ -375,57 +375,51 @@
       (.write dos serialized-value 0 (count serialized-value))
       (.toByteArray bos))))
 
-;; (defn serialize-header
-;;   [record-values data]
-;;   (let [record-keys (map serialize (keys record-values))
-;;         indexes (take (count data) (iterate inc 1))
-;;         idx-int32 (map orient-int32 indexes)
-;;         indexes-v (map serialize idx-int32)
-;;         data-map (zipmap indexes-v data)]
-;;     (mapcat flatten
-;;             (into [] (zipmap record-keys data-map)))))
-
-(defn get-pointer-to-ds
-  [left-pad serialized-class serialized-field-name serialized-field]
-  (+ left-pad                         ; Padding from the beginning of the buffer
-     1                                  ; Add 1 to get the position
-     1                                  ; Version
+(defn get-header-size
+  [serialized-class headers]
+  (+ 1
      (count serialized-class)
-     4                                  ; Position of field name
-     1                                  ; Start of field name
-     (count serialized-field-name)
-     4                                  ; Position of field value
-     1                                  ; Start of field value
-     (count serialized-field)
-     1                                  ; Field type
-     ))
+     (reduce
+      (fn [size field]
+        (+ size (count (serialize field)) 5))
+      0
+      headers)))
 
-(defn field-length-map [record-map data]
-  (let [field-names (keys record-map)
-        positions (map-indexed
-                   (fn [idx elem]
-                     (if (= idx 0)
-                       0
-                       (count (data (- idx 1))))) data)]
-    (zipmap field-names positions)))
+(defn get-field-positions
+  [record-values header-size]
+  (reverse
+   (loop [f (first record-values)
+          r (rest record-values)
+          res []]
+     (if (empty? r)
+       (conj res (orient-int32 (+ 1 header-size)))
+       (recur (first r)
+              (rest r)
+              (conj res
+                    (orient-int32 (+ 1 header-size (count (serialize f))))))))))
 
-(defn serialize-fields [serialized-class record-map data]
+(defn fields-positions-map [serialized-class record-keys record-values]
+  (let [header-size (get-header-size serialized-class record-keys)]
+    (zipmap record-keys (get-field-positions record-values header-size))))
+
+(defn get-headers
+  [serialized-class record-map]
   (let [fields (mapcat vector record-map)
-        lengths (field-length-map record-map data)]
+        record-keys (keys record-map)
+        record-vals (vals record-map)
+        fields-positions (fields-positions-map
+                          serialized-class record-keys record-vals)]
     (vec
      (for [f fields]
        (let [key (first f)
-             value (second f)
-             pos (get lengths key)]
+             value (second f)]
          {:field-name (name key)
-          :pointer-to-data-structure (get-pointer-to-ds pos
-                                                        serialized-class
-                                                        (serialize key)
-                                                        (serialize value))
+          :pointer-to-data-structure (get fields-positions key)
           :data-type (getDataType (second f))})))))
 
-(defn serialize-header [])
-
+(defn serialize-header [serialized-class record-map]
+  (let [headers (get-headers serialized-class record-map)]
+    (map serialize (mapcat vals headers))))
 
 (defn serialize-data
   [data]
@@ -437,13 +431,13 @@
         dos (DataOutputStream. bos)
         version (byte 0)
         class (first (first record))
-        class-serialized (serialize class)
+        serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
         data (serialize-data record-values)
-        header (serialize-header record-map data)]
+        header (serialize-header serialized-class record-map)]
     (.writeByte dos version)
-    (.write dos class-serialized 0 (count class-serialized))
-    (doall (for [h header] (.write dos h 0 (count h))))
+    (.write dos serialized-class 0 (count serialized-class))
+    (.write dos header 0 (count header))
     (doall (for [d data] (.write dos d 0 (count d))))
     (.toByteArray bos)))
