@@ -1,5 +1,6 @@
 (ns clj-odbp.serialize.binary.record
   (:require [clj-odbp.serialize.binary.common :as c]
+            [clj-odbp.serialize.binary.int :as i]
             [clj-odbp.serialize.binary.varint :as v]
             [clojure.string :as string])
   (:import [java.io ByteArrayOutputStream DataOutputStream]
@@ -148,6 +149,24 @@
   (serialize [value]
     (map-type value)))
 
+(deftype OrientInt32 [value]
+  OrientType
+  (serialize [this]
+    (i/int32 (int value))))
+
+(defn orient-int32
+  [value]
+  (->OrientInt32 value))
+
+(deftype OrientInt64 [value]
+  OrientType
+  (serialize [this]
+    (i/int64 value)))
+
+(defn orient-int64
+  [value]
+  (->OrientInt64 value))
+
 (deftype OrientDateTime [value]
   OrientType
   (getDataType [this]
@@ -259,8 +278,8 @@
   (serialize [this]
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
-          cid-varint (v/varint-unsigned cluster-id)
-          rpos-varint (v/varint-unsigned record-position)]
+          cid-varint (i/int64 cluster-id)
+          rpos-varint (i/int64 record-position)]
       (.write dos cid-varint 0 (count cid-varint))
       (.write dos rpos-varint 0 (count rpos-varint))
       (.toByteArray bos))))
@@ -347,9 +366,9 @@
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
           precision (re-find #"[0-9]+" (string/replace value "." ""))
-          value-size (v/varint-unsigned (count precision))
+          value-size (i/int32 (count precision))
           decimals (second (string/split (str value) #"[.]"))
-          scale (v/varint-unsigned (count decimals))
+          scale (i/int32 (count decimals))
           serialized-value (serialize value)]
       (.write dos scale 0 (count scale))
       (.write dos value-size 0 (count value-size))
@@ -360,13 +379,24 @@
   [record-values data]
   (let [record-keys (map serialize (keys record-values))
         indexes (take (count data) (iterate inc 1))
-        indexes-v (vec (map serialize indexes))
+        idx-int32 (map orient-int32 indexes)
+        indexes-v (vec (map serialize idx-int32))
         data-map (zipmap indexes-v data)]
     (into [] (zipmap record-keys (take-nth 2 data-map)))))
 
 (defn serialize-data
   [data]
   (serialize data))
+
+;; [[[8, 110, 97, 109, 101] [[2] [8, 110, 97, 109, 101]]]
+;;  [[14, 115, 117, 114, 110, 97, 109, 101]
+;;   [[6] [14, 115, 117, 114, 110, 97, 109, 101]]]]
+(defn write-header
+  [^DataOutputStream dos header]
+  (doall
+   (for [h header]
+     (map
+      #(for [hh %] (.write dos hh 0 (count hh))) h))))
 
 (defn serialize-record
   [record]
@@ -380,6 +410,6 @@
         header (serialize-header record-values data)]
     (.writeByte dos version)
     (.write dos class-serialized 0 (count class-serialized))
-    (.write dos header 0 (count header))
-    (.write dos data 0 (count data))
+    (write-header dos header)
+    (doall (for [d data] (.write dos d 0 (count d))))
     (.toByteArray bos)))
