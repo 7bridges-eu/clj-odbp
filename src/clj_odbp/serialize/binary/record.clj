@@ -375,19 +375,48 @@
       (.write dos serialized-value 0 (count serialized-value))
       (.toByteArray bos))))
 
-(defn serialize-header
-  [record-values data]
-  (let [record-keys (map serialize (keys record-values))
-        indexes (take (count data) (iterate inc 1))
-        idx-int32 (map orient-int32 indexes)
-        indexes-v (map serialize idx-int32)
-        data-map (zipmap indexes-v data)]
-    (mapcat flatten
-            (into [] (zipmap record-keys (take-nth 2 data-map))))))
+;; (defn serialize-header
+;;   [record-values data]
+;;   (let [record-keys (map serialize (keys record-values))
+;;         indexes (take (count data) (iterate inc 1))
+;;         idx-int32 (map orient-int32 indexes)
+;;         indexes-v (map serialize idx-int32)
+;;         data-map (zipmap indexes-v data)]
+;;     (mapcat flatten
+;;             (into [] (zipmap record-keys data-map)))))
+
+(defn get-pointer-to-ds
+  [left-pad serialized-class serialized-field-name serialized-field]
+  (+ left-pad                         ; Padding from the beginning of the buffer
+     1                                  ; Add 1 to get the position
+     1                                  ; Version
+     (count serialized-class)
+     4                                  ; Position of field name
+     1                                  ; Start of field name
+     (count serialized-field-name)
+     4                                  ; Position of field value
+     1                                  ; Start of field value
+     (count serialized-field)
+     1                                  ; Field type
+     ))
+
+(defn serialize-field [serialized-class record-map data]
+  (let [fields (mapcat vector m)]
+    (vec
+     (for [f fields]
+       {:field-name (name (first f))
+        :pointer-to-data-structure (get-pointer-to-ds 0
+                                                      serialized-class
+                                                      (serialize (first f))
+                                                      (serialize (second f)))
+        :data-type (getDataType (second f))}))))
+
+(defn serialize-header [])
+
 
 (defn serialize-data
   [data]
-  (serialize data))
+  (map serialize data))
 
 (defn serialize-record
   [record]
@@ -396,9 +425,10 @@
         version (byte 0)
         class (first (first record))
         class-serialized (serialize class)
-        record-values (get record class)
+        record-map (get record class)
+        record-values (vals record-map)
         data (serialize-data record-values)
-        header (serialize-header record-values data)]
+        header (serialize-header record-map data)]
     (.writeByte dos version)
     (.write dos class-serialized 0 (count class-serialized))
     (doall (for [h header] (.write dos h 0 (count h))))
