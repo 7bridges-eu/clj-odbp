@@ -398,7 +398,8 @@
               (conj res
                     (orient-int32 (+ 1 header-size (count (serialize f))))))))))
 
-(defn fields-positions-map [serialized-class record-keys record-values]
+(defn fields-positions-map
+  [serialized-class record-keys record-values]
   (let [header-size (get-header-size serialized-class record-keys)]
     (zipmap record-keys (get-field-positions record-values header-size))))
 
@@ -417,9 +418,16 @@
           :pointer-to-data-structure (get fields-positions key)
           :data-type (getDataType (second f))})))))
 
-(defn serialize-header [serialized-class record-map]
+(defn serialize-header
+  [serialized-class record-map]
   (let [headers (get-headers serialized-class record-map)]
     (map serialize (mapcat vals headers))))
+
+(defn write-header
+  [^DataOutputStream dos header]
+  (if (= (type header) java.lang.Byte)
+    (.writeByte dos header)
+    (.write dos header 0 (count header))))
 
 (defn serialize-data
   [data]
@@ -438,6 +446,6 @@
         header (serialize-header serialized-class record-map)]
     (.writeByte dos version)
     (.write dos serialized-class 0 (count serialized-class))
-    (.write dos header 0 (count header))
-    (doall (for [d data] (.write dos d 0 (count d))))
+    (doall (map #(write-header dos %) header))
+    (doall (map #(.write dos % 0 (count %)) data))
     (.toByteArray bos)))
