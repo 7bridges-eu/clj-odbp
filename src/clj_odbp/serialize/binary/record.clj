@@ -406,7 +406,7 @@
                    (fn [idx elem]
                      (if (= idx 0)
                        0
-                       (count (v (- idx 1))))) v)]
+                       (count (data (- idx 1))))) data)]
     (zipmap field-names positions)))
 
 (defn serialize-fields [serialized-class record-map data]
