@@ -400,16 +400,29 @@
      1                                  ; Field type
      ))
 
-(defn serialize-field [serialized-class record-map data]
-  (let [fields (mapcat vector record-map)]
+(defn field-length-map [record-map data]
+  (let [field-names (keys record-map)
+        positions (map-indexed
+                   (fn [idx elem]
+                     (if (= idx 0)
+                       0
+                       (count (v (- idx 1))))) v)]
+    (zipmap field-names positions)))
+
+(defn serialize-fields [serialized-class record-map data]
+  (let [fields (mapcat vector record-map)
+        lengths (field-length-map record-map data)]
     (vec
      (for [f fields]
-       {:field-name (name (first f))
-        :pointer-to-data-structure (get-pointer-to-ds 0
-                                                      serialized-class
-                                                      (serialize (first f))
-                                                      (serialize (second f)))
-        :data-type (getDataType (second f))}))))
+       (let [key (first f)
+             value (second f)
+             pos (get lengths key)]
+         {:field-name (name key)
+          :pointer-to-data-structure (get-pointer-to-ds pos
+                                                        serialized-class
+                                                        (serialize key)
+                                                        (serialize value))
+          :data-type (getDataType (second f))})))))
 
 (defn serialize-header [])
 
