@@ -380,23 +380,14 @@
   (let [record-keys (map serialize (keys record-values))
         indexes (take (count data) (iterate inc 1))
         idx-int32 (map orient-int32 indexes)
-        indexes-v (vec (map serialize idx-int32))
+        indexes-v (map serialize idx-int32)
         data-map (zipmap indexes-v data)]
-    (into [] (zipmap record-keys (take-nth 2 data-map)))))
+    (mapcat flatten
+            (into [] (zipmap record-keys (take-nth 2 data-map))))))
 
 (defn serialize-data
   [data]
   (serialize data))
-
-;; [[[8, 110, 97, 109, 101] [[2] [8, 110, 97, 109, 101]]]
-;;  [[14, 115, 117, 114, 110, 97, 109, 101]
-;;   [[6] [14, 115, 117, 114, 110, 97, 109, 101]]]]
-(defn write-header
-  [^DataOutputStream dos header]
-  (doall
-   (for [h header]
-     (map
-      #(for [hh %] (.write dos hh 0 (count hh))) h))))
 
 (defn serialize-record
   [record]
@@ -410,6 +401,6 @@
         header (serialize-header record-values data)]
     (.writeByte dos version)
     (.write dos class-serialized 0 (count class-serialized))
-    (write-header dos header)
+    (doall (for [h header] (.write dos h 0 (count h))))
     (doall (for [d data] (.write dos d 0 (count d))))
     (.toByteArray bos)))
