@@ -1,17 +1,12 @@
 (ns clj-odbp.deserialize.binary.utils
-  (:import [java.io ByteArrayInputStream]))
+  (:require [clj-odbp.deserialize.binary.buffer :as b]))
 
-(defn to-bytearray
-  [data]
-  (-> data
-      byte-array
-      ByteArrayInputStream.))
-
-(defn take-n-bytes
-  "Return a vector with the first n elements and
-  the rest of a sequence"
-  [^ByteArrayInputStream stream n]
-  (let [b (byte-array n)]
-    (do
-      (.read stream b)
-      (vec b))))
+(defn read-int32
+  "Read a 32 bit integer from the buffer."
+  [buffer]
+  (let [data (b/buffer-take buffer 4)
+        one (bit-shift-left (nth data 0) 24)
+        two (bit-shift-left (bit-and 0xFF (nth data 1)) 16)
+        three (bit-shift-left (bit-and 0xFF (nth data 2)) 8)
+        four (bit-and 0xFF (nth data 3))]
+    (bit-or one two three four)))

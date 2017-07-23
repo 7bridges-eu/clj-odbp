@@ -6,7 +6,6 @@
 (def record-load-request
   {:operation s/byte-type
    :session-id s/int-type
-   ;;   :token s/bytes-type
    :cluster-id s/short-type
    :cluster-position s/long-type
    :fetch-plan s/string-type

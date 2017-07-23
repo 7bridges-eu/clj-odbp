@@ -2,7 +2,8 @@
   (:require [clj-odbp.constants :as constants]
             [clj-odbp.specs.record :as specs]
             [clj-odbp.utils :refer [encode decode]]
-            [clj-odbp.serialize.csv.record :refer [serialize-record]])
+            [clj-odbp.serialize.csv.record :refer [serialize-record]]
+            [clj-odbp.deserialize.binary.record :refer [deserialize-record]])
   (:import [java.io DataInputStream]))
 
 (defn record-load-request
@@ -19,9 +20,10 @@
 
 (defn record-load-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-load-response))
+  (-> (decode
+       in
+       specs/record-load-response)
+      deserialize-record))
 
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request

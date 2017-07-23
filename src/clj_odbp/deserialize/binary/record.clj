@@ -1,17 +1,8 @@
 (ns clj-odbp.deserialize.binary.record
   (:require [clj-odbp.deserialize.binary.varint :as v]
             [clj-odbp.deserialize.binary.otypes :refer [type-list]]
-            [clj-odbp.deserialize.binary.buffer :as b]))
-
-(defn read-int32
-  "Read a 32 bit integer from the buffer."
-  [buffer]
-  (let [data (b/buffer-take buffer 4)
-        one (bit-shift-left (nth data 0) 24)
-        two (bit-shift-left (bit-and 0xFF (nth data 1)) 16)
-        three (bit-shift-left (bit-and 0xFF (nth data 2)) 8)
-        four (bit-and 0xFF (nth data 3))]
-    (bit-or one two three four)))
+            [clj-odbp.deserialize.binary.buffer :as b]
+            [clj-odbp.deserialize.binary.utils :as u]))
 
 (defn string-type
   "Read a string from the buffer."
@@ -36,7 +27,7 @@
     (if (zero? field-size)
       headers
       (let [field-name (string-type buffer field-size)
-            field-position (read-int32 buffer)
+            field-position (u/read-int32 buffer)
             data-type (int (first (b/buffer-take buffer 1)))]
         (recur (v/varint-signed-long (b/buffer-take buffer 1))
                (conj headers
@@ -64,4 +55,4 @@
         version (read-version buffer)
         class-name (read-class-name buffer)
         headers (read-headers buffer)]
-    {class-name (read-record headers content)}))
+    {class-name (read-record headers buffer)}))
