@@ -12,7 +12,7 @@
 
 (defn short-type
   [value]
-  (v/varint-unsigned value))
+  (byte-array (v/varint-unsigned value)))
 
 (extend-type java.lang.Short
   OrientType
@@ -23,7 +23,7 @@
 
 (defn integer-type
   [value]
-  (v/varint-unsigned value))
+  (byte-array (v/varint-unsigned value)))
 
 (extend-type java.lang.Integer
   OrientType
@@ -34,7 +34,7 @@
 
 (defn long-type
   [value]
-  (v/varint-unsigned value))
+  (byte-array (v/varint-unsigned value)))
 
 (extend-type java.lang.Long
   OrientType
@@ -172,7 +172,7 @@
   (getDataType [this]
     (byte 6))
   (serialize [this]
-    (v/varint-unsigned (.getTime value))))
+    (byte-array (v/varint-unsigned (.getTime value)))))
 
 (defn orient-date-time
   [value]
@@ -187,7 +187,7 @@
           date (.value this)
           date-without-time (.parse formatter (.format formatter date))
           date->long (.getTime date-without-time)]
-      (v/varint-unsigned (long (/ date->long 86400))))))
+      (byte-array (v/varint-unsigned (long (/ date->long 86400)))))))
 
 (defn orient-date [value]
   (->OrientDate value))
@@ -230,7 +230,7 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (.write dos (byte 23) 0 1)
+      (.writeByte dos 23)
       (.write dos serialized-items 0 serialized-items-len)
       (.toByteArray bos))))
 
@@ -365,9 +365,10 @@
   (serialize [this]
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
-          precision (re-find #"[0-9]+" (string/replace value "." ""))
+          value-str (.toString value)
+          precision (re-find #"[0-9]+" (string/replace value-str "." ""))
           value-size (i/int32 (count precision))
-          decimals (second (string/split (str value) #"[.]"))
+          decimals (second (string/split value-str #"[.]"))
           scale (i/int32 (count decimals))
           serialized-value (serialize value)]
       (.write dos scale 0 (count scale))
