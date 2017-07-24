@@ -4,7 +4,7 @@
 (defn read-int32
   "Read a 32 bit integer from the buffer."
   [buffer]
-  (let [data (b/buffer-take buffer 4)
+  (let [data (b/buffer-take! buffer 4)
         one (bit-shift-left (nth data 0) 24)
         two (bit-shift-left (bit-and 0xFF (nth data 1)) 16)
         three (bit-shift-left (bit-and 0xFF (nth data 2)) 8)
