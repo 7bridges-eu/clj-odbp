@@ -18,6 +18,9 @@
 (def odate-result [-72 -18 -57 16])
 (def odatetime-result (vec (r/long-type (.getTime (.value odatetime)))))
 
+(defn rid-comparator [r1 r2]
+  (.compareTo (.cluster_id r1) (.cluster_id r2)))
+
 (facts "Serialization of single type"
        (fact "Short - short 1 should return [2]"
              (vec (r/short-type (short 1))) => [2])
@@ -73,10 +76,15 @@
              (vec
               (.serialize (r/orient-link-list
                            (list (r/orient-rid 33 1) (r/orient-rid 34 1))))) =>
-             [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1])
+             [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+              0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1])
        (fact "OrientLinkSet - OrientLinkSet #{#33:1 #34:1} should return [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 34,
  0, 0, 0, 0, 0, 0, 0, 1]"
              (vec
               (.serialize (r/orient-link-set
-                           #{(r/orient-rid 33 1) (r/orient-rid 34 1)}))) =>
-             [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1]))
+                           (sorted-set-by rid-comparator
+                                          (r/orient-rid 33 1)
+                                          (r/orient-rid 34 1))))) =>
+             [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+              0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1])
+       )
