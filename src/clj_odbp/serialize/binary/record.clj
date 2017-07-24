@@ -230,8 +230,8 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (.writeByte dos 23)
-      (.write dos serialized-items 0 serialized-items-len)
+      (.writeByte dos (byte 23))
+      (doall (for [si serialized-items] (.write dos si 0 (count si))))
       (.toByteArray bos))))
 
 (defn orient-embedded-list
@@ -251,8 +251,8 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (.write dos (byte 23) 0 1)
-      (.write dos serialized-items 0 serialized-items-len)
+      (.writeByte dos (byte 23))
+      (doall (for [si serialized-items] (.write dos si 0 (count si))))
       (.toByteArray bos))))
 
 (defn orient-embedded-set
@@ -301,7 +301,7 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (.write dos serialized-items 0 serialized-items-len)
+      (doall (for [si serialized-items] (.write dos si 0 (count si))))
       (.toByteArray bos))))
 
 (defn orient-link-list
@@ -321,7 +321,7 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (.write dos serialized-items 0 serialized-items-len)
+      (doall (for [si serialized-items] (.write dos si 0 (count si))))
       (.toByteArray bos))))
 
 (defn orient-link-set
@@ -388,16 +388,13 @@
 
 (defn get-field-positions
   [record-values header-size]
-  (reverse
-   (loop [f (first record-values)
-          r (rest record-values)
-          res []]
-     (if (empty? r)
-       (conj res (orient-int32 (+ 1 header-size)))
-       (recur (first r)
-              (rest r)
-              (conj res
-                    (orient-int32 (+ 1 header-size (count (serialize f))))))))))
+  (map orient-int32
+       (reduce (fn [acc v]
+                 (if (empty? acc)
+                   (conj acc (+ 1 header-size))
+                   (conj acc (+ (last acc) (count (serialize v))))))
+               []
+               record-values)))
 
 (defn fields-positions-map
   [serialized-class record-keys record-values]
