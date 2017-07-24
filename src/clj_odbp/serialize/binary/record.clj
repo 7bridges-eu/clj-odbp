@@ -416,7 +416,7 @@
              value (second f)]
          {:field-name (name key)
           :pointer-to-data-structure (get fields-positions key)
-          :data-type (getDataType (second f))})))))
+          :data-type (getDataType value)})))))
 
 (defn serialize-header
   [serialized-class record-map]
