@@ -348,10 +348,11 @@
   (serialize [this]
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
-          size (v/varint-unsigned (count value))
+          size (byte-array (v/varint-unsigned (count value)))
           key-values (first (for [[k v] value]
                               (serialize-key-value k v)))]
       (.write dos size 0 (count size))
+      (.write dos key-values 0 (count key-values))
       (.toByteArray bos))))
 
 (defn orient-link-map
@@ -375,6 +376,10 @@
       (.write dos value-size 0 (count value-size))
       (.write dos serialized-value 0 (count serialized-value))
       (.toByteArray bos))))
+
+(defn orient-decimal
+  [value]
+  (->OrientDecimal value))
 
 (defn get-header-size
   [serialized-class headers]

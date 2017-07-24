@@ -87,4 +87,12 @@
                                           (r/orient-rid 34 1))))) =>
              [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0,
               0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1])
-       )
+       (fact "OrientLinkMap - OrientLinkMap {'test' #33:1} should return [2, 7, 8, 116, 101, 115, 116, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1]"
+             (vec
+              (.serialize
+               (r/orient-link-map {"test" (r/orient-rid 33 1)}))) =>
+             [2, 7, 8, 116, 101, 115, 116, 0, 0, 0, 0, 0, 0, 0, 33, 0,
+              0, 0, 0, 0, 0, 0, 1])
+       (fact "OrientDecimal - OrientDecimal 2.50 should return [0, 0, 0, 1, 0, 0, 0, 2, 64, 4, 0, 0, 0, 0, 0, 0]"
+             (vec (.serialize (r/orient-decimal 2.50))) =>
+             [0, 0, 0, 1, 0, 0, 0, 2, 64, 4, 0, 0, 0, 0, 0, 0]))
