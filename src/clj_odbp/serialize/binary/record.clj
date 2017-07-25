@@ -257,7 +257,7 @@
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
       (.writeByte dos (byte 23))
-      (doall (for [si serialized-items] (.write dos si 0 (count si))))
+      (doall (map #(.write dos % 0 (count %)) serialized-items))
       (.toByteArray bos)))
   (serialize [this position]
     (serialize this)))
@@ -280,7 +280,7 @@
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
       (.writeByte dos (byte 23))
-      (doall (for [si serialized-items] (.write dos si 0 (count si))))
+      (doall (map #(.write dos % 0 (count %)) serialized-items))
       (.toByteArray bos)))
   (serialize [this position]
     (serialize this)))
@@ -353,7 +353,7 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (doall (for [si serialized-items] (.write dos si 0 (count si))))
+      (doall (map #(.write dos % 0 (count %)) serialized-items))
       (.toByteArray bos)))
   (serialize [this position]
     (serialize this)))
@@ -375,7 +375,7 @@
           serialized-items (map serialize value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
-      (doall (for [si serialized-items] (.write dos si 0 (count si))))
+      (doall (map #(.write dos % 0 (count %)) serialized-items))
       (.toByteArray bos)))
   (serialize [this position]
     (serialize this)))
@@ -443,15 +443,16 @@
 
 (defn get-structure
   [record-map]
-  (let [record-map-keys (keys record-map)]
-    (vec
-     (for [k record-map-keys]
-       (let [record-map-value (get record-map k)]
-         {:key-type (getDataType k)
-          :field-name k
-          :position 0
-          :type (getDataType record-map-value)
-          :value record-map-value})))))
+  (reduce
+   (fn [acc k]
+     (let [record-map-value (get record-map k)]
+       (conj acc {:key-type (getDataType k)
+                  :field-name k
+                  :position 0
+                  :type (getDataType record-map-value)
+                  :value record-map-value})))
+   []
+   (keys record-map)))
 
 (defn header-size
   [structure]
