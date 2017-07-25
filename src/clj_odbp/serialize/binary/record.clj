@@ -9,7 +9,7 @@
 
 (defprotocol OrientType
   (getDataType [value])
-  (serialize [value]))
+  (serialize [value] [value position]))
 
 (defn short-type
   [value]
@@ -19,8 +19,9 @@
   OrientType
   (getDataType [value]
     (byte 2))
-  (serialize [value]
-    (short-type value)))
+  (serialize
+    ([value] (short-type value))
+    ([value position] (serialize value))))
 
 (defn integer-type
   [value]
@@ -30,8 +31,9 @@
   OrientType
   (getDataType [value]
     (byte 1))
-  (serialize [value]
-    (integer-type value)))
+  (serialize
+    ([value] (integer-type value))
+    ([value position] (serialize value))))
 
 (defn long-type
   [value]
@@ -41,8 +43,9 @@
   OrientType
   (getDataType [value]
     (byte 3))
-  (serialize [value]
-    (long-type value)))
+  (serialize
+    ([value] (long-type value))
+    ([value position] (serialize value))))
 
 (defn byte-type
   [value]
@@ -52,8 +55,9 @@
   OrientType
   (getDataType [value]
     (byte 17))
-  (serialize [value]
-    (byte-type value)))
+  (serialize
+    ([value] (byte-type value))
+    ([value position] (serialize value))))
 
 (defn boolean-type
   [value]
@@ -65,8 +69,9 @@
   OrientType
   (getDataType [value]
     (byte 0))
-  (serialize [value]
-    (boolean-type value)))
+  (serialize
+    ([value] (boolean-type value))
+    ([value position] (serialize value))))
 
 (defn float-type
   [value]
@@ -79,8 +84,9 @@
   OrientType
   (getDataType [value]
     (byte 4))
-  (serialize [value]
-    (float-type value)))
+  (serialize
+    ([value] (float-type value))
+    ([value position] (serialize value))))
 
 (defn double-type
   [value]
@@ -93,8 +99,9 @@
   OrientType
   (getDataType [value]
     (byte 5))
-  (serialize [value]
-    (double-type value)))
+  (serialize
+    ([value] (double-type value))
+    ([value position] (serialize value))))
 
 (defn string-type
   [value]
@@ -105,8 +112,9 @@
   OrientType
   (getDataType [value]
     (byte 7))
-  (serialize [value]
-    (string-type value)))
+  (serialize
+    ([value] (string-type value))
+    ([value position] (serialize value))))
 
 (defn keyword-type
   [value]
@@ -116,8 +124,9 @@
   OrientType
   (getDataType [value]
     (byte 7))
-  (serialize [value]
-    (keyword-type value)))
+  (serialize
+    ([value] (keyword-type value))
+    ([value position] (serialize value))))
 
 (defn coll-type
   [value]
@@ -125,18 +134,21 @@
 
 (extend-type clojure.lang.PersistentList
   OrientType
-  (serialize [value]
-    (coll-type value)))
+  (serialize
+    ([value] (coll-type value))
+    ([value position] (serialize value))))
 
 (extend-type clojure.lang.PersistentVector
   OrientType
-  (serialize [value]
-    (coll-type value)))
+  (serialize
+    ([value] (coll-type value))
+    ([value position] (serialize value))))
 
 (extend-type clojure.lang.PersistentHashSet
   OrientType
-  (serialize [value]
-    (coll-type value)))
+  (serialize
+    ([value] (coll-type value))
+    ([value position] (serialize value))))
 
 (defn map-type
   [value]
@@ -147,13 +159,16 @@
 
 (extend-type clojure.lang.PersistentArrayMap
   OrientType
-  (serialize [value]
-    (map-type value)))
+  (serialize
+    ([value] (map-type value))
+    ([value position] (serialize value))))
 
 (deftype OrientInt32 [value]
   OrientType
   (serialize [this]
-    (i/int32 (int value))))
+    (i/int32 (int value)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-int32
   [value]
@@ -162,7 +177,9 @@
 (deftype OrientInt64 [value]
   OrientType
   (serialize [this]
-    (i/int64 value)))
+    (i/int64 value))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-int64
   [value]
@@ -173,7 +190,9 @@
   (getDataType [this]
     (byte 6))
   (serialize [this]
-    (byte-array (v/varint-unsigned (.getTime value)))))
+    (byte-array (v/varint-unsigned (.getTime value))))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-date-time
   [value]
@@ -188,7 +207,9 @@
           date (.value this)
           date-without-time (.parse formatter (.format formatter date))
           date->long (.getTime date-without-time)]
-      (byte-array (v/varint-unsigned (long (/ date->long 86400)))))))
+      (byte-array (v/varint-unsigned (long (/ date->long 86400))))))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-date [value]
   (->OrientDate value))
@@ -198,7 +219,9 @@
   (getDataType [this]
     (byte 8))
   (serialize [this]
-    (c/bytes-type value)))
+    (c/bytes-type value))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-binary
   [value]
@@ -212,7 +235,9 @@
     (->> value
          vec
          flatten
-         (map serialize))))
+         (map serialize)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-embedded
   [value]
@@ -233,7 +258,9 @@
       (.write dos size-varint 0 size-varint-len)
       (.writeByte dos (byte 23))
       (doall (for [si serialized-items] (.write dos si 0 (count si))))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-embedded-list
   [value]
@@ -254,130 +281,45 @@
       (.write dos size-varint 0 size-varint-len)
       (.writeByte dos (byte 23))
       (doall (for [si serialized-items] (.write dos si 0 (count si))))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-embedded-set
   [value]
   (->OrientEmbeddedSet value))
 
-(defn get-headers
-  [record-map]
-  (let [record-map-keys (keys record-map)]
-    (vec
-     (for [k record-map-keys]
-       (let [record-map-value (get record-map k)]
-         {:key-type (getDataType k)
-          :field-name k
-          :type (getDataType record-map-value)
-          :value record-map-value})))))
+;; (defn serialize-oemap-headers
+;;   [headers data pos]
+;;   (let [headers-default-pos (position headers data)
+;;         oemap-headers-pos (record-headers-position headers-default-pos [] pos)]
+;;     (mapcat
+;;      #(serialize-header % [:key-type :field-name :position :type])
+;;      oemap-headers-pos)))
 
-(defn header-size
-  [headers]
-  (reduce
-   (fn [acc k]
-     (+ acc (count (serialize k)) const/fixed-header-int))
-   0
-   (map :field-name headers)))
+;; (deftype OrientEmbeddedMap [value]
+;;   OrientType
+;;   (getDataType [this]
+;;     (byte 12))
+;;   (serialize [this]
+;;     (serialize this 0))
+;;   (serialize [this position]
+;;     (let [bos (ByteArrayOutputStream.)
+;;           dos (DataOutputStream. bos)
+;;           size (count value)
+;;           size-varint (byte-array (v/varint-unsigned size))
+;;           size-varint-len (count size-varint)
+;;           headers (get-headers value)
+;;           data (serialize-data headers value)
+;;           serialized-headers (serialize-oemap-headers headers data position)]
+;;       (.write dos size-varint 0 size-varint-len)
+;;       (doall (map #(write-header dos %) serialized-headers))
+;;       (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
+;;       (.toByteArray bos))))
 
-(defn serialize-data
-  [headers record-map]
-  (reduce
-   (fn [acc h]
-     (let [k (:field-name h)
-           v (get record-map k)]
-       (conj acc {k (serialize v)})))
-   []
-   headers))
-
-(defn get-in-data [k data]
-  (-> (filter #(= k (first (keys %))) data)
-      first
-      (get k)))
-
-(defn initialize-position
-  [headers data]
-  (map
-   (fn [h]
-     (let [k (:field-name h)
-           v (get-in-data k data)]
-       (assoc h :position (count v))))
-   headers))
-
-(defn calculate-position
-  [headers]
-  (let [field-keys (map :field-name headers)
-        field-values (map :value headers)
-        header-size (header-size headers)]
-    (zipmap
-     field-keys
-     (map orient-int32
-          (reduce
-           (fn [acc v]
-             (if (empty? acc)
-               (conj acc (+ 1 header-size))
-               (conj acc (+ (last acc) (count (serialize v))))))
-           []
-           field-values)))))
-
-(defn position
-  [headers data]
-  (let [hs (initialize-position headers data)
-        positions (calculate-position hs)]
-    (for [h hs]
-      (assoc h :position
-             (get positions (:field-name h))))))
-
-(defn record-headers-position
-  [headers serialized-class]
-  (for [h headers]
-    (assoc h :position
-           (orient-int32 (+ 1
-                            (count serialized-class)
-                            (.value (:position h)))))))
-
-(defn serialize-header
-  [header key-order]
-  (reduce
-   (fn [acc hk]
-     (conj acc (serialize (get header hk))))
-   []
-   key-order))
-
-(defn serialize-oemap-headers
-  [headers data]
-  (let [headers-default-pos (position headers data)
-        oemap-headers-pos (record-headers-position headers-default-pos 0)]
-    (mapcat
-     #(serialize-header % [:key-type :field-name :position :type])
-     oemap-headers-pos)))
-
-(defn write-header
-  [^DataOutputStream dos header]
-  (if (= (type header) java.lang.Byte)
-    (.writeByte dos header)
-    (.write dos header 0 (count header))))
-
-(deftype OrientEmbeddedMap [value]
-  OrientType
-  (getDataType [this]
-    (byte 12))
-  (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
-          headers (get-headers value)
-          data (serialize-data headers value)
-          serialized-headers (serialize-oemap-headers headers data)]
-      (.write dos size-varint 0 size-varint-len)
-      (doall (map #(write-header dos %) serialized-headers))
-      (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
-      (.toByteArray bos))))
-
-(defn orient-embedded-map
-  [value]
-  (->OrientEmbeddedMap value))
+;; (defn orient-embedded-map
+;;   [value]
+;;   (->OrientEmbeddedMap value))
 
 (deftype OrientRid [cluster-id record-position]
   OrientType
@@ -390,7 +332,9 @@
           rpos-varint (i/int64 record-position)]
       (.write dos cid-varint 0 (count cid-varint))
       (.write dos rpos-varint 0 (count rpos-varint))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-rid
   [cluster-id record-position]
@@ -410,7 +354,9 @@
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
       (doall (for [si serialized-items] (.write dos si 0 (count si))))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-link-list
   [value]
@@ -430,7 +376,9 @@
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
       (doall (for [si serialized-items] (.write dos si 0 (count si))))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-link-set
   [value]
@@ -461,7 +409,9 @@
                               (serialize-key-value k v)))]
       (.write dos size 0 (count size))
       (.write dos key-values 0 (count key-values))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-link-map
   [value]
@@ -483,20 +433,87 @@
       (.write dos scale 0 (count scale))
       (.write dos value-size 0 (count value-size))
       (.write dos serialized-value 0 (count serialized-value))
-      (.toByteArray bos))))
+      (.toByteArray bos)))
+  (serialize [this position]
+    (serialize this)))
 
 (defn orient-decimal
   [value]
   (->OrientDecimal value))
 
+(defn get-structure
+  [record-map]
+  (let [record-map-keys (keys record-map)]
+    (vec
+     (for [k record-map-keys]
+       (let [record-map-value (get record-map k)]
+         {:key-type (getDataType k)
+          :field-name k
+          :position 0
+          :type (getDataType record-map-value)
+          :value record-map-value})))))
+
+(defn header-size
+  [structure]
+  (reduce
+   (fn [acc k]
+     (+ acc (count (serialize k)) const/fixed-header-int))
+   0
+   (map :field-name structure)))
+
+(defn serialize-structure-values
+  [structure]
+  (map
+   (fn [s]
+     (let [v (:value s)]
+       (assoc s :serialized-value (serialize v))))
+   structure))
+
+(defn positions
+  [structure serialized-class]
+  (let [serialized-sv (serialize-structure-values structure)
+        header-size (header-size structure)]
+    (reduce
+     (fn [acc s]
+       (if (empty? acc)
+         (conj acc
+               (assoc s :position
+                      (+ (count serialized-class)
+                         header-size)))
+         (conj acc
+               (assoc s :position
+                      (+ (count (:serialized-value (last acc)))
+                         (:position (last acc)))))))
+     []
+     serialized-sv)))
+
+(defn positions->orient-int32
+  [structure]
+  (map #(update % :position orient-int32) structure))
+
+(defn serialize-elements
+  [header key-order]
+  (reduce
+   (fn [acc hk]
+     (conj acc (serialize (get header hk))))
+   []
+   key-order))
+
 (defn serialize-record-headers
-  [headers data serialized-class]
-  (let [headers-default-pos (position headers data)
-        record-headers-pos (record-headers-position
-                            headers-default-pos serialized-class)]
+  [structure serialized-class]
+  (let [poses (positions structure serialized-class)
+        struct-oint32-poses (positions->orient-int32 poses)]
     (mapcat
-     #(serialize-header % [:field-name :position :type])
-     record-headers-pos)))
+     #(serialize-elements % [:field-name :position :type])
+     struct-oint32-poses)))
+
+(defn serialize-record-data [])
+
+(defn write-header
+  [^DataOutputStream dos header]
+  (if (= (type header) java.lang.Byte)
+    (.writeByte dos header)
+    (.write dos header 0 (count header))))
 
 (defn serialize-record
   [record]
@@ -507,13 +524,13 @@
         serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
-        headers (get-headers record-map)
-        data (serialize-data headers record-map)
-        serialized-record-headers (serialize-record-headers
-                                   headers data serialized-class)]
+        structure (get-structure record-map)
+        serialized-data (serialize-record-data)
+        serialized-headers (serialize-record-headers
+                            structure serialized-class)]
     (.writeByte dos version)
     (.write dos serialized-class 0 (count serialized-class))
-    (doall (map #(write-header dos %) serialized-record-headers))
+    (doall (map #(write-header dos %) serialized-headers))
     (.writeByte dos (byte 0))
-    (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
+    ;; (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
     (.toByteArray bos)))
