@@ -501,19 +501,21 @@
 
 (defn serialize-record-headers
   [structure serialized-class]
-  (let [poses (positions structure serialized-class)
-        struct-oint32-poses (positions->orient-int32 poses)]
-    (mapcat
-     #(serialize-elements % [:field-name :position :type])
-     struct-oint32-poses)))
-
-(defn serialize-record-data [])
+  (mapcat
+   #(serialize-elements % [:field-name :position :type])
+   structure))
 
 (defn write-header
   [^DataOutputStream dos header]
   (if (= (type header) java.lang.Byte)
     (.writeByte dos header)
     (.write dos header 0 (count header))))
+
+(defn serialize-record-data
+  [structure]
+  (->> structure
+       (map :serialized-value)
+       (map byte-array)))
 
 (defn serialize-record
   [record]
@@ -524,13 +526,14 @@
         serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
-        structure (get-structure record-map)
-        serialized-data (serialize-record-data)
-        serialized-headers (serialize-record-headers
-                            structure serialized-class)]
+        structure (-> (get-structure record-map)
+                      (positions serialized-class)
+                      positions->orient-int32)
+        serialized-headers (serialize-record-headers structure serialized-class)
+        serialized-data (serialize-record-data structure)]
     (.writeByte dos version)
     (.write dos serialized-class 0 (count serialized-class))
     (doall (map #(write-header dos %) serialized-headers))
     (.writeByte dos (byte 0))
-    ;; (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
+    (doall (map #(.write dos % 0 (count %)) serialized-data))
     (.toByteArray bos)))
