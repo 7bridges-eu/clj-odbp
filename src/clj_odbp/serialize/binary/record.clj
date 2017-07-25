@@ -491,6 +491,12 @@
   [structure]
   (map #(update % :position orient-int32) structure))
 
+(defn record-map->structure
+  [record-map serialized-class]
+  (-> (get-structure record-map)
+      (positions serialized-class)
+      positions->orient-int32))
+
 (defn serialize-elements
   [header key-order]
   (reduce
@@ -526,9 +532,7 @@
         serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
-        structure (-> (get-structure record-map)
-                      (positions serialized-class)
-                      positions->orient-int32)
+        structure (record-map->structure record-map serialized-class)
         serialized-headers (serialize-record-headers structure serialized-class)
         serialized-data (serialize-record-data structure)]
     (.writeByte dos version)
