@@ -1,5 +1,6 @@
 (ns clj-odbp.serialize.binary.record
-  (:require [clj-odbp.serialize.binary.common :as c]
+  (:require [clj-odbp.constants :as const]
+            [clj-odbp.serialize.binary.common :as c]
             [clj-odbp.serialize.binary.int :as i]
             [clj-odbp.serialize.binary.varint :as v]
             [clojure.string :as string])
@@ -259,13 +260,120 @@
   [value]
   (->OrientEmbeddedSet value))
 
+(defn get-headers
+  [record-map]
+  (let [record-map-keys (keys record-map)]
+    (vec
+     (for [k record-map-keys]
+       (let [record-map-value (get record-map k)]
+         {:key-type (getDataType k)
+          :field-name k
+          :type (getDataType record-map-value)
+          :value record-map-value})))))
+
+(defn header-size
+  [headers]
+  (reduce
+   (fn [acc k]
+     (+ acc (count (serialize k)) const/fixed-header-int))
+   0
+   (map :field-name headers)))
+
+(defn serialize-data
+  [headers record-map]
+  (reduce
+   (fn [acc h]
+     (let [k (:field-name h)
+           v (get record-map k)]
+       (conj acc {k (serialize v)})))
+   []
+   headers))
+
+(defn get-in-data [k data]
+  (-> (filter #(= k (first (keys %))) data)
+      first
+      (get k)))
+
+(defn initialize-position
+  [headers data]
+  (map
+   (fn [h]
+     (let [k (:field-name h)
+           v (get-in-data k data)]
+       (assoc h :position (count v))))
+   headers))
+
+(defn calculate-position
+  [headers]
+  (let [field-keys (map :field-name headers)
+        field-values (map :value headers)
+        header-size (header-size headers)]
+    (zipmap
+     field-keys
+     (map orient-int32
+          (reduce
+           (fn [acc v]
+             (if (empty? acc)
+               (conj acc (+ 1 header-size))
+               (conj acc (+ (last acc) (count (serialize v))))))
+           []
+           field-values)))))
+
+(defn position
+  [headers data]
+  (let [hs (initialize-position headers data)
+        positions (calculate-position hs)]
+    (for [h hs]
+      (assoc h :position
+             (get positions (:field-name h))))))
+
+(defn record-headers-position
+  [headers serialized-class]
+  (for [h headers]
+    (assoc h :position
+           (orient-int32 (+ 1
+                            (count serialized-class)
+                            (.value (:position h)))))))
+
+(defn serialize-header
+  [header key-order]
+  (reduce
+   (fn [acc hk]
+     (conj acc (serialize (get header hk))))
+   []
+   key-order))
+
+(defn serialize-oemap-headers
+  [headers data]
+  (let [headers-default-pos (position headers data)
+        oemap-headers-pos (record-headers-position headers-default-pos 0)]
+    (mapcat
+     #(serialize-header % [:key-type :field-name :position :type])
+     oemap-headers-pos)))
+
+(defn write-header
+  [^DataOutputStream dos header]
+  (if (= (type header) java.lang.Byte)
+    (.writeByte dos header)
+    (.write dos header 0 (count header))))
+
 (deftype OrientEmbeddedMap [value]
   OrientType
   (getDataType [this]
     (byte 12))
   (serialize [this]
-    ;; TODO
-    ))
+    (let [bos (ByteArrayOutputStream.)
+          dos (DataOutputStream. bos)
+          size (count value)
+          size-varint (byte-array (v/varint-unsigned size))
+          size-varint-len (count size-varint)
+          headers (get-headers value)
+          data (serialize-data headers value)
+          serialized-headers (serialize-oemap-headers headers data)]
+      (.write dos size-varint 0 size-varint-len)
+      (doall (map #(write-header dos %) serialized-headers))
+      (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
+      (.toByteArray bos))))
 
 (defn orient-embedded-map
   [value]
@@ -381,60 +489,14 @@
   [value]
   (->OrientDecimal value))
 
-(defn get-header-size
-  [serialized-class headers]
-  (+ 1
-     (count serialized-class)
-     (reduce
-      (fn [size field]
-        (+ size (count (serialize field)) 5))
-      0
-      headers)))
-
-(defn get-field-positions
-  [record-values header-size]
-  (map orient-int32
-       (reduce (fn [acc v]
-                 (if (empty? acc)
-                   (conj acc (+ 1 header-size))
-                   (conj acc (+ (last acc) (count (serialize v))))))
-               []
-               record-values)))
-
-(defn fields-positions-map
-  [serialized-class record-keys record-values]
-  (let [header-size (get-header-size serialized-class record-keys)]
-    (zipmap record-keys (get-field-positions record-values header-size))))
-
-(defn get-headers
-  [serialized-class record-map]
-  (let [fields (mapcat vector record-map)
-        record-keys (keys record-map)
-        record-vals (vals record-map)
-        fields-positions (fields-positions-map
-                          serialized-class record-keys record-vals)]
-    (vec
-     (for [f fields]
-       (let [key (first f)
-             value (second f)]
-         {:field-name (name key)
-          :pointer-to-data-structure (get fields-positions key)
-          :data-type (getDataType value)})))))
-
-(defn serialize-header
-  [serialized-class record-map]
-  (let [headers (get-headers serialized-class record-map)]
-    (map serialize (mapcat vals headers))))
-
-(defn write-header
-  [^DataOutputStream dos header]
-  (if (= (type header) java.lang.Byte)
-    (.writeByte dos header)
-    (.write dos header 0 (count header))))
-
-(defn serialize-data
-  [data]
-  (map serialize data))
+(defn serialize-record-headers
+  [headers data serialized-class]
+  (let [headers-default-pos (position headers data)
+        record-headers-pos (record-headers-position
+                            headers-default-pos serialized-class)]
+    (mapcat
+     #(serialize-header % [:field-name :position :type])
+     record-headers-pos)))
 
 (defn serialize-record
   [record]
@@ -445,10 +507,13 @@
         serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
-        data (serialize-data record-values)
-        header (serialize-header serialized-class record-map)]
+        headers (get-headers record-map)
+        data (serialize-data headers record-map)
+        serialized-record-headers (serialize-record-headers
+                                   headers data serialized-class)]
     (.writeByte dos version)
     (.write dos serialized-class 0 (count serialized-class))
-    (doall (map #(write-header dos %) header))
-    (doall (map #(.write dos % 0 (count %)) data))
+    (doall (map #(write-header dos %) serialized-record-headers))
+    (.writeByte dos (byte 0))
+    (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
     (.toByteArray bos)))
