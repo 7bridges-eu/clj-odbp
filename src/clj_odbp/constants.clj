@@ -6,3 +6,5 @@
 
 (def ^:const request-command-sync-mode (byte \s))
 (def ^:const request-command-query "q")
+
+(def ^:const fixed-header-int 5)
