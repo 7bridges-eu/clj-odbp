@@ -530,20 +530,19 @@
 
 (defn rest-elem
   [record-map first-elem]
-  (let [r (rest record-map)]
-    (reduce
-     (fn [acc [k v]]
-       (let [last-elem (last acc)
-             pos (+ (count (:serialized-value last-elem))
-                    (:position last-elem))]
-         (conj acc {:key-type (getDataType k)
-                    :field-name k
-                    :type (getDataType v)
-                    :value v
-                    :position pos
-                    :serialized-value (serialize v pos)})))
-     (conj [] first-elem)
-     r)))
+  (reduce
+   (fn [acc [k v]]
+     (let [last-elem (last acc)
+           pos (+ (count (:serialized-value last-elem))
+                  (:position last-elem))]
+       (conj acc {:key-type (getDataType k)
+                  :field-name k
+                  :type (getDataType v)
+                  :value v
+                  :position pos
+                  :serialized-value (serialize v pos)})))
+   (conj [] first-elem)
+   (rest record-map)))
 
 (defn record-map->structure
   [record-map serialized-class]
