@@ -422,7 +422,7 @@
    []
    (keys record-map)))
 
-(defn header-size
+(defn oemap-header-size
   [structure]
   (reduce
    (fn [acc k]
@@ -438,19 +438,18 @@
        (assoc s :serialized-value (serialize v))))
    structure))
 
-(defn positions
-  [structure serialized-class]
-  (let [header-size (header-size structure)]
+(defn oemap-positions
+  [structure offset]
+  (let [header-size (oemap-header-size structure)]
     (reduce
      (fn [acc s]
        (if (empty? acc)
          (conj acc
-               (assoc s :position
-                      (+ (count serialized-class)
-                         header-size)))
+               (assoc s :position (+ offset header-size)))
          (conj acc
                (assoc s :position
-                      (+ (count (:serialized-value (last acc)))
+                      (+ offset
+                         (count (:serialized-value (last acc)))
                          (:position (last acc)))))))
      []
      structure)))
@@ -459,14 +458,12 @@
   [structure]
   (map #(update % :position orient-int32) structure))
 
-(defn map->structure
-  ([data-map]
-   (map->structure data-map []))
-  ([data-map serialized-class]
-   (-> (get-structure data-map)
-       serialize-structure-values
-       (positions serialized-class)
-       positions->orient-int32)))
+(defn oemap->structure
+  [data-map offset]
+  (-> (get-structure data-map)
+      serialize-structure-values
+      (oemap-positions offset)
+      positions->orient-int32))
 
 (defn serialize-elements
   [header key-order]
@@ -506,7 +503,7 @@
           size (count value)
           size-varint (byte-array (v/varint-unsigned size))
           size-varint-len (count size-varint)
-          structure (map->structure value)
+          structure (oemap->structure value position)
           key-order [:key-type :field-name :position :type]
           serialized-headers (serialize-headers structure key-order)
           serialized-data (serialize-data structure)]
@@ -519,7 +516,57 @@
   [value]
   (->OrientEmbeddedMap value))
 
+(defn record-header-size
+  [record-map]
+  (reduce
+   (fn [acc k]
+     (+ acc (count (serialize k)) const/fixed-header-int))
+   0
+   (keys record-map)))
+
+(defn first-elem
+  [record-map serialized-class]
+  (let [f (first record-map)
+        k (first f)
+        v (second f)
+        header-size (record-header-size record-map)]
+    {:key-type (getDataType k)
+     :field-name k
+     :type (getDataType v)
+     :value v
+     :serialized-value (serialize v)
+     :position (+ (count serialized-class) header-size)}))
+
+(defn rest-elem
+  [record-map first-elem]
+  (let [r (rest record-map)]
+    (reduce
+     (fn [acc [k v]]
+       (let [pos (+ (count (:serialized-value first-elem))
+                    (:position first-elem))]
+         (conj acc {:key-type (getDataType k)
+                    :field-name k
+                    :type (getDataType v)
+                    :value v
+                    :position pos
+                    :serialized-value (serialize v pos)})))
+     []
+     r)))
+
+(defn record-map->structure
+  [record-map serialized-class]
+  (let [fe (first-elem record-map serialized-class)
+        res (conj [] fe)]
+    (if-not (empty? (rest record-map))
+      (->> (rest-elem record-map fe)
+           (mapcat #(conj res %))
+           positions->orient-int32)
+      (positions->orient-int32 res))))
+
 (defn serialize-record
+  "Serialize `record` for OrientDB.
+   `record` must be a Clojure map. It can contain Clojure types (string,
+   boolean, etc.) or Orient custom types (OrientRid, OrientBinary, etc.)."
   [record]
   (let [bos (ByteArrayOutputStream.)
         dos (DataOutputStream. bos)
@@ -528,7 +575,7 @@
         serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
-        structure (map->structure record-map serialized-class)
+        structure (record-map->structure record-map serialized-class)
         key-order [:field-name :position :type]
         serialized-headers (serialize-headers structure key-order)
         serialized-data (serialize-data structure)]
