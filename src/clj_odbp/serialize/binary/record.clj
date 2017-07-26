@@ -472,8 +472,7 @@
 
 (defn positions
   [structure serialized-class]
-  (let [serialized-sv (serialize-structure-values structure)
-        header-size (header-size structure)]
+  (let [header-size (header-size structure)]
     (reduce
      (fn [acc s]
        (if (empty? acc)
@@ -486,7 +485,7 @@
                       (+ (count (:serialized-value (last acc)))
                          (:position (last acc)))))))
      []
-     serialized-sv)))
+     structure)))
 
 (defn positions->orient-int32
   [structure]
@@ -495,6 +494,7 @@
 (defn record-map->structure
   [record-map serialized-class]
   (-> (get-structure record-map)
+      serialize-structure-values
       (positions serialized-class)
       positions->orient-int32))
 
