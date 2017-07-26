@@ -289,38 +289,6 @@
   [value]
   (->OrientEmbeddedSet value))
 
-;; (defn serialize-oemap-headers
-;;   [headers data pos]
-;;   (let [headers-default-pos (position headers data)
-;;         oemap-headers-pos (record-headers-position headers-default-pos [] pos)]
-;;     (mapcat
-;;      #(serialize-header % [:key-type :field-name :position :type])
-;;      oemap-headers-pos)))
-
-;; (deftype OrientEmbeddedMap [value]
-;;   OrientType
-;;   (getDataType [this]
-;;     (byte 12))
-;;   (serialize [this]
-;;     (serialize this 0))
-;;   (serialize [this position]
-;;     (let [bos (ByteArrayOutputStream.)
-;;           dos (DataOutputStream. bos)
-;;           size (count value)
-;;           size-varint (byte-array (v/varint-unsigned size))
-;;           size-varint-len (count size-varint)
-;;           headers (get-headers value)
-;;           data (serialize-data headers value)
-;;           serialized-headers (serialize-oemap-headers headers data position)]
-;;       (.write dos size-varint 0 size-varint-len)
-;;       (doall (map #(write-header dos %) serialized-headers))
-;;       (doall (map #(.write dos % 0 (count %)) (mapcat vals data)))
-;;       (.toByteArray bos))))
-
-;; (defn orient-embedded-map
-;;   [value]
-;;   (->OrientEmbeddedMap value))
-
 (deftype OrientRid [cluster-id record-position]
   OrientType
   (getDataType [this]
@@ -491,12 +459,14 @@
   [structure]
   (map #(update % :position orient-int32) structure))
 
-(defn record-map->structure
-  [record-map serialized-class]
-  (-> (get-structure record-map)
-      serialize-structure-values
-      (positions serialized-class)
-      positions->orient-int32))
+(defn map->structure
+  ([data-map]
+   (map->structure data-map []))
+  ([data-map serialized-class]
+   (-> (get-structure data-map)
+       serialize-structure-values
+       (positions serialized-class)
+       positions->orient-int32)))
 
 (defn serialize-elements
   [header key-order]
@@ -506,10 +476,10 @@
    []
    key-order))
 
-(defn serialize-record-headers
-  [structure serialized-class]
+(defn serialize-headers
+  [structure key-order]
   (mapcat
-   #(serialize-elements % [:field-name :position :type])
+   #(serialize-elements % key-order)
    structure))
 
 (defn write-header
@@ -518,11 +488,36 @@
     (.writeByte dos header)
     (.write dos header 0 (count header))))
 
-(defn serialize-record-data
+(defn serialize-data
   [structure]
   (->> structure
        (map :serialized-value)
        (map byte-array)))
+
+(deftype OrientEmbeddedMap [value]
+  OrientType
+  (getDataType [this]
+    (byte 12))
+  (serialize [this]
+    (serialize this 0))
+  (serialize [this position]
+    (let [bos (ByteArrayOutputStream.)
+          dos (DataOutputStream. bos)
+          size (count value)
+          size-varint (byte-array (v/varint-unsigned size))
+          size-varint-len (count size-varint)
+          structure (map->structure value)
+          key-order [:key-type :field-name :position :type]
+          serialized-headers (serialize-headers structure key-order)
+          serialized-data (serialize-data structure)]
+      (.write dos size-varint 0 size-varint-len)
+      (doall (map #(write-header dos %) serialized-headers))
+      (doall (map #(.write dos % 0 (count %)) serialized-data))
+      (.toByteArray bos))))
+
+(defn orient-embedded-map
+  [value]
+  (->OrientEmbeddedMap value))
 
 (defn serialize-record
   [record]
@@ -533,9 +528,10 @@
         serialized-class (serialize class)
         record-map (get record class)
         record-values (vals record-map)
-        structure (record-map->structure record-map serialized-class)
-        serialized-headers (serialize-record-headers structure serialized-class)
-        serialized-data (serialize-record-data structure)]
+        structure (map->structure record-map serialized-class)
+        key-order [:field-name :position :type]
+        serialized-headers (serialize-headers structure key-order)
+        serialized-data (serialize-data structure)]
     (.writeByte dos version)
     (.write dos serialized-class 0 (count serialized-class))
     (doall (map #(write-header dos %) serialized-headers))
