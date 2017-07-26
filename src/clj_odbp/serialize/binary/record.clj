@@ -534,26 +534,24 @@
   (let [r (rest record-map)]
     (reduce
      (fn [acc [k v]]
-       (let [pos (+ (count (:serialized-value first-elem))
-                    (:position first-elem))]
+       (let [last-elem (last acc)
+             pos (+ (count (:serialized-value last-elem))
+                    (:position last-elem))]
          (conj acc {:key-type (getDataType k)
                     :field-name k
                     :type (getDataType v)
                     :value v
                     :position pos
                     :serialized-value (serialize v pos)})))
-     []
+     (conj [] first-elem)
      r)))
 
 (defn record-map->structure
   [record-map serialized-class]
-  (let [fe (first-elem record-map serialized-class)
-        res (conj [] fe)]
-    (if-not (empty? (rest record-map))
-      (->> (rest-elem record-map fe)
-           (mapcat #(conj res %))
-           positions->orient-int32)
-      (positions->orient-int32 res))))
+  (let [fe (first-elem record-map serialized-class)]
+    (->> (rest-elem record-map fe)
+         (mapcat #(conj [] %))
+         positions->orient-int32)))
 
 (defn serialize-record
   "Serialize `record` for OrientDB.
