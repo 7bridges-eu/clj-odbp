@@ -1,4 +1,5 @@
-(ns clj-odbp.deserialize.binary.buffer)
+(ns clj-odbp.deserialize.binary.buffer
+  (:require [clj-odbp.utils :refer [take-upto]]))
 
 (defn to-buffer
   "Transform a sequence into a rewindable buffer."
@@ -21,6 +22,15 @@
   [buffer pred]
   (let [{position :position data :data} @buffer
         result (take-while pred (drop position data))]
+    (swap! buffer assoc :position (+ position (count result)))
+    (vec result)))
+
+(defn buffer-take-upto!
+  "Returns a vector of n elements while pred is
+   true including the first false."
+  [buffer pred]
+  (let [{position :position data :data} @buffer
+        result (take-upto pred (drop position data))]
     (swap! buffer assoc :position (+ position (count result)))
     (vec result)))
 

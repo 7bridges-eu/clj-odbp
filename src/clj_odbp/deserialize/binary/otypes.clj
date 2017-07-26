@@ -1,43 +1,51 @@
 (ns clj-odbp.deserialize.binary.otypes
   (:require [clj-odbp.deserialize.binary.varint :as v]
-            [clj-odbp.deserialize.binary.buffer :as b]))
+            [clj-odbp.deserialize.binary.buffer :as b])
+  (:import [java.nio ByteBuffer]))
+
+(defn- is-varint-part [n]
+  (not= (bit-and n 0x80) 0x80))
 
 (defn bool-orient-type
   "Read a boolean from the stream"
   [buffer position]
-  (let [lenght (v/varint-signed-long (b/buffer-take! buffer 1))
-        b (b/buffer-take! buffer lenght)]
-    (apply str (map char b))))
+  (let [b (first (b/buffer-take! buffer 1))]
+    (> b 0)))
 
 (defn integer-orient-type
   "Read a integer from the stream"
   [buffer position]
   (b/buffer-set-position! buffer position)
-  (int (v/varint-signed-long (b/buffer-take! buffer 1))))
+  (let [b (b/buffer-take-upto! buffer is-varint-part)]
+    (int (v/varint-signed-long b))))
 
 (defn short-orient-type
   "Read a short from the stream"
   [buffer position]
   (b/buffer-set-position! buffer position)
-  nil)
+  (let [b (b/buffer-take-upto! buffer is-varint-part)]
+    (short (v/varint-signed-long b))))
 
 (defn long-orient-type
   "Read a long from the stream"
   [buffer position]
   (b/buffer-set-position! buffer position)
-  nil)
+  (let [b (b/buffer-take-upto! buffer is-varint-part)]
+    (long (v/varint-signed-long b))))
 
 (defn float-orient-type
   "Read a float from the stream"
   [buffer position]
   (b/buffer-set-position! buffer position)
-  nil)
+  (let [b (b/buffer-take! buffer 4)]
+    (.getFloat (ByteBuffer/wrap (byte-array b)))))
 
 (defn double-orient-type
   "Read a double from the stream"
   [buffer position]
   (b/buffer-set-position! buffer position)
-  nil)
+  (let [b (b/buffer-take! buffer 8)]
+    (.getDouble (ByteBuffer/wrap (byte-array b)))))
 
 (defn datetime-orient-type
   "Read a datetime from the stream"
