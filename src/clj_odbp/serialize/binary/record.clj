@@ -478,17 +478,16 @@
    #(serialize-elements % key-order)
    structure))
 
-(defn write-header
-  [^DataOutputStream dos header]
-  (if (= (type header) java.lang.Byte)
-    (.writeByte dos header)
-    (.write dos header 0 (count header))))
+(defn write-serialized-data
+  [^DataOutputStream dos data]
+  (if (= (type data) java.lang.Byte)
+    (.writeByte dos data)
+    (.write dos data 0 (count data))))
 
 (defn serialize-data
   [structure]
   (->> structure
-       (map :serialized-value)
-       (map byte-array)))
+       (map :serialized-value)))
 
 (deftype OrientEmbeddedMap [value]
   OrientType
@@ -507,8 +506,8 @@
           serialized-headers (serialize-headers structure key-order)
           serialized-data (serialize-data structure)]
       (.write dos size-varint 0 size-varint-len)
-      (doall (map #(write-header dos %) serialized-headers))
-      (doall (map #(.write dos % 0 (count %)) serialized-data))
+      (doall (map #(write-serialized-data dos %) serialized-headers))
+      (doall (map #(write-serialized-data dos %) serialized-data))
       (.toByteArray bos))))
 
 (defn orient-embedded-map
@@ -568,7 +567,7 @@
         serialized-data (serialize-data structure)]
     (.writeByte dos version)
     (.write dos serialized-class 0 (count serialized-class))
-    (doall (map #(write-header dos %) serialized-headers))
+    (doall (map #(write-serialized-data dos %) serialized-headers))
     (.writeByte dos (byte 0))
-    (doall (map #(.write dos % 0 (count %)) serialized-data))
+    (doall (map #(write-serialized-data dos %) serialized-data))
     (.toByteArray bos)))
