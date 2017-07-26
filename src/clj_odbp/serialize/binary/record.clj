@@ -547,9 +547,9 @@
 
 (defn record-map->structure
   [record-map serialized-class]
-  (let [fe (first-elem record-map serialized-class)]
-    (->> (rest-elem record-map fe)
-         positions->orient-int32)))
+  (->> (first-elem record-map serialized-class)
+       (rest-elem record-map)
+       positions->orient-int32))
 
 (defn serialize-record
   "Serialize `record` for OrientDB.
