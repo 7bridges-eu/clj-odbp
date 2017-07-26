@@ -448,8 +448,7 @@
                (assoc s :position (+ offset hsize)))
          (conj acc
                (assoc s :position
-                      (+ offset
-                         (count (:serialized-value (last acc)))
+                      (+ (count (:serialized-value (last acc)))
                          (:position (last acc)))))))
      []
      structure)))
