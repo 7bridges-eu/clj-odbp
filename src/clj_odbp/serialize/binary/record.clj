@@ -424,11 +424,12 @@
 
 (defn header-size
   [headers]
-  (reduce
-   (fn [acc k]
-     (+ acc (count (serialize k)) const/fixed-header-int))
-   0
-   headers))
+  (+ 1                                  ; closing header
+     (reduce
+      (fn [acc k]
+        (+ acc (count (serialize k)) const/fixed-header-int))
+      0
+      headers)))
 
 (defn serialize-structure-values
   [structure]
@@ -525,7 +526,7 @@
      :type (getDataType v)
      :value v
      :serialized-value (serialize v)
-     :position (+ (count serialized-class) hsize)}))
+     :position (+ 1 (count serialized-class) hsize)}))
 
 (defn rest-elem
   [record-map first-elem]
