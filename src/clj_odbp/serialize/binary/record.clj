@@ -422,13 +422,13 @@
    []
    (keys record-map)))
 
-(defn oemap-header-size
-  [structure]
+(defn header-size
+  [headers]
   (reduce
    (fn [acc k]
      (+ acc (count (serialize k)) const/fixed-header-int))
    0
-   (map :field-name structure)))
+   headers))
 
 (defn serialize-structure-values
   [structure]
@@ -440,12 +440,12 @@
 
 (defn oemap-positions
   [structure offset]
-  (let [header-size (oemap-header-size structure)]
+  (let [hsize (header-size (map :field-name structure))]
     (reduce
      (fn [acc s]
        (if (empty? acc)
          (conj acc
-               (assoc s :position (+ offset header-size)))
+               (assoc s :position (+ offset hsize)))
          (conj acc
                (assoc s :position
                       (+ offset
@@ -516,26 +516,18 @@
   [value]
   (->OrientEmbeddedMap value))
 
-(defn record-header-size
-  [record-map]
-  (reduce
-   (fn [acc k]
-     (+ acc (count (serialize k)) const/fixed-header-int))
-   0
-   (keys record-map)))
-
 (defn first-elem
   [record-map serialized-class]
   (let [f (first record-map)
         k (first f)
         v (second f)
-        header-size (record-header-size record-map)]
+        hsize (header-size (keys record-map))]
     {:key-type (getDataType k)
      :field-name k
      :type (getDataType v)
      :value v
      :serialized-value (serialize v)
-     :position (+ (count serialized-class) header-size)}))
+     :position (+ (count serialized-class) hsize)}))
 
 (defn rest-elem
   [record-map first-elem]
