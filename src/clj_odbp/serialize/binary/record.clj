@@ -206,22 +206,6 @@
   [value]
   (->OrientDateTime value))
 
-(deftype OrientDate [value]
-  OrientType
-  (getDataType [this]
-    (byte 19))
-  (serialize [this]
-    (let [formatter (SimpleDateFormat. "dd/MM/yyyy")
-          date (.value this)
-          date-without-time (.parse formatter (.format formatter date))
-          date->long (.getTime date-without-time)]
-      (long-type (long (/ date->long 86400)))))
-  (serialize [this offset]
-    (serialize this)))
-
-(defn orient-date [value]
-  (->OrientDate value))
-
 (deftype OrientBinary [value]
   OrientType
   (getDataType [this]

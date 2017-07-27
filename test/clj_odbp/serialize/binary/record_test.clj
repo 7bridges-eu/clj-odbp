@@ -10,12 +10,10 @@
   (let [formatter (SimpleDateFormat. format)]
     (.parse formatter s)))
 
-(def odate (r/orient-date (format-date "dd/MM/yyyy" "19/07/2017")))
 (def odatetime
   (r/orient-date-time
    (format-date "dd/MM/YYYY hh:mm:ss" "19/07/2017 10:30:00")))
 
-(def odate-result [-72 -18 -57 16])
 (def odatetime-result (vec (r/long-type (.getTime (.value odatetime)))))
 
 (defn rid-comparator [r1 r2]
@@ -61,8 +59,6 @@
              [0, 0, 0, 0, 0, 0, 1, 44])
        (fact "OrientBinary - OrientBinary [116 101 115 116] should return [8 116 101 115 116]"
              (vec (.serialize obinary)) => [8 116 101 115 116])
-       (fact "OrientDate - odate should return odate-result"
-             (vec (.serialize odate)) => odate-result)
        (fact "OrientDateTime - odatetime should return odatetime-result"
              (vec (.serialize odatetime)) => odatetime-result)
        (fact "OrientEmbedded - oemb should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 8 84 101 115 116]"
