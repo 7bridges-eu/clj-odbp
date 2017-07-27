@@ -103,6 +103,14 @@
     ([value] (double-type value))
     ([value position] (serialize value))))
 
+(extend-type java.math.BigDecimal
+  OrientType
+  (serialize [value]
+    (-> value
+        (.multiply (bigdec (Math/pow 10 (.scale value))))
+        .toBigInteger
+        .toByteArray)))
+
 (defn string-type
   [value]
   (let [bytes (.getBytes value)]
@@ -392,12 +400,10 @@
   (serialize [this]
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
-          value-str (.toString value)
-          precision (re-find #"[0-9]+" (string/replace value-str "." ""))
-          value-size (i/int32 (count precision))
-          decimals (second (string/split value-str #"[.]"))
-          scale (i/int32 (count decimals))
-          serialized-value (serialize value)]
+          v (bigdec value)
+          scale (i/int32 (.scale v))
+          serialized-value (serialize v)
+          value-size (i/int32 (count serialized-value))]
       (.write dos scale 0 (count scale))
       (.write dos value-size 0 (count value-size))
       (.write dos serialized-value 0 (count serialized-value))
