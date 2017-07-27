@@ -423,11 +423,11 @@
    (keys record-map)))
 
 (defn header-size
-  [headers]
+  [headers fixed-header-int]
   (+ 1                                  ; closing header
      (reduce
       (fn [acc k]
-        (+ acc (count (serialize k)) const/fixed-header-int))
+        (+ acc (count (serialize k)) fixed-header-int))
       0
       headers)))
 
@@ -441,7 +441,8 @@
 
 (defn oemap-positions
   [structure offset]
-  (let [hsize (header-size (map :field-name structure))]
+  (let [hsize (header-size
+               (map :field-name structure) const/fixed-oemap-header-int)]
     (reduce
      (fn [acc s]
        (if (empty? acc)
@@ -520,7 +521,7 @@
   (let [f (first record-map)
         k (first f)
         v (second f)
-        hsize (header-size (keys record-map))]
+        hsize (header-size (keys record-map) const/fixed-header-int)]
     {:key-type (getDataType k)
      :field-name k
      :type (getDataType v)
