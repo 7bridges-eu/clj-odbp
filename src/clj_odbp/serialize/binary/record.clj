@@ -491,7 +491,7 @@
   (->OrientEmbeddedMap value))
 
 (defn first-elem
-  [record-map serialized-class]
+  [record-map offset]
   (let [f (first record-map)
         k (first f)
         v (second f)
@@ -501,7 +501,7 @@
      :type (getDataType v)
      :value v
      :serialized-value (serialize v)
-     :position (+ 1 (count serialized-class) hsize)}))
+     :position (+ 1 offset hsize)}))
 
 (defn rest-elem
   [record-map first-elem]
@@ -510,18 +510,20 @@
      (let [last-elem (last acc)
            pos (+ (count (:serialized-value last-elem))
                   (:position last-elem))]
-       (conj acc {:key-type (getDataType k)
-                  :field-name k
-                  :type (getDataType v)
-                  :value v
-                  :position pos
-                  :serialized-value (serialize v pos)})))
+       (conj
+        acc
+        {:key-type (getDataType k)
+         :field-name k
+         :type (getDataType v)
+         :value v
+         :position pos
+         :serialized-value (serialize v pos)})))
    (conj [] first-elem)
    (rest record-map)))
 
 (defn record-map->structure
-  [record-map serialized-class]
-  (->> (first-elem record-map serialized-class)
+  [record-map offset]
+  (->> (first-elem record-map offset)
        (rest-elem record-map)
        positions->orient-int32))
 
@@ -535,14 +537,14 @@
         version (byte 0)
         class (first (first record))
         serialized-class (serialize class)
+        serialized-class-size (count serialized-class)
         record-map (get record class)
-        record-values (vals record-map)
-        structure (record-map->structure record-map serialized-class)
+        structure (record-map->structure record-map serialized-class-size)
         key-order [:field-name :position :type]
         serialized-headers (serialize-headers structure key-order)
         serialized-data (serialize-data structure)]
     (.writeByte dos version)
-    (.write dos serialized-class 0 (count serialized-class))
+    (.write dos serialized-class 0 serialized-class-size)
     (doall (map #(write-serialized-data dos %) serialized-headers))
     (.writeByte dos (byte 0))
     (doall (map #(write-serialized-data dos %) serialized-data))
@@ -552,10 +554,28 @@
   OrientType
   (getDataType [this]
     (byte 9))
-  (serialize [this]
-    (serialize-record value))
   (serialize [this offset]
-    (serialize this)))
+    (let [bos (ByteArrayOutputStream.)
+          dos (DataOutputStream. bos)
+          size (count value)
+          size-varint (byte-array (v/varint-unsigned size))
+          size-varint-len (count size-varint)
+          class (first (first value))
+          serialized-class (serialize class)
+          serialized-class-size (count serialized-class)
+          record-map (get value class)
+          first-elem-pos (dec (+ offset serialized-class-size))
+          structure (record-map->structure record-map first-elem-pos)
+          key-order [:field-name :position :type]
+          serialized-headers (serialize-headers structure key-order)
+          serialized-data (serialize-data structure)]
+      (.write dos serialized-class 0 serialized-class-size)
+      (doall (map #(write-serialized-data dos %) serialized-headers))
+      (.writeByte dos (byte 0))
+      (doall (map #(write-serialized-data dos %) serialized-data))
+      (.toByteArray bos)))
+  (serialize [this]
+    (serialize this 0)))
 
 (defn orient-embedded
   [value]

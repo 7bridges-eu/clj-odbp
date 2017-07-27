@@ -61,10 +61,9 @@
              (vec (.serialize obinary)) => [8 116 101 115 116])
        (fact "OrientDateTime - odatetime should return odatetime-result"
              (vec (.serialize odatetime)) => odatetime-result)
-       (fact "OrientEmbedded - oemb should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 8 84 101 115 116]"
+       (fact "OrientEmbedded - oemb should return [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116]"
              (vec (.serialize oemb)) =>
-             [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0
-              8 84 101 115 116])
+             [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116])
        (fact "OrientEmbeddedList - OrientEmbeddedList (12 13 14) should return [6, 23, 24, 26, 28]"
              (vec (.serialize (r/orient-embedded-list '(12 13 14)))) =>
              [6, 23, 24, 26, 28])
