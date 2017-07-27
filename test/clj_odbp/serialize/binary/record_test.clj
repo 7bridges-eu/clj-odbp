@@ -21,6 +21,8 @@
 (defn rid-comparator [r1 r2]
   (.compareTo (.cluster_id r1) (.cluster_id r2)))
 
+(def oemb (r/orient-embedded {"User" {:name "Test"}}))
+
 (def oemap (r/orient-embedded-map {:test "1"}))
 
 (def record {"User" {:name "admin"}})
@@ -63,9 +65,10 @@
              (vec (.serialize odate)) => odate-result)
        (fact "OrientDateTime - odatetime should return odatetime-result"
              (vec (.serialize odatetime)) => odatetime-result)
-       (fact "OrientEmbedded - OrientEmbedded {:name 'test'} should return ([8, 110, 97, 109, 101] [8, 116, 101, 115, 116])"
-             (map vec (.serialize (r/orient-embedded {:name "test"}))) =>
-             '([8, 110, 97, 109, 101] [8, 116, 101, 115, 116]))
+       (fact "OrientEmbedded - oemb should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 8 84 101 115 116]"
+             (vec (.serialize oemb)) =>
+             [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0
+              8 84 101 115 116])
        (fact "OrientEmbeddedList - OrientEmbeddedList (12 13 14) should return [6, 23, 24, 26, 28]"
              (vec (.serialize (r/orient-embedded-list '(12 13 14)))) =>
              [6, 23, 24, 26, 28])
