@@ -198,7 +198,7 @@
   (getDataType [this]
     (byte 6))
   (serialize [this]
-    (byte-array (v/varint-unsigned (.getTime value))))
+    (long-type (.getTime value)))
   (serialize [this offset]
     (serialize this)))
 
@@ -215,7 +215,7 @@
           date (.value this)
           date-without-time (.parse formatter (.format formatter date))
           date->long (.getTime date-without-time)]
-      (byte-array (v/varint-unsigned (long (/ date->long 86400))))))
+      (long-type (long (/ date->long 86400)))))
   (serialize [this offset]
     (serialize this)))
 
