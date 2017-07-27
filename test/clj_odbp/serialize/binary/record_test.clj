@@ -71,25 +71,25 @@
        (fact "OrientEmbeddedSet - OrientEmbeddedSet #{12 13 14} should return [6, 23, 26, 24, 28]"
              (vec (.serialize (r/orient-embedded-list #{12 13 14}))) =>
              [6, 23, 26, 24, 28])
-       (fact "OrientRid - OrientRid #33:0 should return [66 0]"
-             (vec (.serialize (r/orient-rid 33 0))) =>
+       (fact "OrientLink - OrientLink #33:0 should return [66 0]"
+             (vec (.serialize (r/orient-link 33 0))) =>
              [66 0])
        (fact "OrientLinkList - OrientLinkList (#33:1 #34:1) should return [4 66 2 68 2]"
              (vec
               (.serialize (r/orient-link-list
-                           (list (r/orient-rid 33 1) (r/orient-rid 34 1))))) =>
+                           (list (r/orient-link 33 1) (r/orient-link 34 1))))) =>
              [4 66 2 68 2])
        (fact "OrientLinkSet - OrientLinkSet #{#33:1 #34:1} should return [4 66 2 68 2]"
              (vec
               (.serialize (r/orient-link-set
                            (sorted-set-by rid-comparator
-                                          (r/orient-rid 33 1)
-                                          (r/orient-rid 34 1))))) =>
+                                          (r/orient-link 33 1)
+                                          (r/orient-link 34 1))))) =>
              [4 66 2 68 2])
        (fact "OrientLinkMap - OrientLinkMap {'test' #33:1} should return [2 7 8 116 101 115 116 66 2]"
              (vec
               (.serialize
-               (r/orient-link-map {"test" (r/orient-rid 33 1)}))) =>
+               (r/orient-link-map {"test" (r/orient-link 33 1)}))) =>
              [2 7 8 116 101 115 116 66 2])
        (fact "OrientDecimal - OrientDecimal 2.50 should return [0 0 0 1 0 0 0 1 25]"
              (vec (.serialize (r/orient-decimal 2.50))) =>

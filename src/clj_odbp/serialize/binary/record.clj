@@ -265,7 +265,7 @@
   [value]
   (->OrientEmbeddedSet value))
 
-(deftype OrientRid [cluster-id record-position]
+(deftype OrientLink [cluster-id record-position]
   OrientType
   (getDataType [this]
     (byte 13))
@@ -280,9 +280,9 @@
   (serialize [this offset]
     (serialize this)))
 
-(defn orient-rid
+(defn orient-link
   [cluster-id record-position]
-  (->OrientRid cluster-id record-position))
+  (->OrientLink cluster-id record-position))
 
 (deftype OrientLinkList [value]
   OrientType
@@ -528,7 +528,7 @@
 (defn serialize-record
   "Serialize `record` for OrientDB.
    `record` must be a Clojure map. It can contain Clojure types (string,
-   boolean, etc.) or Orient custom types (OrientRid, OrientBinary, etc.)."
+   boolean, etc.) or Orient custom types (OrientLink, OrientBinary, etc.)."
   [record]
   (let [bos (ByteArrayOutputStream.)
         dos (DataOutputStream. bos)
