@@ -100,9 +100,9 @@
        (fact "OrientDecimal - OrientDecimal 2.50 should return [0, 0, 0, 1, 0, 0, 0, 2, 64, 4, 0, 0, 0, 0, 0, 0]"
              (vec (.serialize (r/orient-decimal 2.50))) =>
              [0, 0, 0, 1, 0, 0, 0, 2, 64, 4, 0, 0, 0, 0, 0, 0])
-       (fact "OrientEmbeddedMap - oemap should return [2 7 8 116 101 115 116 0 0 0 11 7 2 49]"
+       (fact "OrientEmbeddedMap - oemap should return [2 7 8 116 101 115 116 0 0 0 12 7 2 49]"
              (vec (.serialize oemap)) =>
-             [2 7 8 116 101 115 116 0 0 0 11 7 2 49])
+             [2 7 8 116 101 115 116 0 0 0 12 7 2 49])
        (fact "record - record should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 10 97 100 109 105 110]"
              (vec (r/serialize-record record)) =>
              [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17
