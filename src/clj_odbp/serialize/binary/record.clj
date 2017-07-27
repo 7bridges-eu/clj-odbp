@@ -272,8 +272,8 @@
   (serialize [this]
     (let [bos (ByteArrayOutputStream.)
           dos (DataOutputStream. bos)
-          cid-varint (i/int64 cluster-id)
-          rpos-varint (i/int64 record-position)]
+          cid-varint (byte-array (v/varint-unsigned cluster-id))
+          rpos-varint (byte-array (v/varint-unsigned record-position))]
       (.write dos cid-varint 0 (count cid-varint))
       (.write dos rpos-varint 0 (count rpos-varint))
       (.toByteArray bos)))
