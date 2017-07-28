@@ -7,5 +7,8 @@
 (def ^:const request-command-sync-mode (byte \s))
 (def ^:const request-command-query "q")
 
-;; version byte + 1 (size:varint of Class) + 1 (closing header)
-(def ^:const fixed-header-int 6)
+;; version byte + 1 (size:varint of Class)
+(def ^:const fixed-header-int 5)
+
+;; type key (1) + position (4) + type value (1)
+(def ^:const fixed-oemap-header-int 6)

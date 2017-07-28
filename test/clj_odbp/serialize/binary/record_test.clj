@@ -10,16 +10,16 @@
   (let [formatter (SimpleDateFormat. format)]
     (.parse formatter s)))
 
-(def odate (r/orient-date (format-date "dd/MM/yyyy" "19/07/2017")))
 (def odatetime
   (r/orient-date-time
    (format-date "dd/MM/YYYY hh:mm:ss" "19/07/2017 10:30:00")))
 
-(def odate-result [-72 -18 -57 16])
 (def odatetime-result (vec (r/long-type (.getTime (.value odatetime)))))
 
 (defn rid-comparator [r1 r2]
   (.compareTo (.cluster_id r1) (.cluster_id r2)))
+
+(def oemb (r/orient-embedded {"User" {:name "Test"}}))
 
 (def oemap (r/orient-embedded-map {:test "1"}))
 
@@ -59,51 +59,44 @@
              [0, 0, 0, 0, 0, 0, 1, 44])
        (fact "OrientBinary - OrientBinary [116 101 115 116] should return [8 116 101 115 116]"
              (vec (.serialize obinary)) => [8 116 101 115 116])
-       (fact "OrientDate - odate should return odate-result"
-             (vec (.serialize odate)) => odate-result)
        (fact "OrientDateTime - odatetime should return odatetime-result"
              (vec (.serialize odatetime)) => odatetime-result)
-       (fact "OrientEmbedded - OrientEmbedded {:name 'test'} should return ([8, 110, 97, 109, 101] [8, 116, 101, 115, 116])"
-             (map vec (.serialize (r/orient-embedded {:name "test"}))) =>
-             '([8, 110, 97, 109, 101] [8, 116, 101, 115, 116]))
+       (fact "OrientEmbedded - oemb should return [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116]"
+             (vec (.serialize oemb)) =>
+             [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116])
        (fact "OrientEmbeddedList - OrientEmbeddedList (12 13 14) should return [6, 23, 24, 26, 28]"
              (vec (.serialize (r/orient-embedded-list '(12 13 14)))) =>
              [6, 23, 24, 26, 28])
        (fact "OrientEmbeddedSet - OrientEmbeddedSet #{12 13 14} should return [6, 23, 26, 24, 28]"
              (vec (.serialize (r/orient-embedded-list #{12 13 14}))) =>
              [6, 23, 26, 24, 28])
-       (fact "OrientRid - OrientRid #33:0 should return [0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0]"
-             (vec (.serialize (r/orient-rid 33 0))) =>
-             [0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0])
-       (fact "OrientLinkList - OrientLinkList (#33:1 #34:1) should return [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 34,
- 0, 0, 0, 0, 0, 0, 0, 1]"
+       (fact "OrientLink - OrientLink #33:0 should return [66 0]"
+             (vec (.serialize (r/orient-link 33 0))) =>
+             [66 0])
+       (fact "OrientLinkList - OrientLinkList (#33:1 #34:1) should return [4 66 2 68 2]"
              (vec
               (.serialize (r/orient-link-list
-                           (list (r/orient-rid 33 1) (r/orient-rid 34 1))))) =>
-             [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-              0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1])
-       (fact "OrientLinkSet - OrientLinkSet #{#33:1 #34:1} should return [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 34,
- 0, 0, 0, 0, 0, 0, 0, 1]"
+                           (list (r/orient-link 33 1) (r/orient-link 34 1))))) =>
+             [4 66 2 68 2])
+       (fact "OrientLinkSet - OrientLinkSet #{#33:1 #34:1} should return [4 66 2 68 2]"
              (vec
               (.serialize (r/orient-link-set
                            (sorted-set-by rid-comparator
-                                          (r/orient-rid 33 1)
-                                          (r/orient-rid 34 1))))) =>
-             [4, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-              0, 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 1])
-       (fact "OrientLinkMap - OrientLinkMap {'test' #33:1} should return [2, 7, 8, 116, 101, 115, 116, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 1]"
+                                          (r/orient-link 33 1)
+                                          (r/orient-link 34 1))))) =>
+             [4 66 2 68 2])
+       (fact "OrientLinkMap - OrientLinkMap {'test' #33:1} should return [2 7 8 116 101 115 116 66 2]"
              (vec
               (.serialize
-               (r/orient-link-map {"test" (r/orient-rid 33 1)}))) =>
-             [2, 7, 8, 116, 101, 115, 116, 0, 0, 0, 0, 0, 0, 0, 33, 0,
-              0, 0, 0, 0, 0, 0, 1])
-       (fact "OrientDecimal - OrientDecimal 2.50 should return [0, 0, 0, 1, 0, 0, 0, 2, 64, 4, 0, 0, 0, 0, 0, 0]"
+               (r/orient-link-map {"test" (r/orient-link 33 1)}))) =>
+             [2 7 8 116 101 115 116 66 2])
+       (fact "OrientDecimal - OrientDecimal 2.50 should return [0 0 0 1 0 0 0 1 25]"
              (vec (.serialize (r/orient-decimal 2.50))) =>
-             [0, 0, 0, 1, 0, 0, 0, 2, 64, 4, 0, 0, 0, 0, 0, 0])
-       (fact "OrientEmbeddedMap - oemap should return [2 7 8 116 101 115 116 0 0 0 11 7 2 49]"
+             [0 0 0 1 0 0 0 1 25])
+       (fact "OrientEmbeddedMap - oemap should return [2 7 8 116 101 115 116 0 0 0 12 7 2 49]"
              (vec (.serialize oemap)) =>
-             [2 7 8 116 101 115 116 0 0 0 11 7 2 49])
-       (fact "record - record should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 10 97 100 109 105 110]"
+             [2 7 8 116 101 115 116 0 0 0 12 7 2 49])
+       (fact "record - record should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 10 97 100 109 105 110]"
              (vec (r/serialize-record record)) =>
-             [0 8 85 115 101 114 8 110 97 109 101 0 0 0 16
+             [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17
               7 0 10 97 100 109 105 110]))
