@@ -60,22 +60,22 @@
   db/db-reload-response)
 
 (defcommand record-load
-  [session-id record-id record-position]
+  [session-id token record-id record-position]
   record/record-load-request
   record/record-load-response)
 
 (defcommand record-create
-  [session-id record-content]
+  [session-id token record-content]
   record/record-create-request
   record/record-create-response)
 
 (defcommand record-update
-  [session-id cluster-id cluster-position record-content]
+  [session-id token cluster-id cluster-position record-content]
   record/record-update-request
   record/record-update-response)
 
 (defcommand record-delete
-  [session-id cluster-id cluster-position]
+  [session-id token cluster-id cluster-position]
   record/record-delete-request
   record/record-delete-response)
 
