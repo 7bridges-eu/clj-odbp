@@ -527,29 +527,6 @@
        (rest-elem record-map)
        positions->orient-int32))
 
-(defn serialize-record
-  "Serialize `record` for OrientDB.
-   `record` must be a Clojure map. It can contain Clojure types (string,
-   boolean, etc.) or Orient custom types (OrientLink, OrientBinary, etc.)."
-  [record]
-  (let [bos (ByteArrayOutputStream.)
-        dos (DataOutputStream. bos)
-        version (byte 0)
-        class (first (first record))
-        serialized-class (serialize class)
-        serialized-class-size (count serialized-class)
-        record-map (get record class)
-        structure (record-map->structure record-map serialized-class-size)
-        key-order [:field-name :position :type]
-        serialized-headers (serialize-headers structure key-order)
-        serialized-data (serialize-data structure)]
-    (.writeByte dos version)
-    (.write dos serialized-class 0 serialized-class-size)
-    (doall (map #(write-serialized-data dos %) serialized-headers))
-    (.writeByte dos (byte 0))
-    (doall (map #(write-serialized-data dos %) serialized-data))
-    (.toByteArray bos)))
-
 (deftype OrientEmbedded [value]
   OrientType
   (getDataType [this]
@@ -580,3 +557,26 @@
 (defn orient-embedded
   [value]
   (->OrientEmbedded value))
+
+(defn serialize-record
+  "Serialize `record` for OrientDB.
+   `record` must be a Clojure map. It can contain Clojure types (string,
+   boolean, etc.) or Orient custom types (OrientLink, OrientBinary, etc.)."
+  [record]
+  (let [bos (ByteArrayOutputStream.)
+        dos (DataOutputStream. bos)
+        version (byte 0)
+        class (first (first record))
+        serialized-class (serialize class)
+        serialized-class-size (count serialized-class)
+        record-map (get record class)
+        structure (record-map->structure record-map serialized-class-size)
+        key-order [:field-name :position :type]
+        serialized-headers (serialize-headers structure key-order)
+        serialized-data (serialize-data structure)]
+    (.writeByte dos version)
+    (.write dos serialized-class 0 serialized-class-size)
+    (doall (map #(write-serialized-data dos %) serialized-headers))
+    (.writeByte dos (byte 0))
+    (doall (map #(write-serialized-data dos %) serialized-data))
+    (.toByteArray bos)))
