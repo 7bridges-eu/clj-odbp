@@ -23,7 +23,7 @@
   db/db-open-response)
 
 (defcommand db-create
-  [session-id db-name & opts]
+  [session-id token db-name & opts]
   db/db-create-request
   db/db-create-response)
 
@@ -35,27 +35,27 @@
     {}))
 
 (defcommand db-exist
-  [session-id db-name]
+  [session-id token db-name]
   db/db-exist-request
   db/db-exist-response)
 
 (defcommand db-drop
-  [session-id db-name]
+  [session-id token db-name]
   db/db-drop-request
   db/db-drop-response)
 
 (defcommand db-size
-  [session-id]
+  [session-id token]
   db/db-size-request
   db/db-size-response)
 
 (defcommand db-countrecords
-  [session-id]
+  [session-id token]
   db/db-countrecords-request
   db/db-countrecords-response)
 
 (defcommand db-reload
-  [session-id]
+  [session-id token]
   db/db-reload-request
   db/db-reload-response)
 

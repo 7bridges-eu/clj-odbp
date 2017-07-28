@@ -57,6 +57,7 @@
 (def db-create-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :database-name s/string-type
    :database-type s/string-type
    :storage-type s/string-type
@@ -70,43 +71,52 @@
 (def db-exist-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :database-name s/string-type
    :server-storage-type s/string-type})
 
 (def db-exist-response
   {:session-id d/int-type
+   :token d/bytes-type
    :result d/bool-type})
 
 ;; REQUEST_DB_DROP
 (def db-drop-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :database-name s/string-type
    :storage-type s/string-type})
 
 ;; REQUEST_DB_SIZE
 (def db-size-request
   {:operation s/byte-type
-   :session-id s/int-type})
+   :session-id s/int-type
+   :token s/bytes-type})
 
 (def db-size-response
   {:session-id d/int-type
+   :token d/bytes-type
    :size d/long-type})
 
 ;; REQUEST_DB_COUNTRECORDS
 (def db-countrecords-request
   {:operation s/byte-type
-   :session-id s/int-type})
+   :session-id s/int-type
+   :token s/bytes-type})
 
 (def db-countrecords-response
   {:session-id d/int-type
+   :token d/bytes-type
    :count d/long-type})
 
 ;; REQUEST_DB_RELOAD
 (def db-reload-request
   {:operation s/byte-type
-   :session-id s/int-type})
+   :session-id s/int-type
+   :token s/bytes-type})
 
 (def db-reload-response
   {:session-id d/int-type
+   :token d/bytes-type
    :clusters (d/array-of d/short-type [d/string-type d/short-type])})

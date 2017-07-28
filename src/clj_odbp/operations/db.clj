@@ -30,7 +30,7 @@
     [:protocol-version 36]
     [:client-id ""]
     [:serialization "onet_ser_v0"]
-    [:token-session false]
+    [:token-session true]
     [:support-push false]
     [:collect-stats false]
     [:username username]
@@ -54,7 +54,7 @@
     [:protocol-version 36]
     [:client-id ""]
     [:serialization "onet_ser_v0"]
-    [:token-session false]
+    [:token-session true]
     [:support-push false]
     [:collect-stats false]
     [:database-name db-name]
@@ -69,13 +69,14 @@
 
 ;; REQUEST_DB_CREATE
 (defn db-create-request
-  [session-id db-name
+  [session-id token db-name
    {:keys [db-type storage-type backup-path]
     :or {db-type "graph" storage-type "plocal" backup-path ""}}]
   (encode
    specs/db-create-request
    [[:operation 4]
     [:session-id session-id]
+    [:token token]
     [:database-name db-name]
     [:database-type db-type]
     [:storage-type storage-type]
@@ -98,11 +99,12 @@
 
 ;; REQUEST_DB_EXIST
 (defn db-exist-request
-  [session-id db-name]
+  [session-id token db-name]
   (encode
    specs/db-exist-request
    [[:operation 6]
     [:session-id session-id]
+    [:token token]
     [:database-name db-name]
     [:server-storage-type consts/storage-type-plocal]]))
 
@@ -114,11 +116,12 @@
 
 ;; REQUEST_DB_DROP
 (defn db-drop-request
-  [session-id db-name]
+  [session-id token db-name]
   (encode
    specs/db-drop-request
    [[:operation 7]
     [:session-id session-id]
+    [:token token]
     [:database-name db-name]
     [:storage-type consts/storage-type-plocal]]))
 
@@ -128,11 +131,12 @@
 
 ;; REQUEST_DB_SIZE
 (defn db-size-request
-  [session-id]
+  [session-id token]
   (encode
    specs/db-size-request
    [[:operation 8]
-    [:session-id session-id]]))
+    [:session-id session-id]
+    [:token token]]))
 
 (defn db-size-response
   [^DataInputStream in]
@@ -142,11 +146,12 @@
 
 ;; REQUEST_DB_COUNTRECORDS
 (defn db-countrecords-request
-  [session-id]
+  [session-id token]
   (encode
    specs/db-countrecords-request
    [[:operation 9]
-    [:session-id session-id]]))
+    [:session-id session-id]
+    [:token token]]))
 
 (defn db-countrecords-response
   [^DataInputStream in]
@@ -156,11 +161,12 @@
 
 ;; REQUEST_DB_RELOAD
 (defn db-reload-request
-  [session-id]
+  [session-id token]
   (encode
    specs/db-reload-request
    [[:operation 73]
-    [:session-id session-id]]))
+    [:session-id session-id]
+    [:token token]]))
 
 (defn db-reload-response
   [^DataInputStream in]
