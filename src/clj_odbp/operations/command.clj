@@ -3,7 +3,7 @@
              [constants :as constants]
              [utils :refer [encode]]]
             [clj-odbp.specs.command :as specs]
-            [clj-odbp.serialize.csv.types :as types])
+            [clj-odbp.serialize.binary.record :as record])
   (:import java.io.DataInputStream))
 
 (defn get-bytes-type-length [bytes-type]
@@ -27,7 +27,8 @@
           indexes (take params-len (iterate inc 0))
           indexes-v (vec (map str indexes))
           params-map (zipmap indexes-v params)
-          orient-map (types/orient-map {"@type" "d" "params" params-map})]
+          orient-map (record/orient-embedded-map
+                      {"@type" "d" "params" params-map})]
       (.serialize orient-map))))
 
 ;; REQUEST_COMMAND > SELECT
