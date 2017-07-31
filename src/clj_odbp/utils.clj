@@ -1,5 +1,6 @@
 (ns clj-odbp.utils
-  (:require [clj-odbp.net :as net])
+  (:require [clj-odbp.net :as net]
+            [clj-odbp.sessions :as sessions])
   (:import [java.io ByteArrayOutputStream DataOutputStream DataInputStream]))
 
 (defn- validate-message
@@ -38,3 +39,17 @@
        (-> s#
            (net/write-request ~request-handler ~@(remove '#{&} args))
            (net/read-response ~response-handler)))))
+
+(defmacro defconnection
+  [command-name args request-handler response-handler service]
+  `(defn ~command-name
+     [~@args]
+     (if (sessions/has-session? ~service)
+       (sessions/read-session ~service)
+       (with-open [s# (net/create-socket)]
+         (-> s#
+             (net/write-request ~request-handler ~@(remove '#{&} args))
+             (net/read-response ~response-handler)
+             (select-keys [:session-id :token])
+             (sessions/put-session! ~service))
+         (sessions/read-session ~service)))))
