@@ -69,18 +69,20 @@
 
 ;; REQUEST_DB_CREATE
 (defn db-create-request
-  [session-id token db-name
+  [connection db-name
    {:keys [db-type storage-type backup-path]
     :or {db-type "graph" storage-type "plocal" backup-path ""}}]
-  (encode
-   specs/db-create-request
-   [[:operation 4]
-    [:session-id session-id]
-    [:token token]
-    [:database-name db-name]
-    [:database-type db-type]
-    [:storage-type storage-type]
-    [:backup-path backup-path]]))
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/db-create-request
+     [[:operation 4]
+      [:session-id session-id]
+      [:token token]
+      [:database-name db-name]
+      [:database-type db-type]
+      [:storage-type storage-type]
+      [:backup-path backup-path]])))
 
 (defn db-create-response
   [^DataInputStream in]
@@ -99,14 +101,16 @@
 
 ;; REQUEST_DB_EXIST
 (defn db-exist-request
-  [session-id token db-name]
-  (encode
-   specs/db-exist-request
-   [[:operation 6]
-    [:session-id session-id]
-    [:token token]
-    [:database-name db-name]
-    [:server-storage-type consts/storage-type-plocal]]))
+  [connection db-name]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/db-exist-request
+     [[:operation 6]
+      [:session-id session-id]
+      [:token token]
+      [:database-name db-name]
+      [:server-storage-type consts/storage-type-plocal]])))
 
 (defn db-exist-response
   [^DataInputStream in]
@@ -116,14 +120,16 @@
 
 ;; REQUEST_DB_DROP
 (defn db-drop-request
-  [session-id token db-name]
-  (encode
-   specs/db-drop-request
-   [[:operation 7]
-    [:session-id session-id]
-    [:token token]
-    [:database-name db-name]
-    [:storage-type consts/storage-type-plocal]]))
+  [connection db-name]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/db-drop-request
+     [[:operation 7]
+      [:session-id session-id]
+      [:token token]
+      [:database-name db-name]
+      [:storage-type consts/storage-type-plocal]])))
 
 (defn db-drop-response
   [^DataInputStream in]
@@ -131,12 +137,14 @@
 
 ;; REQUEST_DB_SIZE
 (defn db-size-request
-  [session-id token]
-  (encode
-   specs/db-size-request
-   [[:operation 8]
-    [:session-id session-id]
-    [:token token]]))
+  [connection]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/db-size-request
+     [[:operation 8]
+      [:session-id session-id]
+      [:token token]])))
 
 (defn db-size-response
   [^DataInputStream in]
@@ -146,12 +154,14 @@
 
 ;; REQUEST_DB_COUNTRECORDS
 (defn db-countrecords-request
-  [session-id token]
-  (encode
-   specs/db-countrecords-request
-   [[:operation 9]
-    [:session-id session-id]
-    [:token token]]))
+  [connection]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/db-countrecords-request
+     [[:operation 9]
+      [:session-id session-id]
+      [:token token]])))
 
 (defn db-countrecords-response
   [^DataInputStream in]
@@ -161,12 +171,14 @@
 
 ;; REQUEST_DB_RELOAD
 (defn db-reload-request
-  [session-id token]
-  (encode
-   specs/db-reload-request
-   [[:operation 73]
-    [:session-id session-id]
-    [:token token]]))
+  [connection]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/db-reload-request
+     [[:operation 73]
+      [:session-id session-id]
+      [:token token]])))
 
 (defn db-reload-response
   [^DataInputStream in]
