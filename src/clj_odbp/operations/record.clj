@@ -6,16 +6,19 @@
   (:import [java.io DataInputStream]))
 
 (defn record-load-request
-  [session-id id position]
-  (encode
-   specs/record-load-request
-   [[:operation 30]
-    [:session-id session-id]
-    [:cluster-id id]
-    [:cluster-position position]
-    [:fetch-plan "*:0"]
-    [:ignore-cache false]
-    [:load-tombstone false]]))
+  [connection id position]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/record-load-request
+     [[:operation 30]
+      [:session-id session-id]
+      [:token token]
+      [:cluster-id id]
+      [:cluster-position position]
+      [:fetch-plan "*:0"]
+      [:ignore-cache false]
+      [:load-tombstone false]])))
 
 (defn record-load-response
   [^DataInputStream in]
@@ -25,12 +28,15 @@
 
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request
-  [session-id record-content]
-  (let [record-bytes (serialize-record record-content)]
+  [connection record-content]
+  (let [session-id (:session-id connection)
+        token (:token connection)
+        record-bytes (serialize-record record-content)]
     (encode
      specs/record-create-request
      [[:operation 31]
       [:session-id session-id]
+      [:token token]
       [:cluster-id -1]
       [:record-content record-bytes]
       [:record-type constants/record-type-document]
@@ -44,12 +50,15 @@
 
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
-  [session-id cluster-id cluster-position record-content]
-  (let [record-bytes (serialize-record record-content)]
+  [connection cluster-id cluster-position record-content]
+  (let [session-id (:session-id connection)
+        token (:token connection)
+        record-bytes (serialize-record record-content)]
     (encode
      specs/record-update-request
      [[:operation 32]
       [:session-id session-id]
+      [:token token]
       [:cluster-id cluster-id]
       [:cluster-position cluster-position]
       [:update-content true]
@@ -66,15 +75,18 @@
 
 ;; REQUEST_RECORD_DELETE
 (defn record-delete-request
-  [session-id cluster-id cluster-position]
-  (encode
-   specs/record-delete-request
-   [[:operation 33]
-    [:session-id session-id]
-    [:cluster-id cluster-id]
-    [:cluster-position cluster-position]
-    [:record-version -1]
-    [:mode 0]]))
+  [connection cluster-id cluster-position]
+  (let [session-id (:session-id connection)
+        token (:token connection)]
+    (encode
+     specs/record-delete-request
+     [[:operation 33]
+      [:session-id session-id]
+      [:token token]
+      [:cluster-id cluster-id]
+      [:cluster-position cluster-position]
+      [:record-version -1]
+      [:mode 0]])))
 
 (defn record-delete-response
   [^DataInputStream in]

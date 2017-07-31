@@ -6,7 +6,7 @@
 (def record-load-request
   {:operation s/byte-type
    :session-id s/int-type
-   ;;   :token s/bytes-type
+   :token s/bytes-type
    :cluster-id s/short-type
    :cluster-position s/long-type
    :fetch-plan s/string-type
@@ -15,6 +15,7 @@
 
 (def record-load-response
   {:session-id d/int-type
+   :token d/bytes-type
    :payload-status d/byte-type
    :record-type d/byte-type
    :record-version d/int-type
@@ -24,6 +25,7 @@
 (def record-create-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :cluster-id s/short-type
    :record-content s/bytes-type
    :record-type s/byte-type
@@ -31,6 +33,7 @@
 
 (def record-create-response
   {:session-id d/int-type
+   :token d/bytes-type
    :cluster-id d/short-type
    :cluster-position d/long-type
    :record-version d/int-type
@@ -42,6 +45,7 @@
 (def record-update-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :cluster-id s/short-type
    :cluster-position s/long-type
    :update-content s/bool-type
@@ -52,6 +56,7 @@
 
 (def record-update-response
   {:session-id d/int-type
+   :token d/bytes-type
    :record-version d/int-type
    :collection-changes (d/array-of d/int-type [d/long-type d/long-type
                                                d/long-type d/long-type
@@ -61,6 +66,7 @@
 (def record-delete-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :cluster-id s/short-type
    :cluster-position s/long-type
    :record-version s/int-type
@@ -68,4 +74,5 @@
 
 (def record-delete-response
   {:session-id d/int-type
+   :token d/bytes-type
    :deleted d/bool-type})
