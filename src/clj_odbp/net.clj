@@ -1,8 +1,7 @@
 (ns clj-odbp.net
-  (:require [clj-odbp.deserialize.otype :as d]
-            [clojure.java.io :as io])
-  (:import [java.io DataInputStream DataOutputStream]
-           [java.net Socket]))
+  (:require [clj-odbp.deserialize.otype :as d])
+  (:import java.io.DataInputStream
+           java.net.Socket))
 
 (def ^:const supported-protocol-version 36)
 (def config

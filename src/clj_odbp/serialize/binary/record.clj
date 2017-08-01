@@ -1,11 +1,10 @@
 (ns clj-odbp.serialize.binary.record
   (:require [clj-odbp.constants :as const]
-            [clj-odbp.serialize.binary.common :as c]
-            [clj-odbp.serialize.binary.int :as i]
-            [clj-odbp.serialize.binary.varint :as v]
-            [clojure.string :as string])
-  (:import [java.io ByteArrayOutputStream DataOutputStream]
-           [java.text SimpleDateFormat]))
+            [clj-odbp.serialize.binary
+             [common :as c]
+             [int :as i]
+             [varint :as v]])
+  (:import [java.io ByteArrayOutputStream DataOutputStream]))
 
 (defprotocol OrientType
   (getDataType [value])

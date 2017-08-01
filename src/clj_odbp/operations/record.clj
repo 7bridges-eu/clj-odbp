@@ -1,9 +1,10 @@
 (ns clj-odbp.operations.record
-  (:require [clj-odbp.constants :as constants]
-            [clj-odbp.specs.record :as specs]
-            [clj-odbp.utils :refer [encode decode]]
-            [clj-odbp.serialize.binary.record :refer [serialize-record]])
-  (:import [java.io DataInputStream]))
+  (:require [clj-odbp
+             [constants :as constants]
+             [utils :refer [decode encode]]]
+            [clj-odbp.serialize.binary.record :refer [serialize-record]]
+            [clj-odbp.specs.record :as specs])
+  (:import java.io.DataInputStream))
 
 (defn record-load-request
   [connection id position]

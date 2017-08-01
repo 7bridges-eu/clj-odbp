@@ -1,26 +1,28 @@
 (ns clj-odbp.core
   (:require [clj-odbp
              [net :as net]
-             [utils :refer [defcommand]]]
+             [utils :refer [defcommand defconnection]]]
             [clj-odbp.operations
              [command :as command]
              [db :as db]
              [record :as record]]))
 
-(defcommand connect-server
+(defconnection connect-server
   [username password]
   db/connect-request
-  db/connect-response)
+  db/connect-response
+  :server)
 
 (defcommand shutdown-server
   [username password]
   db/shutdown-request
   db/shutdown-response)
 
-(defcommand db-open
+(defconnection db-open
   [db-name username password]
   db/db-open-request
-  db/db-open-response)
+  db/db-open-response
+  :db)
 
 (defcommand db-create
   [connection db-name & opts]
