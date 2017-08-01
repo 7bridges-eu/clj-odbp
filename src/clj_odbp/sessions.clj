@@ -17,6 +17,11 @@
   [service]
   (get @sessions service))
 
+(defn read-sessions
+  "Read all the sessions."
+  []
+  @sessions)
+
 (defn reset-session!
   "Reset the sessions of the specified service."
   [service]
