@@ -1,8 +1,9 @@
 (ns clj-odbp.operations.db
-  (:require [clj-odbp.constants :as consts]
-            [clj-odbp.specs.db :as specs]
-            [clj-odbp.utils :refer [encode decode]])
-  (:import [java.io DataInputStream]))
+  (:require [clj-odbp
+             [constants :as consts]
+             [utils :refer [decode encode]]]
+            [clj-odbp.specs.db :as specs])
+  (:import java.io.DataInputStream))
 
 ;; REQUEST_SHUTDOWN
 (defn shutdown-request

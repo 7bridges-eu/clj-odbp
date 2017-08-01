@@ -1,6 +1,6 @@
 (ns clj-odbp.specs.record
-  (:require [clj-odbp.serialize.otype :as s]
-            [clj-odbp.deserialize.otype :as d]))
+  (:require [clj-odbp.deserialize.otype :as d]
+            [clj-odbp.serialize.otype :as s]))
 
 ;; REQUEST_RECORD_LOAD
 (def record-load-request
