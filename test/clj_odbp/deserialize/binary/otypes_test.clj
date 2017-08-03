@@ -92,8 +92,52 @@
        (fact "Binary - Empty raw bytes"
              (t/call :binary-orient-type
                      (b/to-buffer [0]) 0) => [])
-       (fact "Binary - 8 raw bytes"
+       (fact "Binary - eight raw bytes"
              (t/call :binary-orient-type
                      (b/to-buffer [16
                                    0 1 2 3
-                                   4 5 6 7]) 0) => [0 1 2 3 4 5 6 7]))
+                                   4 5 6 7]) 0) => [0 1 2 3 4 5 6 7])
+       (fact "EmbeddedList - 2 Integers"
+             (t/call :embedded-list-orient-type
+                     (b/to-buffer [4 1 2 4])) => [1 2])
+       (fact "EmbeddedList - two Strings"
+             (t/call :embedded-list-orient-type
+                     (b/to-buffer [4 7
+                                   4 97 98
+                                   4 99 100])) => ["ab" "cd"])
+       (fact "EmbeddedSet - three Integers (+ one duplicate)"
+             (t/call :embedded-set-orient-type
+                     (b/to-buffer [8 1 2 4 2 6])) => (just 1 2 3))
+       (fact "EmbeddedSet - three Strings (+ one duplicate)"
+             (t/call :embedded-set-orient-type
+                     (b/to-buffer [6 7
+                                   4 97 98
+                                   4 99 100
+                                   4 97 98])) => #{"ab" "cd"})
+       (fact "Link - one ORid"
+             (t/call :link-orient-type
+                     (b/to-buffer [4 6])) => {:cluster-id 2 :record-position 3})
+       (fact "Link list - three ORid"
+             (t/call :link-list-orient-type
+                     (b/to-buffer [6
+                                   4 6
+                                   8 10
+                                   12 14])) => [{:cluster-id 2 :record-position 3}
+                                                {:cluster-id 4 :record-position 5}
+                                                {:cluster-id 6 :record-position 7}])
+       (fact "Link set - three ORid"
+             (t/call :link-list-orient-type
+                     (b/to-buffer [6
+                                   4 6
+                                   8 10
+                                   12 14])) => (just {:cluster-id 2 :record-position 3}
+                                                     {:cluster-id 4 :record-position 5}
+                                                     {:cluster-id 6 :record-position 7}))
+       (fact "Link map - three ORid"
+             (t/call :link-map-orient-type
+                     (b/to-buffer [6
+                                   1 2 4 6
+                                   7 4 97 98 8 10
+                                   3 6 12 14])) => {1 {:cluster-id 2 :record-position 3}
+                                                    "ab" {:cluster-id 4 :record-position 5}
+                                                    3 {:cluster-id 6 :record-position 7}}))

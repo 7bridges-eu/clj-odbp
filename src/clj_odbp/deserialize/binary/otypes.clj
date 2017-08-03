@@ -108,13 +108,17 @@
         collection-type (call :byte-orient-type buffer)
         otype (nth otype-list collection-type)]
     (into [] (repeatedly size
-                         (call otype buffer)))))
+                         #(call otype buffer)))))
 
 (defmethod deserialize :embedded-set-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [size (call :integer-orient-type buffer)
+        collection-type (call :byte-orient-type buffer)
+        otype (nth otype-list collection-type)]
+    (into #{} (repeatedly size
+                          #(call otype buffer)))))
 
 (defmethod deserialize :embedded-map-orient-type
   [{:keys [buffer position] :or {position nil}}]
@@ -124,24 +128,42 @@
 
 (defmethod deserialize :link-orient-type
   [{:keys [buffer position] :or {position nil}}]
-  (b/buffer-set-position! buffer position)
-  nil)
+  (when position
+    (b/buffer-set-position! buffer position))
+  (let [cluster-id (call :integer-orient-type buffer)
+        record-position (call :integer-orient-type buffer)]
+    {:cluster-id cluster-id :record-position record-position}))
 
 (defmethod deserialize :link-list-orient-type
   [{:keys [buffer position] :or {position nil}}]
-  (b/buffer-set-position! buffer position)
-  nil)
+  (when position
+    (b/buffer-set-position! buffer position))
+  (let [size (call :integer-orient-type buffer)]
+    (into [] (repeatedly size
+                         #(call :link-orient-type buffer)))))
 
 (defmethod deserialize :link-set-orient-type
   [{:keys [buffer position] :or {position nil}}]
-  (b/buffer-set-position! buffer position)
-  nil)
+  (when position
+    (b/buffer-set-position! buffer position))
+  (let [size (call :integer-orient-type buffer)]
+    (into #{} (repeatedly size
+                          #(call :link-orient-type buffer)))))
 
 (defmethod deserialize :link-map-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [size (call :integer-orient-type buffer)]
+    (reduce
+     (fn [acc _]
+       (let [key-index (int (call :byte-orient-type buffer))
+             key-type (nth otype-list key-index)
+             key (call key-type buffer)
+             value (call :link-orient-type buffer)]
+         (assoc acc key value)))
+     {}
+     (range size))))
 
 (defmethod deserialize :transient-orient-type
   [{:keys [buffer position] :or {position nil}}]
