@@ -1,6 +1,6 @@
 (ns clj-odbp.deserialize.binary.record
   (:require [clj-odbp.deserialize.binary.varint :as v]
-            [clj-odbp.deserialize.binary.otypes :refer [type-list]]
+            [clj-odbp.deserialize.binary.otypes :refer [otype-list call]]
             [clj-odbp.deserialize.binary.buffer :as b]
             [clj-odbp.deserialize.binary.utils :as u]))
 
@@ -33,18 +33,19 @@
                (conj headers
                      {:field-name field-name
                       :field-position field-position
-                      :data-type (nth type-list data-type)}))))))
+                      :data-type (nth otype-list data-type)}))))))
+
 (defn read-record
   [headers content]
   (reduce
    (fn [record header]
      (let [{key :field-name
             position :field-position
-            reader :data-type} header]
+            otype :data-type} header]
        (assoc
         record
         (keyword key)
-        (reader content position))))
+        (call otype content position))))
    {}
    headers))
 
