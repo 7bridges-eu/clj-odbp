@@ -1,7 +1,8 @@
 (ns clj-odbp.deserialize.binary.otypes
   (:require [clj-odbp.deserialize.binary.varint :as v]
             [clj-odbp.deserialize.binary.buffer :as b])
-  (:import [java.nio ByteBuffer]))
+  (:import [java.nio ByteBuffer]
+           [java.math BigInteger BigDecimal]))
 
 (defn- is-varint-part [n]
   (not= (bit-and n 0x80) 0x80))
@@ -187,7 +188,13 @@
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [scale (call :integer-orient-type buffer)
+        size (call :integer-orient-type buffer)
+        data (b/buffer-take! buffer size)]
+    (-> data
+        byte-array
+        BigInteger.
+        (BigDecimal. scale))))
 
 (defmethod deserialize :link-bag-orient-type
   [{:keys [buffer position] :or {position nil}}]

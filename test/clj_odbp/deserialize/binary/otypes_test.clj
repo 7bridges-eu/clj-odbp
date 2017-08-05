@@ -3,8 +3,6 @@
             [clj-odbp.deserialize.binary.buffer :as b]
             [midje.sweet :refer :all]))
 
-
-
 (facts "Testing basic types."
        (fact "Bool - 0 is false."
              (t/call :bool-orient-type
@@ -140,4 +138,19 @@
                                    7 4 97 98 8 10
                                    3 6 12 14])) => {1 {:cluster-id 2 :record-position 3}
                                                     "ab" {:cluster-id 4 :record-position 5}
-                                                    3 {:cluster-id 6 :record-position 7}}))
+                                                    3 {:cluster-id 6 :record-position 7}})
+       (fact "Decimal - BigDecimal 0"
+             (t/call :decimal-orient-type
+                     (b/to-buffer [0 2 0])) => (bigdec 0))
+       (fact "Decimal - BigDecimal 1"
+             (t/call :decimal-orient-type
+                     (b/to-buffer [0 2 1])) => (bigdec 1))
+       (fact "Decimal - BigDecimal 1.2"
+             (t/call :decimal-orient-type
+                     (b/to-buffer [2 2 12])) => (bigdec 1.2))
+       (fact "Decimal - BigDecimal 12.34"
+             (t/call :decimal-orient-type
+                     (b/to-buffer [4 4 4 -46])) => (bigdec 12.34))
+       (fact "Decimal - BigDecimal -12.34"
+             (t/call :decimal-orient-type
+                     (b/to-buffer [4 4 -5 46])) => (bigdec -12.34)))
