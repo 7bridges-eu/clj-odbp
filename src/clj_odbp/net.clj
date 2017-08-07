@@ -1,5 +1,5 @@
 (ns clj-odbp.net
-  (:require [clj-odbp.deserialize.otype :as d])
+  (:require [clj-odbp.deserialize.exception :as e])
   (:import java.io.DataInputStream
            java.net.Socket))
 
@@ -24,6 +24,7 @@
       (throw (Exception.
               (str "Unsupported binary protocol version "
                    version "."))))
+    (.setSoTimeout socket 5000)
     socket))
 
 (defn write-request
@@ -40,4 +41,4 @@
         status (.readByte in)]
     (if (= 0 status)
       (command in)
-      (d/handle-exception in))))
+      (e/handle-exception in))))

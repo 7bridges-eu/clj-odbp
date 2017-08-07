@@ -1,7 +1,8 @@
 (ns clj-odbp.utils
   (:require [clj-odbp
              [net :as net]
-             [sessions :as sessions]])
+             [sessions :as sessions]]
+            [clj-odbp.deserialize.exception :as ex])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn- validate-message
@@ -36,10 +37,14 @@
   [command-name args request-handler response-handler]
   `(defn ~command-name
      [~@args]
-     (with-open [s# (net/create-socket)]
-       (-> s#
-           (net/write-request ~request-handler ~@(remove '#{&} args))
-           (net/read-response ~response-handler)))))
+     (try
+       (with-open [s# (net/create-socket)]
+         (-> s#
+             (net/write-request ~request-handler ~@(remove '#{&} args))
+             (net/read-response ~response-handler)))
+       (catch Exception e#
+         (ex/manage-exception {:exception-type (:type (ex-data e#))
+                               :exception e#})))))
 
 (defmacro defconnection
   [command-name args request-handler response-handler service]
@@ -47,10 +52,14 @@
      [~@args]
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
-       (with-open [s# (net/create-socket)]
-         (-> s#
-             (net/write-request ~request-handler ~@(remove '#{&} args))
-             (net/read-response ~response-handler)
-             (select-keys [:session-id :token])
-             (sessions/put-session! ~service))
-         (sessions/read-session ~service)))))
+       (try
+         (with-open [s# (net/create-socket)]
+           (-> s#
+               (net/write-request ~request-handler ~@(remove '#{&} args))
+               (net/read-response ~response-handler)
+               (select-keys [:session-id :token])
+               (sessions/put-session! ~service))
+           (sessions/read-session ~service))
+         (catch Exception e#
+           (ex/manage-exception {:exception-type (:type (ex-data e#))
+                                 :exception e#}))))))
