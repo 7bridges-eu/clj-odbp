@@ -1,9 +1,7 @@
 (ns clj-odbp.deserialize.exception
   (:require [clj-odbp.deserialize.otype :as ot]
+            [clj-odbp.sessions :as s]
             [clojure.string :as string]))
-
-(def exceptions
-  {"OTokenSecurityException" :otoken-security-exception})
 
 (defn deserialize-exception
   "De-serialize OrientDB exception from DataInputStream `in`."
@@ -17,9 +15,8 @@
   [m]
   (let [fully-qualified-name (:class m)
         message (:message m)
-        class-name (last (string/split fully-qualified-name #"\."))
-        orient-exception (get exceptions class-name)]
-    (ex-info message {:type orient-exception})))
+        class-name (last (string/split fully-qualified-name #"\."))]
+    (ex-info message {:type (keyword class-name)})))
 
 (defn handle-exception
   "De-serialize an OrientDB exception in DataInputStream `in` and throw it."
@@ -31,3 +28,8 @@
         deserialize-exception
         create-exception
         throw)))
+
+(defmulti manage-exception :exception-type)
+
+(defmethod manage-exception :default [e]
+  (throw (:exception e)))
