@@ -17,8 +17,15 @@
    :transient-orient-type :date-orient-type :custom-orient-type
    :decimal-orient-type :link-bag-orient-type :any-orient-type])
 
+(defn- get-otype
+  [i]
+  (->> i
+       int
+       (nth otype-list)))
+
 (defmulti deserialize :otype)
-(defmethod deserialize :default [_] nil)
+(defmethod deserialize :default [_]
+  (throw (Exception. "Unknown Orient type.")))
 
 (defn call
   ([otype buffer]
@@ -106,26 +113,45 @@
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)
-        collection-type (call :byte-orient-type buffer)
-        otype (nth otype-list collection-type)]
+        collection-type (get-otype (call :byte-orient-type buffer))]
     (into [] (repeatedly size
-                         #(call otype buffer)))))
+                         #(call collection-type buffer)))))
 
 (defmethod deserialize :embedded-set-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)
-        collection-type (call :byte-orient-type buffer)
-        otype (nth otype-list collection-type)]
+        collection-type (get-otype (call :byte-orient-type buffer))]
     (into #{} (repeatedly size
-                          #(call otype buffer)))))
+                          #(call collection-type buffer)))))
+
+(defn- deserialize-embedded-map-headers
+  [buffer n]
+  (reduce
+   (fn [m _]
+     (let [key-type (get-otype (call :byte-orient-type buffer))
+           key-value (call key-type buffer)
+           position (v/varint-unsigned-long (b/buffer-take! buffer 4))
+           value-type (get-otype (call :byte-orient-type buffer))]
+       (assoc m key-value value-type)))
+   {}
+   (range n)))
 
 (defmethod deserialize :embedded-map-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [size (call :integer-orient-type buffer)
+        headers (deserialize-embedded-map-headers buffer size)]
+    (reduce
+     (fn [m k]
+       (let [value-type (get headers k)
+             value (deserialize {:otype value-type
+                                 :buffer buffer})]
+         (assoc m k value)))
+     {}
+     (keys headers))))
 
 (defmethod deserialize :link-orient-type
   [{:keys [buffer position] :or {position nil}}]
@@ -158,8 +184,7 @@
   (let [size (call :integer-orient-type buffer)]
     (reduce
      (fn [acc _]
-       (let [key-index (int (call :byte-orient-type buffer))
-             key-type (nth otype-list key-index)
+       (let [key-type (get-otype (call :byte-orient-type buffer))
              key (call key-type buffer)
              value (call :link-orient-type buffer)]
          (assoc acc key value)))
@@ -206,4 +231,5 @@
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [otype (get-otype (call :byte-orient-type buffer))]
+    (call otype buffer)))

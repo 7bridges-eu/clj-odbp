@@ -153,4 +153,10 @@
                      (b/to-buffer [4 4 4 -46])) => (bigdec 12.34))
        (fact "Decimal - BigDecimal -12.34"
              (t/call :decimal-orient-type
-                     (b/to-buffer [4 4 -5 46])) => (bigdec -12.34)))
+                     (b/to-buffer [4 4 -5 46])) => (bigdec -12.34))
+       (fact "Embedded map - Simple map"
+             (t/call :embedded-map-orient-type
+                     (b/to-buffer [4
+                                   7 8 107 101 121 49 0 0 0 -42 7
+                                   7 8 107 101 121 50 0 0 0 -35 1
+                                   12 115 116 114 105 110 103 2])) => {"key1" "string", "key2" 1}))
