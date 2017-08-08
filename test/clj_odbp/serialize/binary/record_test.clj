@@ -32,12 +32,12 @@
              (vec (r/integer-type (int 10))) => [20])
        (fact "Long - long 1000000 should return [-128 -119 122]"
              (vec (r/long-type (long 1000000))) => [-128 -119 122])
-       (fact "Byte - byte 1 should return byte 1"
-             (r/byte-type (byte 1)) => (byte 1))
+       (fact "Byte - byte 1 should return byte [1]"
+             (vec (r/byte-type (byte 1))) => [(byte 1)])
        (fact "Boolean - boolean true should return byte 1"
-             (r/boolean-type true) => (byte 1))
+             (vec (r/boolean-type true)) => [(byte 1)])
        (fact "Boolean - boolean false should return byte 0"
-             (r/boolean-type false) => (byte 0))
+             (vec (r/boolean-type false)) => [(byte 0)])
        (fact "Float - float 2.50 should return the bytes [64, 32, 0, 0]"
              (vec (r/float-type (float 2.50))) => [64, 32, 0, 0])
        (fact "Double - double 20000.50 should return the bytes [64 -45 -120 32 0 0 0 0]"
