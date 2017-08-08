@@ -1,6 +1,6 @@
 (ns clj-odbp.specs.command
-  (:require [clj-odbp.serialize.otype :as s]
-            [clj-odbp.deserialize.otype :as d]))
+  (:require [clj-odbp.deserialize.otype :as d]
+            [clj-odbp.serialize.otype :as s]))
 
 ;; REQUEST_COMMAND > SELECT
 (def select-request

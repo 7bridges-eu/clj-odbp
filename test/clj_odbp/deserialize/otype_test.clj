@@ -44,32 +44,4 @@
           (f (provide-input [0 2
                              0 0 0 2 97 98 0 2
                              0 0 0 2 99 100 0 3])) => [["ab" 2]
-                                                       ["cd" 3]]))
-       (fact
-        "deserialize-exception should return a vector of strings: ['error 1' 'error 2']"
-        (let [in (let [ex-class (.getBytes "error")
-                       ex-message (.getBytes "test")]
-                   (provide-input (concat [1]
-                                          [0 0 0 5]
-                                          ex-class
-                                          [0 0 0 4]
-                                          ex-message
-                                          [0])))]
-          (d/deserialize-exception in) => ["error: test"]))
-       (fact
-        "format-stacktrace should reduce a vector of string to a string"
-        (let [in (let [ex-class (.getBytes "error")
-                       ex-message (.getBytes "test")]
-                   (provide-input (concat [1]
-                                          [0 0 0 5]
-                                          ex-class
-                                          [0 0 0 4]
-                                          ex-message
-                                          [1]
-                                          [0 0 0 5]
-                                          ex-class
-                                          [0 0 0 4]
-                                          ex-message
-                                          [0])))
-              exs (d/deserialize-exception in)]
-          (d/format-stacktrace exs) => "error: test\nerror: test")))
+                                                       ["cd" 3]])))

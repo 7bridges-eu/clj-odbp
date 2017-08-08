@@ -1,8 +1,7 @@
 (ns clj-odbp.net
-  (:require [clj-odbp.deserialize.otype :as d]
-            [clojure.java.io :as io])
-  (:import [java.io DataInputStream DataOutputStream]
-           [java.net Socket]))
+  (:require [clj-odbp.deserialize.exception :as e])
+  (:import java.io.DataInputStream
+           java.net.Socket))
 
 (def ^:const supported-protocol-version 36)
 (def config
@@ -25,6 +24,7 @@
       (throw (Exception.
               (str "Unsupported binary protocol version "
                    version "."))))
+    (.setSoTimeout socket 5000)
     socket))
 
 (defn write-request
@@ -41,4 +41,4 @@
         status (.readByte in)]
     (if (= 0 status)
       (command in)
-      (d/handle-exception in))))
+      (e/handle-exception in))))
