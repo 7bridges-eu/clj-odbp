@@ -218,6 +218,12 @@
   [value]
   (->OrientBinary value))
 
+(defn serialize-any
+  [value]
+  (let [v (serialize value)
+        t (getDataType value)]
+    (byte-array (into [t] v))))
+
 (deftype OrientEmbeddedList [value]
   OrientType
   (getDataType [this]
@@ -228,7 +234,7 @@
           size (count value)
           size-varint (byte-array (v/varint-unsigned size))
           size-varint-len (count size-varint)
-          serialized-items (map serialize value)
+          serialized-items (map serialize-any value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
       (.writeByte dos (byte 23))
@@ -251,7 +257,7 @@
           size (count value)
           size-varint (byte-array (v/varint-unsigned size))
           size-varint-len (count size-varint)
-          serialized-items (map serialize value)
+          serialized-items (map serialize-any value)
           serialized-items-len (count serialized-items)]
       (.write dos size-varint 0 size-varint-len)
       (.writeByte dos (byte 23))

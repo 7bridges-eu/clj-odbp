@@ -64,12 +64,12 @@
        (fact "OrientEmbedded - oemb should return [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116]"
              (vec (.serialize oemb)) =>
              [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116])
-       (fact "OrientEmbeddedList - OrientEmbeddedList (12 13 14) should return [6, 23, 24, 26, 28]"
+       (fact "OrientEmbeddedList - OrientEmbeddedList (12 13 14) should return [6 23 3 24 3 26 3 28]"
              (vec (.serialize (r/orient-embedded-list '(12 13 14)))) =>
-             [6, 23, 24, 26, 28])
-       (fact "OrientEmbeddedSet - OrientEmbeddedSet #{12 13 14} should return [6, 23, 26, 24, 28]"
-             (vec (.serialize (r/orient-embedded-list #{12 13 14}))) =>
-             [6, 23, 26, 24, 28])
+             [6 23 3 24 3 26 3 28])
+       (fact "OrientEmbeddedSet - OrientEmbeddedSet #{12 13 14} should return [6 23 3 24 3 26 3 28]"
+             (vec (.serialize (r/orient-embedded-set #{12 13 14}))) =>
+             (just [6 23 3 24 3 26 3 28] :in-any-order))
        (fact "OrientLink - OrientLink #33:0 should return [66 0]"
              (vec (.serialize (r/orient-link 33 0))) =>
              [66 0])
