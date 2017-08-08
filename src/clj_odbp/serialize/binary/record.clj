@@ -48,7 +48,7 @@
 
 (defn byte-type
   [value]
-  value)
+  (byte-array [value]))
 
 (extend-type java.lang.Byte
   OrientType
@@ -61,8 +61,8 @@
 (defn boolean-type
   [value]
   (if value
-    (byte 1)
-    (byte 0)))
+    (byte-array [(byte 1)])
+    (byte-array [(byte 0)])))
 
 (extend-type java.lang.Boolean
   OrientType
@@ -512,8 +512,9 @@
   (reduce
    (fn [acc [k v]]
      (let [last-elem (last acc)
-           pos (+ (count (:serialized-value last-elem))
-                  (:position last-elem))]
+           serialized-elem (:serialized-value last-elem)
+           size-le (count serialized-elem)
+           pos (+ size-le (:position last-elem))]
        (conj
         acc
         {:key-type (getDataType k)

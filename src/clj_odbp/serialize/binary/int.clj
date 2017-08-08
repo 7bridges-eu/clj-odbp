@@ -1,25 +1,18 @@
-(ns clj-odbp.serialize.binary.int)
+(ns clj-odbp.serialize.binary.int
+  (:import [java.nio ByteBuffer]))
 
 (defn int32
-  "Serialize an int32. Return a byte-array.
-   See: com.orientechnologies.common.serialization.types.OIntegerSerializer"
+  "Serialize an int32. Return a byte-array."
   [n]
-  (let [one (byte (bit-and (unsigned-bit-shift-right n 24) 0xFF))
-        two (byte (bit-and (unsigned-bit-shift-right n 16) 0xFF))
-        three (byte (bit-and (unsigned-bit-shift-right n 8) 0xFF))
-        four (byte (bit-and (unsigned-bit-shift-right n 0) 0xFF))]
-    (byte-array [one two three four])))
+  (-> (ByteBuffer/allocate 4)
+      (.putInt n)
+      .array
+      byte-array))
 
 (defn int64
-  "Serialize an int64. Return a byte-array.
-   See: com.orientechnologies.common.serialization.types.OLongSerializer"
+  "Serialize an int64. Return a byte-array."
   [n]
-  (let [one (byte (bit-and (unsigned-bit-shift-right n 56) 0xFF))
-        two (byte (bit-and (unsigned-bit-shift-right n 48) 0xFF))
-        three (byte (bit-and (unsigned-bit-shift-right n 40) 0xFF))
-        four (byte (bit-and (unsigned-bit-shift-right n 32) 0xFF))
-        five (byte (bit-and (unsigned-bit-shift-right n 24) 0xFF))
-        six (byte (bit-and (unsigned-bit-shift-right n 16) 0xFF))
-        seven (byte (bit-and (unsigned-bit-shift-right n 8) 0xFF))
-        eight (byte (bit-and (unsigned-bit-shift-right n 0) 0xFF))]
-    (byte-array [one two three four five six seven eight])))
+  (-> (ByteBuffer/allocate 8)
+      (.putLong n)
+      .array
+      byte-array))
