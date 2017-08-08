@@ -1,6 +1,7 @@
 (ns clj-odbp.deserialize.binary.otypes
   (:require [clj-odbp.deserialize.binary.varint :as v]
-            [clj-odbp.deserialize.binary.buffer :as b])
+            [clj-odbp.deserialize.binary.buffer :as b]
+            [clj-odbp.deserialize.binary.utils :as u])
   (:import [java.nio ByteBuffer]
            [java.math BigInteger BigDecimal]))
 
@@ -11,7 +12,7 @@
   [:bool-orient-type :integer-orient-type :short-orient-type
    :long-orient-type :float-orient-type :double-orient-type
    :datetime-orient-type :string-orient-type :binary-orient-type
-   :embedded-record-orient-type :embedded-list-orient-type :embedded-set-orient-type
+   :record-orient-type :embedded-list-orient-type :embedded-set-orient-type
    :embedded-map-orient-type :link-orient-type :link-list-orient-type
    :link-set-orient-type :link-map-orient-type :byte-orient-type
    :transient-orient-type :date-orient-type :custom-orient-type
@@ -102,11 +103,61 @@
   (let [size (call :integer-orient-type buffer)]
     (b/buffer-take! buffer size)))
 
-(defmethod deserialize :embedded-record-orient-type
+;; Record deserialization
+
+(defn- string-type
+  "Read a string from the buffer."
+  [buffer lenght]
+  (let [b (b/buffer-take! buffer lenght)]
+    (apply str (map char b))))
+
+(defn- read-version
+  [buffer]
+  (int (first (b/buffer-take! buffer 1))))
+
+(defn- read-class-name
+  [buffer]
+  (let [size (v/varint-signed-long (b/buffer-take! buffer 1))]
+    (apply str (map char (b/buffer-take! buffer size)))))
+
+(defn- read-headers
+  "Read and decode the header"
+  [buffer]
+  (loop [field-size (v/varint-signed-long (b/buffer-take! buffer 1))
+         headers []]
+    (if (zero? field-size)
+      headers
+      (let [field-name (string-type buffer field-size)
+            field-position (u/read-int32 buffer)
+            data-type (int (first (b/buffer-take! buffer 1)))]
+        (recur (v/varint-signed-long (b/buffer-take! buffer 1))
+               (conj headers
+                     {:field-name field-name
+                      :field-position field-position
+                      :data-type (nth otype-list data-type)}))))))
+
+(defn- read-record
+  [headers content]
+  (reduce
+   (fn [record header]
+     (let [{key :field-name
+            position :field-position
+            otype :data-type} header]
+       (assoc
+        record
+        (keyword key)
+        (call otype content position))))
+   {}
+   headers))
+
+(defmethod deserialize :record-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [version (read-version buffer)
+        class-name (read-class-name buffer)
+        headers (read-headers buffer)]
+    {class-name (read-record headers buffer)}))
 
 (defmethod deserialize :embedded-list-orient-type
   [{:keys [buffer position] :or {position nil}}]
