@@ -5,4 +5,4 @@
   [value]
   (let [size (count value)
         size-varint (v/varint-unsigned size)]
-    (vec (concat size-varint value))))
+    (into size-varint value)))
