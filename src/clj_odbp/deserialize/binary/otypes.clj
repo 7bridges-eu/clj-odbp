@@ -128,7 +128,7 @@
     (if (zero? field-size)
       headers
       (let [field-name (string-type buffer field-size)
-            field-position (u/read-int32 buffer)
+            field-position (u/bytes->integer buffer)
             data-type (int (first (b/buffer-take! buffer 1)))]
         (recur (v/varint-signed-long (b/buffer-take! buffer 1))
                (conj headers
@@ -264,8 +264,8 @@
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  (let [scale (call :integer-orient-type buffer)
-        size (call :integer-orient-type buffer)
+  (let [scale (u/bytes->integer buffer)
+        size (u/bytes->integer buffer)
         data (b/buffer-take! buffer size)]
     (-> data
         byte-array

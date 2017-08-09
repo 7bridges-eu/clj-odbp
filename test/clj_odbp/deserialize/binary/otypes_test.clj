@@ -141,19 +141,29 @@
                                                     3 {:cluster-id 6 :record-position 7}})
        (fact "Decimal - BigDecimal 0"
              (t/call :decimal-orient-type
-                     (b/to-buffer [0 2 0])) => (bigdec 0))
+                     (b/to-buffer [0 0 0 0
+                                   0 0 0 1
+                                   0])) => (bigdec 0))
        (fact "Decimal - BigDecimal 1"
              (t/call :decimal-orient-type
-                     (b/to-buffer [0 2 1])) => (bigdec 1))
+                     (b/to-buffer [0 0 0 0
+                                   0 0 0 1
+                                   1])) => (bigdec 1))
        (fact "Decimal - BigDecimal 1.2"
              (t/call :decimal-orient-type
-                     (b/to-buffer [2 2 12])) => (bigdec 1.2))
+                     (b/to-buffer [0 0 0 1
+                                   0 0 0 1
+                                   12])) => (bigdec 1.2))
        (fact "Decimal - BigDecimal 12.34"
              (t/call :decimal-orient-type
-                     (b/to-buffer [4 4 4 -46])) => (bigdec 12.34))
+                     (b/to-buffer [0 0 0 2
+                                   0 0 0 2
+                                   4 -46])) => (bigdec 12.34))
        (fact "Decimal - BigDecimal -12.34"
              (t/call :decimal-orient-type
-                     (b/to-buffer [4 4 -5 46])) => (bigdec -12.34))
+                     (b/to-buffer [0 0 0 2
+                                   0 0 0 2
+                                   -5 46])) => (bigdec -12.34))
        (fact "Embedded map - Simple map"
              (t/call :embedded-map-orient-type
                      (b/to-buffer [4

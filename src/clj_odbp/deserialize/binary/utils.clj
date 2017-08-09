@@ -1,12 +1,20 @@
 (ns clj-odbp.deserialize.binary.utils
-  (:require [clj-odbp.deserialize.binary.buffer :as b]))
+  (:require [clj-odbp.deserialize.binary.buffer :as b])
+  (:import [java.nio ByteBuffer]))
 
-(defn read-int32
+(defn bytes->integer
   "Read a 32 bit integer from the buffer."
   [buffer]
-  (let [data (b/buffer-take! buffer 4)
-        one (bit-shift-left (nth data 0) 24)
-        two (bit-shift-left (bit-and 0xFF (nth data 1)) 16)
-        three (bit-shift-left (bit-and 0xFF (nth data 2)) 8)
-        four (bit-and 0xFF (nth data 3))]
-    (bit-or one two three four)))
+  (let [data (b/buffer-take! buffer 4)]
+    (-> data
+        byte-array
+        ByteBuffer/wrap
+        .getInt)))
+
+(defn bytes->long
+  [buffer]
+  (let [data (b/buffer-take! buffer 8)]
+    (-> data
+        byte-array
+        ByteBuffer/wrap
+        .getLong)))
