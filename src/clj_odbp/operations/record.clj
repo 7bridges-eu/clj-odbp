@@ -4,7 +4,8 @@
              [utils :refer [decode encode]]]
             [clj-odbp.serialize.binary.record :refer [serialize-record]]
             [clj-odbp.deserialize.binary.record :refer [deserialize-record]]
-            [clj-odbp.specs.record :as specs])
+            [clj-odbp.specs.record :as specs]
+            [clj-odbp.sessions :as session])
   (:import java.io.DataInputStream))
 
 (defn record-load-request
@@ -24,10 +25,12 @@
 
 (defn record-load-response
   [^DataInputStream in]
-  (-> (decode
-       in
-       specs/record-load-response)
-      deserialize-record))
+  (let [response (decode in specs/record-load-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    (deserialize-record response)))
 
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request
@@ -47,9 +50,12 @@
 
 (defn record-create-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-create-response))
+  (let [response (decode in specs/record-create-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    response))
 
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
@@ -72,9 +78,12 @@
 
 (defn record-update-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-update-response))
+  (let [response (decode in specs/record-update-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    response))
 
 ;; REQUEST_RECORD_DELETE
 (defn record-delete-request
@@ -93,6 +102,9 @@
 
 (defn record-delete-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-delete-response))
+  (let [response (decode in specs/record-delete-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    response))

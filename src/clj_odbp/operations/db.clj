@@ -1,6 +1,7 @@
 (ns clj-odbp.operations.db
   (:require [clj-odbp
              [constants :as consts]
+             [sessions :as sessions]
              [utils :refer [decode encode]]]
             [clj-odbp.specs.db :as specs])
   (:import java.io.DataInputStream))
@@ -87,7 +88,10 @@
 
 (defn db-create-response
   [^DataInputStream in]
-  {})
+  (let [response (decode in specs/db-create-response)]
+    (when-not (empty? (:token response))
+      (sessions/reset-session! :db)
+      (sessions/put-session! response :db))))
 
 ;; REQUEST_DB_CLOSE
 (defn db-close-request
@@ -98,7 +102,10 @@
 
 (defn db-close-response
   [^DataInputStream in]
-  {})
+  (let [response (decode in specs/db-close-response)]
+    (when-not (empty? (:token response))
+      (sessions/reset-session! :db)
+      (sessions/put-session! response :db))))
 
 ;; REQUEST_DB_EXIST
 (defn db-exist-request
@@ -115,9 +122,12 @@
 
 (defn db-exist-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-exist-response))
+  (let [response (decode in specs/db-exist-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))
 
 ;; REQUEST_DB_DROP
 (defn db-drop-request
@@ -134,7 +144,10 @@
 
 (defn db-drop-response
   [^DataInputStream in]
-  {})
+  (let [response (decode in specs/db-drop-response)]
+    (when-not (empty? (:token response))
+      (sessions/reset-session! :db)
+      (sessions/put-session! response :db))))
 
 ;; REQUEST_DB_SIZE
 (defn db-size-request
@@ -149,9 +162,12 @@
 
 (defn db-size-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-size-response))
+  (let [response (decode in specs/db-size-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))
 
 ;; REQUEST_DB_COUNTRECORDS
 (defn db-countrecords-request
@@ -166,9 +182,12 @@
 
 (defn db-countrecords-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-countrecords-response))
+  (let [response (decode in specs/db-countrecords-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))
 
 ;; REQUEST_DB_RELOAD
 (defn db-reload-request
@@ -183,6 +202,9 @@
 
 (defn db-reload-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-reload-response))
+  (let [response (decode in specs/db-reload-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))

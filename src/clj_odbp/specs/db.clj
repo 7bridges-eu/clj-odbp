@@ -63,9 +63,17 @@
    :storage-type s/string-type
    :backup-path s/string-type})
 
+(def db-create-response
+  {:session-id d/int-type
+   :token d/bytes-type})
+
 ;; REQUEST_DB_CLOSE
 (def db-close-request
   {:operation s/byte-type})
+
+(def db-close-response
+  {:session-id d/int-type
+   :token d/bytes-type})
 
 ;; REQUEST_DB_EXIST
 (def db-exist-request
@@ -87,6 +95,10 @@
    :token s/bytes-type
    :database-name s/string-type
    :storage-type s/string-type})
+
+(def db-drop-response
+  {:session-id d/int-type
+   :token d/bytes-type})
 
 ;; REQUEST_DB_SIZE
 (def db-size-request
