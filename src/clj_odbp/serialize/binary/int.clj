@@ -7,7 +7,7 @@
   (-> (ByteBuffer/allocate 4)
       (.putInt n)
       .array
-      byte-array))
+      vec))
 
 (defn int64
   "Serialize an int64. Return a byte-array."
@@ -15,4 +15,4 @@
   (-> (ByteBuffer/allocate 8)
       (.putLong n)
       .array
-      byte-array))
+      vec))
