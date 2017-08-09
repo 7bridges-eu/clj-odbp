@@ -157,7 +157,6 @@
   (let [version (read-version buffer)
         class-name (read-class-name buffer)
         headers (read-headers buffer)]
-    (println headers)
     {class-name (read-record headers buffer)}))
 
 (defmethod deserialize :embedded-list-orient-type
