@@ -23,7 +23,38 @@
 
 (def oemap (r/orient-embedded-map {:test "1"}))
 
-(def record {"User" {:name "admin"}})
+(def record
+  {"Location"
+   {:binary (r/orient-binary [84 104 105 115 32 105 115 32
+                              115 111 109 101 32 98 105 110
+                              97 114 121 32 100 97 116 97 10])
+    :date odatetime
+    :bool_true true
+    :bool_false false
+    :name "Casa"
+    :sector "1x1"
+    :means (r/orient-link-list [(r/orient-link 23 0) (r/orient-link 22 0)])
+    :document (r/orient-embedded-map {"name" "Marco" "age" 36})
+    :set (r/orient-embedded-set #{1 "Marco" 3})
+    :cost 5.5M}})
+
+(def expected-record [0 16 76 111 99 97 116 105 111 110 12
+                      98 105 110 97 114 121 0 0 0 -126 8 8
+                      100 97 116 101 0 0 0 -100 6 18 98 111
+                      111 108 95 116 114 117 101 0 0 0 -94 0
+                      20 98 111 111 108 95 102 97 108 115 101
+                      0 0 0 -93 0 8 110 97 109 101 0 0 0 -92 7
+                      12 115 101 99 116 111 114 0 0 0 -87 7 10
+                      109 101 97 110 115 0 0 0 -83 14 16 100 111
+                      99 117 109 101 110 116 0 0 0 -78 12 8 99
+                      111 115 116 0 0 0 -49 21 6 115 101 116 0 0
+                      0 -40 11 0 50 84 104 105 115 32 105 115 32
+                      115 111 109 101 32 98 105 110 97 114 121 32
+                      100 97 116 97 10 128 231 156 232 171 86 1 0
+                      8 67 97 115 97 6 49 120 49 4 46 0 44 0 4 7 8
+                      110 97 109 101 0 0 0 -56 7 7 6 97 103 101 0
+                      0 0 -50 3 10 77 97 114 99 111 72 0 0 0 1 0 0
+                      0 1 55 6 23 3 2 7 10 77 97 114 99 111 3 6])
 
 (facts "Serialization of single types and record"
        (fact "Short - short 1 should return [2]"
@@ -94,7 +125,5 @@
        (fact "OrientEmbeddedMap - oemap should return [2 7 8 116 101 115 116 0 0 0 12 7 2 49]"
              (vec (.serialize oemap)) =>
              [2 7 8 116 101 115 116 0 0 0 12 7 2 49])
-       (fact "record - record should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 10 97 100 109 105 110]"
-             (vec (r/serialize-record record)) =>
-             [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17
-              7 0 10 97 100 109 105 110]))
+       (fact "record - record should return expected-record"
+             (vec (r/serialize-record record)) => expected-record))
