@@ -1,6 +1,6 @@
 # clj-odbp
 
-OrientDB Clojure driver.
+A Clojure driver for OrientDB binary protocol.
 
 ## Usage
 
