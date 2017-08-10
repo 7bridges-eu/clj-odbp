@@ -156,8 +156,7 @@
   (let [version (read-version buffer)
         class-name (read-class-name buffer)
         headers (read-headers buffer)]
-    (conj {:_class class-name
-           :_version version}
+    (conj {:_class class-name}
           (read-record headers buffer))))
 
 (defmethod deserialize :embedded-list-orient-type

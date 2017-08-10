@@ -9,5 +9,6 @@
         version (get record :record-version nil)
         content (:record-content record)
         buffer (b/to-buffer content)]
-    (conj {(keyword "_rid") (str "#" cluster ":" position)}
+    (conj {(keyword "_rid") (str "#" cluster ":" position)
+           (keyword "_version") version}
           (call :record-orient-type buffer))))
