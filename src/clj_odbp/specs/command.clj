@@ -6,6 +6,7 @@
 (def select-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :mode s/byte-type
    :payload-length s/int-type
    :class-name s/string-type
@@ -42,8 +43,17 @@
    :complex-params s/bytes-type})
 
 ;; REQUEST_COMMAND > Sync response
-(def sync-response
-  {:session-id d/int-type})
+(def sync-generic-response
+  {:session-id d/int-type
+   :token d/bytes-type
+   :result-type (comp char d/byte-type)})
+
+(def record-response
+  {:record-type (comp char d/byte-type)
+   :record-cluster d/short-type
+   :record-position d/long-type
+   :record-version d/int-type
+   :record-content d/bytes-type})
 
 ;; REQUEST_COMMAND > Async response
 (def async-response {})

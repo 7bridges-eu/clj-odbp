@@ -4,6 +4,10 @@
 
 (defn deserialize-record
   [record]
-  (let [content (:record-content record)
+  (let [cluster (get record :record-cluster nil)
+        position (get record :record-position nil)
+        version (get record :record-version nil)
+        content (:record-content record)
         buffer (b/to-buffer content)]
-    (call :record-orient-type buffer)))
+    (conj {(keyword "_rid") (str "#" cluster ":" position)}
+          (call :record-orient-type buffer))))

@@ -104,7 +104,6 @@
     (b/buffer-take! buffer size)))
 
 ;; Record deserialization
-
 (defn- string-type
   "Read a string from the buffer."
   [buffer lenght]
@@ -157,8 +156,9 @@
   (let [version (read-version buffer)
         class-name (read-class-name buffer)
         headers (read-headers buffer)]
-    (println headers)
-    {class-name (read-record headers buffer)}))
+    (conj {:_class class-name
+           :_version version}
+          (read-record headers buffer))))
 
 (defmethod deserialize :embedded-list-orient-type
   [{:keys [buffer position] :or {position nil}}]
