@@ -62,7 +62,7 @@
 (defn string-type
   "Writes a String and return the stream."
   [^DataOutputStream out ^String value]
-  (let [chars (.getBytes value)]
+  (let [chars (.getBytes value "UTF-8")]
     (bytes-type out chars)
     out))
 

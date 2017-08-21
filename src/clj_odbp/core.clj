@@ -96,6 +96,6 @@
   record/record-delete-response)
 
 (defcommand select-command
-  [session-id command & opts]
+  [connection command & opts]
   command/select-request
   command/select-response)

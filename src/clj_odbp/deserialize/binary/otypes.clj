@@ -108,7 +108,7 @@
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)]
-    (apply str (map char (b/buffer-take! buffer size)))))
+    (u/bytes->utf8-str (b/buffer-take! buffer size))))
 
 (defmethod deserialize :binary-orient-type
   [{:keys [buffer position] :or {position nil}}]
@@ -118,12 +118,11 @@
     (b/buffer-take! buffer size)))
 
 ;; Record deserialization
-
 (defn- string-type
   "Read a string from the buffer."
-  [buffer lenght]
-  (let [b (b/buffer-take! buffer lenght)]
-    (apply str (map char b))))
+  [buffer length]
+  (let [b (b/buffer-take! buffer length)]
+    (u/bytes->utf8-str b)))
 
 (defn- read-version
   [buffer]
@@ -132,7 +131,7 @@
 (defn- read-class-name
   [buffer]
   (let [size (v/varint-signed-long (b/buffer-take! buffer 1))]
-    (apply str (map char (b/buffer-take! buffer size)))))
+    (u/bytes->utf8-str (b/buffer-take! buffer size))))
 
 (defn- read-headers
   "Read and decode the header"
@@ -171,7 +170,8 @@
   (let [version (read-version buffer)
         class-name (read-class-name buffer)
         headers (read-headers buffer)]
-    {class-name (read-record headers buffer)}))
+    (conj {:_class class-name}
+          (read-record headers buffer))))
 
 (defmethod deserialize :embedded-list-orient-type
   [{:keys [buffer position] :or {position nil}}]
@@ -224,7 +224,7 @@
     (b/buffer-set-position! buffer position))
   (let [cluster-id (call :integer-orient-type buffer)
         record-position (call :integer-orient-type buffer)]
-    {:cluster-id cluster-id :record-position record-position}))
+    (str "#" cluster-id ":" record-position)))
 
 (defmethod deserialize :link-list-orient-type
   [{:keys [buffer position] :or {position nil}}]
