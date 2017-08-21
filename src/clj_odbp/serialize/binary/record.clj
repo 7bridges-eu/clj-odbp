@@ -112,7 +112,7 @@
 
 (defn string-type
   [value]
-  (let [bytes (.getBytes value)]
+  (let [bytes (.getBytes value "UTF-8")]
     (c/bytes-type bytes)))
 
 (extend-type java.lang.String
