@@ -106,9 +106,9 @@
 ;; Record deserialization
 (defn- string-type
   "Read a string from the buffer."
-  [buffer lenght]
-  (let [b (b/buffer-take! buffer lenght)]
-    (apply str (map char b))))
+  [buffer length]
+  (let [b (b/buffer-take! buffer length)]
+    (String. (byte-array b) "UTF-8")))
 
 (defn- read-version
   [buffer]
@@ -117,7 +117,7 @@
 (defn- read-class-name
   [buffer]
   (let [size (v/varint-signed-long (b/buffer-take! buffer 1))]
-    (apply str (map char (b/buffer-take! buffer size)))))
+    (String. (byte-array (b/buffer-take! buffer size)) "UTF-8")))
 
 (defn- read-headers
   "Read and decode the header"
