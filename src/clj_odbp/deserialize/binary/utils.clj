@@ -18,3 +18,8 @@
         byte-array
         ByteBuffer/wrap
         .getLong)))
+
+(defn bytes->utf8-str
+  "Transform a sequence of bytes into an UTF-8 encoded string."
+  [bytes]
+  (String. (byte-array bytes) "UTF-8"))

@@ -94,7 +94,7 @@
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)]
-    (String. (byte-array (b/buffer-take! buffer size)) "UTF-8")))
+    (u/bytes->utf8-str (b/buffer-take! buffer size))))
 
 (defmethod deserialize :binary-orient-type
   [{:keys [buffer position] :or {position nil}}]
@@ -108,7 +108,7 @@
   "Read a string from the buffer."
   [buffer length]
   (let [b (b/buffer-take! buffer length)]
-    (String. (byte-array b) "UTF-8")))
+    (u/bytes->utf8-str b)))
 
 (defn- read-version
   [buffer]
@@ -117,7 +117,7 @@
 (defn- read-class-name
   [buffer]
   (let [size (v/varint-signed-long (b/buffer-take! buffer 1))]
-    (String. (byte-array (b/buffer-take! buffer size)) "UTF-8")))
+    (u/bytes->utf8-str (b/buffer-take! buffer size))))
 
 (defn- read-headers
   "Read and decode the header"
