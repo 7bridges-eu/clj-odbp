@@ -210,7 +210,7 @@
     (b/buffer-set-position! buffer position))
   (let [cluster-id (call :integer-orient-type buffer)
         record-position (call :integer-orient-type buffer)]
-    {:cluster-id cluster-id :record-position record-position}))
+    (str "#" cluster-id ":" record-position)))
 
 (defmethod deserialize :link-list-orient-type
   [{:keys [buffer position] :or {position nil}}]
