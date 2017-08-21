@@ -94,7 +94,7 @@
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)]
-    (apply str (map char (b/buffer-take! buffer size)))))
+    (String. (byte-array (b/buffer-take! buffer size)) "UTF-8")))
 
 (defmethod deserialize :binary-orient-type
   [{:keys [buffer position] :or {position nil}}]
