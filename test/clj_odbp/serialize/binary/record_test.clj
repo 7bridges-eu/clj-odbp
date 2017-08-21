@@ -33,36 +33,26 @@
 (defn rid-comparator [r1 r2]
   (.compareTo (.cluster_id r1) (.cluster_id r2)))
 
-(def oemb (r/orient-embedded {"User" {:name "Test"}}))
+(def oemb (r/orient-embedded {:_class "User" :name "Test"}))
 
 (def oemap (r/orient-embedded-map {:test "1"}))
 
 (def record
-  {"Location"
-   {:binary (r/orient-binary [84 104 105 115 32 105 115 32
-                              115 111 109 101 32 98 105 110
-                              97 114 121 32 100 97 116 97 10])
-    :bool_true true
-    :bool_false false
-    :name "Casa"
-    :sector "1x1"
-    :means (r/orient-link-list [(r/orient-link 23 0) (r/orient-link 22 0)])
-    :document (r/orient-embedded-map {"name" "Marco" "age" 36})
-    :set (r/orient-embedded-set #{1 "Marco" 3})
-    :cost 5.5M}})
+  {:_class "Location"
+   :binary (r/orient-binary [84 104 105 115 32 105 115 32
+                             115 111 109 101 32 98 105 110
+                             97 114 121 32 100 97 116 97 10])
+   :bool_true true
+   :bool_false false
+   :name "Casa"
+   :sector "1x1"
+   :means (r/orient-link-list [(r/orient-link 23 0) (r/orient-link 22 0)])
+   :document (r/orient-embedded-map {"name" "Marco" "age" 36})
+   :set (r/orient-embedded-set #{1 "Marco" 3})
+   :cost 5.5M})
 
 (def expected-record
-  [0 16 76 111 99 97 116 105 111 110 12 98 105 110 97 114
-   121 0 0 0 120 8 18 98 111 111 108 95 116 114 117 101 0
-   0 0 -110 0 20 98 111 111 108 95 102 97 108 115 101 0 0 0
-   -109 0 8 110 97 109 101 0 0 0 -108 7 12 115 101 99 116 111
-   114 0 0 0 -103 7 10 109 101 97 110 115 0 0 0 -99 14 16 100
-   111 99 117 109 101 110 116 0 0 0 -94 12 8 99 111 115 116 0
-   0 0 -65 21 6 115 101 116 0 0 0 -56 11 0 50 84 104 105 115 32
-   105 115 32 115 111 109 101 32 98 105 110 97 114 121 32 100 97
-   116 97 10 1 0 8 67 97 115 97 6 49 120 49 4 46 0 44 0 4 7 8 110
-   97 109 101 0 0 0 -72 7 7 6 97 103 101 0 0 0 -66 3 10 77 97 114
-   99 111 72 0 0 0 1 0 0 0 1 55 6 23 3 2 7 10 77 97 114 99 111 3 6])
+  [0 16 76 111 99 97 116 105 111 110 12 98 105 110 97 114 121 0 0 0 -124 8 18 98 111 111 108 95 116 114 117 101 0 0 0 -98 0 20 98 111 111 108 95 102 97 108 115 101 0 0 0 -97 0 8 110 97 109 101 0 0 0 -96 7 12 115 101 99 116 111 114 0 0 0 -91 7 10 109 101 97 110 115 0 0 0 -87 14 16 100 111 99 117 109 101 110 116 0 0 0 -82 12 12 95 99 108 97 115 115 0 0 0 -53 7 8 99 111 115 116 0 0 0 -44 21 6 115 101 116 0 0 0 -35 11 0 50 84 104 105 115 32 105 115 32 115 111 109 101 32 98 105 110 97 114 121 32 100 97 116 97 10 1 0 8 67 97 115 97 6 49 120 49 4 46 0 44 0 4 7 8 110 97 109 101 0 0 0 -60 7 7 6 97 103 101 0 0 0 -54 3 10 77 97 114 99 111 72 16 76 111 99 97 116 105 111 110 0 0 0 1 0 0 0 1 55 6 23 3 2 7 10 77 97 114 99 111 3 6])
 
 (facts "Serialization of single types and record"
        (fact "Short - short 1 should return [2]"
@@ -103,7 +93,8 @@
              (vec (.serialize odatetime)) => odatetime-result)
        (fact "OrientEmbedded - oemb should return [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116]"
              (vec (.serialize oemb)) =>
-             [8 85 115 101 114 8 110 97 109 101 0 0 0 16 7 0 8 84 101 115 116])
+             [8 85 115 101 114 12 95 99 108 97 115 115 0 0 0 28 7 8 110
+              97 109 101 0 0 0 33 7 0 8 85 115 101 114 8 84 101 115 116])
        (fact "OrientEmbeddedList - OrientEmbeddedList (12 13 14) should return [6 23 3 24 3 26 3 28]"
              (vec (.serialize (r/orient-embedded-list '(12 13 14)))) =>
              [6 23 3 24 3 26 3 28])

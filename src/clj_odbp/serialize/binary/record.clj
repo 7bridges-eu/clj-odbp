@@ -458,7 +458,7 @@
      :field-name k
      :type (getDataType v)
      :value v
-     :serialized-value (serialize v)
+     :serialized-value (serialize v (+ 1 offset hsize))
      :position (+ 1 offset hsize)}))
 
 (defn rest-elem
@@ -493,12 +493,11 @@
   (serialize [this offset]
     (let [size (count value)
           size-varint (v/varint-unsigned size)
-          class (first (first value))
+          class (get value :_class "")
           serialized-class (serialize class)
           serialized-class-size (count serialized-class)
-          record-map (get value class)
           first-elem-pos (dec (+ offset serialized-class-size))
-          structure (record-map->structure record-map first-elem-pos)
+          structure (record-map->structure value first-elem-pos)
           key-order [:field-name :position :type]
           serialized-headers (serialize-headers structure key-order)
           end-headers [(byte 0)]
@@ -519,12 +518,11 @@
    `record` must be a Clojure map. It can contain Clojure types (string,
    boolean, etc.) or Orient custom types (OrientLink, OrientBinary, etc.)."
   [record]
-  (let [version [(byte 0)]
-        class (first (first record))
+  (let [version (vector (get record :_version (byte 0)))
+        class (get record :_class "")
         serialized-class (serialize class)
         serialized-class-size (count serialized-class)
-        record-map (get record class)
-        structure (record-map->structure record-map serialized-class-size)
+        structure (record-map->structure record serialized-class-size)
         key-order [:field-name :position :type]
         serialized-headers (serialize-headers structure key-order)
         end-headers [(byte 0)]
