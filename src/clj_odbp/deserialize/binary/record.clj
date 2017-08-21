@@ -23,6 +23,6 @@
         version (get record :record-version nil)
         content (:record-content record)
         buffer (b/to-buffer content)]
-    (conj {"_rid" (str "#" cluster ":" position)
-           "_version" version}
+    (conj {:_rid (str "#" cluster ":" position)
+           :_version version}
           (call :record-orient-type buffer))))

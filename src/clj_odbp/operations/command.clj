@@ -43,9 +43,9 @@
           indexes (take params-len (iterate inc 0))
           indexes-v (vec (map str indexes))
           params-map (zipmap indexes-v params)
-          orient-map (serialize/orient-embedded-map
-                      {"@type" "d" "params" params-map})]
-      (.serialize orient-map))))
+          oem-params (serialize/orient-embedded-map params-map)
+          orient-document (serialize/orient-embedded {"params" oem-params})]
+      (.serialize orient-document))))
 
 ;; REQUEST_COMMAND > SELECT
 (defn select-request
