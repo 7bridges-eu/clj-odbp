@@ -1,6 +1,6 @@
 # clj-odbp
 
-OrientDB driver.
+A Clojure driver for OrientDB binary protocol.
 
 ## Usage
 
@@ -8,7 +8,6 @@ FIXME
 
 ## License
 
-Copyright © 2017 FIXME
+Copyright © 2017 7bridges s.r.l.
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Apache License 2.0.

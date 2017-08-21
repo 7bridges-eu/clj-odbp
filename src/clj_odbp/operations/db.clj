@@ -1,6 +1,21 @@
+;; Copyright 2017 7bridges s.r.l.
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;; http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
 (ns clj-odbp.operations.db
   (:require [clj-odbp
              [constants :as consts]
+             [sessions :as sessions]
              [utils :refer [decode encode]]]
             [clj-odbp.specs.db :as specs])
   (:import java.io.DataInputStream))
@@ -87,7 +102,10 @@
 
 (defn db-create-response
   [^DataInputStream in]
-  {})
+  (let [response (decode in specs/db-create-response)]
+    (when-not (empty? (:token response))
+      (sessions/reset-session! :db)
+      (sessions/put-session! response :db))))
 
 ;; REQUEST_DB_CLOSE
 (defn db-close-request
@@ -98,7 +116,10 @@
 
 (defn db-close-response
   [^DataInputStream in]
-  {})
+  (let [response (decode in specs/db-close-response)]
+    (when-not (empty? (:token response))
+      (sessions/reset-session! :db)
+      (sessions/put-session! response :db))))
 
 ;; REQUEST_DB_EXIST
 (defn db-exist-request
@@ -115,9 +136,12 @@
 
 (defn db-exist-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-exist-response))
+  (let [response (decode in specs/db-exist-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))
 
 ;; REQUEST_DB_DROP
 (defn db-drop-request
@@ -134,7 +158,10 @@
 
 (defn db-drop-response
   [^DataInputStream in]
-  {})
+  (let [response (decode in specs/db-drop-response)]
+    (when-not (empty? (:token response))
+      (sessions/reset-session! :db)
+      (sessions/put-session! response :db))))
 
 ;; REQUEST_DB_SIZE
 (defn db-size-request
@@ -149,9 +176,12 @@
 
 (defn db-size-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-size-response))
+  (let [response (decode in specs/db-size-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))
 
 ;; REQUEST_DB_COUNTRECORDS
 (defn db-countrecords-request
@@ -166,9 +196,12 @@
 
 (defn db-countrecords-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-countrecords-response))
+  (let [response (decode in specs/db-countrecords-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))
 
 ;; REQUEST_DB_RELOAD
 (defn db-reload-request
@@ -183,6 +216,9 @@
 
 (defn db-reload-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/db-reload-response))
+  (let [response (decode in specs/db-reload-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (sessions/reset-session! :db)
+      (sessions/put-session! session :db))
+    response))

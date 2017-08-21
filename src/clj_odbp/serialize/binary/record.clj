@@ -1,10 +1,23 @@
+;; Copyright 2017 7bridges s.r.l.
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;; http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
 (ns clj-odbp.serialize.binary.record
   (:require [clj-odbp.constants :as const]
             [clj-odbp.serialize.binary
              [common :as c]
              [int :as i]
-             [varint :as v]])
-  (:import [java.io ByteArrayOutputStream DataOutputStream]))
+             [varint :as v]]))
 
 (defprotocol OrientType
   (getDataType [value])
@@ -12,7 +25,7 @@
 
 (defn short-type
   [value]
-  (byte-array (v/varint-unsigned value)))
+  (v/varint-unsigned value))
 
 (extend-type java.lang.Short
   OrientType
@@ -24,7 +37,7 @@
 
 (defn integer-type
   [value]
-  (byte-array (v/varint-unsigned value)))
+  (v/varint-unsigned value))
 
 (extend-type java.lang.Integer
   OrientType
@@ -36,7 +49,7 @@
 
 (defn long-type
   [value]
-  (byte-array (v/varint-unsigned value)))
+  (v/varint-unsigned value))
 
 (extend-type java.lang.Long
   OrientType
@@ -48,7 +61,7 @@
 
 (defn byte-type
   [value]
-  (byte-array [value]))
+  [value])
 
 (extend-type java.lang.Byte
   OrientType
@@ -61,8 +74,8 @@
 (defn boolean-type
   [value]
   (if value
-    (byte-array [(byte 1)])
-    (byte-array [(byte 0)])))
+    [(byte 1)]
+    [(byte 0)]))
 
 (extend-type java.lang.Boolean
   OrientType
@@ -74,10 +87,10 @@
 
 (defn float-type
   [value]
-  (let [bos (ByteArrayOutputStream. 4)
-        dos (DataOutputStream. bos)]
-    (.writeFloat dos value)
-    (.toByteArray bos)))
+  (-> (java.nio.ByteBuffer/allocate 4)
+      (.putFloat value)
+      .array
+      vec))
 
 (extend-type java.lang.Float
   OrientType
@@ -89,10 +102,10 @@
 
 (defn double-type
   [value]
-  (let [bos (ByteArrayOutputStream. 8)
-        dos (DataOutputStream. bos)]
-    (.writeDouble dos value)
-    (.toByteArray bos)))
+  (-> (java.nio.ByteBuffer/allocate 8)
+      (.putDouble value)
+      .array
+      vec))
 
 (extend-type java.lang.Double
   OrientType
@@ -102,13 +115,23 @@
     ([value] (double-type value))
     ([value offset] (serialize value))))
 
+(defn bigdec-type
+  [value]
+  (let [scale (i/int32 (.scale value))
+        serialized-value (-> value
+                             .unscaledValue
+                             .toByteArray
+                             vec)
+        value-size (i/int32 (count serialized-value))]
+    (vec (concat scale value-size serialized-value))))
+
 (extend-type java.math.BigDecimal
   OrientType
-  (serialize [value]
-    (-> value
-        (.multiply (bigdec (Math/pow 10 (.scale value))))
-        .toBigInteger
-        .toByteArray)))
+  (getDataType [value]
+    (byte 21))
+  (serialize
+    ([value] (bigdec-type value))
+    ([value offset] (serialize value))))
 
 (defn string-type
   [value]
@@ -222,24 +245,18 @@
   [value]
   (let [v (serialize value)
         t (getDataType value)]
-    (byte-array (into [t] v))))
+    (into [t] v)))
 
 (deftype OrientEmbeddedList [value]
   OrientType
   (getDataType [this]
     (byte 10))
   (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
-          serialized-items (map serialize-any value)
-          serialized-items-len (count serialized-items)]
-      (.write dos size-varint 0 size-varint-len)
-      (.writeByte dos (byte 23))
-      (doall (map #(.write dos % 0 (count %)) serialized-items))
-      (.toByteArray bos)))
+    (let [size (count value)
+          size-varint (v/varint-unsigned size)
+          serialized-items (into [] (apply concat (map serialize-any value)))
+          any [(byte 23)]]
+      (vec (concat size-varint any serialized-items))))
   (serialize [this offset]
     (serialize this)))
 
@@ -252,17 +269,11 @@
   (getDataType [this]
     (byte 11))
   (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
-          serialized-items (map serialize-any value)
-          serialized-items-len (count serialized-items)]
-      (.write dos size-varint 0 size-varint-len)
-      (.writeByte dos (byte 23))
-      (doall (map #(.write dos % 0 (count %)) serialized-items))
-      (.toByteArray bos)))
+    (let [size (count value)
+          size-varint (v/varint-unsigned size)
+          serialized-items (into [] (apply concat (map serialize-any value)))
+          any [(byte 23)]]
+      (vec (concat size-varint any serialized-items))))
   (serialize [this offset]
     (serialize this)))
 
@@ -275,13 +286,9 @@
   (getDataType [this]
     (byte 13))
   (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          cid-varint (byte-array (v/varint-unsigned cluster-id))
-          rpos-varint (byte-array (v/varint-unsigned record-position))]
-      (.write dos cid-varint 0 (count cid-varint))
-      (.write dos rpos-varint 0 (count rpos-varint))
-      (.toByteArray bos)))
+    (let [cid-varint (v/varint-unsigned cluster-id)
+          rpos-varint (v/varint-unsigned record-position)]
+      (vec (concat cid-varint rpos-varint))))
   (serialize [this offset]
     (serialize this)))
 
@@ -294,16 +301,10 @@
   (getDataType [this]
     (byte 14))
   (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
-          serialized-items (map serialize value)
-          serialized-items-len (count serialized-items)]
-      (.write dos size-varint 0 size-varint-len)
-      (doall (map #(.write dos % 0 (count %)) serialized-items))
-      (.toByteArray bos)))
+    (let [size (count value)
+          size-varint (v/varint-unsigned size)
+          serialized-items (mapcat serialize value)]
+      (vec (concat size-varint serialized-items))))
   (serialize [this offset]
     (serialize this)))
 
@@ -316,16 +317,10 @@
   (getDataType [this]
     (byte 15))
   (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
-          serialized-items (map serialize value)
-          serialized-items-len (count serialized-items)]
-      (.write dos size-varint 0 size-varint-len)
-      (doall (map #(.write dos % 0 (count %)) serialized-items))
-      (.toByteArray bos)))
+    (let [size (count value)
+          size-varint (v/varint-unsigned size)
+          serialized-items (mapcat serialize value)]
+      (vec (concat size-varint serialized-items))))
   (serialize [this offset]
     (serialize this)))
 
@@ -336,56 +331,25 @@
 (defn serialize-key-value
   [k v]
   (if-not (map? v)
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          key-type (getDataType k)
+    (let [key-type [(getDataType k)]
           key-value (serialize k)
           link (serialize v)]
-      (.writeByte dos key-type)
-      (.write dos key-value 0 (count key-value))
-      (.write dos link 0 (count link))
-      (.toByteArray bos))))
+      (vec (concat key-type key-value link)))))
 
 (deftype OrientLinkMap [value]
   OrientType
   (getDataType [this]
     (byte 16))
   (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (byte-array (v/varint-unsigned (count value)))
-          key-values (doall (map (fn [[k v]] (serialize-key-value k v)) value))]
-      (.write dos size 0 (count size))
-      (doall (map #(.write dos % 0 (count %)) key-values))
-      (.toByteArray bos)))
+    (let [size (v/varint-unsigned (count value))
+          key-values (mapcat (fn [[k v]] (serialize-key-value k v)) value)]
+      (vec (concat size key-values))))
   (serialize [this offset]
     (serialize this)))
 
 (defn orient-link-map
   [value]
   (->OrientLinkMap value))
-
-(deftype OrientDecimal [value]
-  OrientType
-  (getDataType [this]
-    (byte 21))
-  (serialize [this]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          v (bigdec value)
-          scale (i/int32 (.scale v))
-          serialized-value (serialize v)
-          value-size (i/int32 (count serialized-value))]
-      (.write dos scale 0 (count scale))
-      (.write dos value-size 0 (count value-size))
-      (.write dos serialized-value 0 (count serialized-value))
-      (.toByteArray bos)))
-  (serialize [this offset]
-    (serialize this)))
-
-(defn orient-decimal
-  [value]
-  (->OrientDecimal value))
 
 (defn get-structure
   [record-map]
@@ -458,12 +422,6 @@
    #(serialize-elements % key-order)
    structure))
 
-(defn write-serialized-data
-  [^DataOutputStream dos data]
-  (if (= (type data) java.lang.Byte)
-    (.writeByte dos data)
-    (.write dos data 0 (count data))))
-
 (defn serialize-data
   [structure]
   (->> structure
@@ -476,19 +434,15 @@
   (serialize [this]
     (serialize this 0))
   (serialize [this offset]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
+    (let [size (count value)
+          size-varint (v/varint-unsigned size)
           structure (oemap->structure value offset)
           key-order [:key-type :field-name :position :type]
           serialized-headers (serialize-headers structure key-order)
           serialized-data (serialize-data structure)]
-      (.write dos size-varint 0 size-varint-len)
-      (doall (map #(write-serialized-data dos %) serialized-headers))
-      (doall (map #(write-serialized-data dos %) serialized-data))
-      (.toByteArray bos))))
+      (-> (concat size-varint serialized-headers serialized-data)
+          flatten
+          vec))))
 
 (defn orient-embedded-map
   [value]
@@ -537,11 +491,8 @@
   (getDataType [this]
     (byte 9))
   (serialize [this offset]
-    (let [bos (ByteArrayOutputStream.)
-          dos (DataOutputStream. bos)
-          size (count value)
-          size-varint (byte-array (v/varint-unsigned size))
-          size-varint-len (count size-varint)
+    (let [size (count value)
+          size-varint (v/varint-unsigned size)
           class (first (first value))
           serialized-class (serialize class)
           serialized-class-size (count serialized-class)
@@ -550,12 +501,12 @@
           structure (record-map->structure record-map first-elem-pos)
           key-order [:field-name :position :type]
           serialized-headers (serialize-headers structure key-order)
+          end-headers [(byte 0)]
           serialized-data (serialize-data structure)]
-      (.write dos serialized-class 0 serialized-class-size)
-      (doall (map #(write-serialized-data dos %) serialized-headers))
-      (.writeByte dos (byte 0))
-      (doall (map #(write-serialized-data dos %) serialized-data))
-      (.toByteArray bos)))
+      (-> (concat serialized-class serialized-headers
+                  end-headers serialized-data)
+          flatten
+          vec)))
   (serialize [this]
     (serialize this 0)))
 
@@ -568,9 +519,7 @@
    `record` must be a Clojure map. It can contain Clojure types (string,
    boolean, etc.) or Orient custom types (OrientLink, OrientBinary, etc.)."
   [record]
-  (let [bos (ByteArrayOutputStream.)
-        dos (DataOutputStream. bos)
-        version (byte 0)
+  (let [version [(byte 0)]
         class (first (first record))
         serialized-class (serialize class)
         serialized-class-size (count serialized-class)
@@ -578,10 +527,9 @@
         structure (record-map->structure record-map serialized-class-size)
         key-order [:field-name :position :type]
         serialized-headers (serialize-headers structure key-order)
+        end-headers [(byte 0)]
         serialized-data (serialize-data structure)]
-    (.writeByte dos version)
-    (.write dos serialized-class 0 serialized-class-size)
-    (doall (map #(write-serialized-data dos %) serialized-headers))
-    (.writeByte dos (byte 0))
-    (doall (map #(write-serialized-data dos %) serialized-data))
-    (.toByteArray bos)))
+    (-> (concat version serialized-class serialized-headers
+                end-headers serialized-data)
+        flatten
+        vec)))

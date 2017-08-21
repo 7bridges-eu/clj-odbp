@@ -1,9 +1,24 @@
+;; Copyright 2017 7bridges s.r.l.
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;; http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
 (ns clj-odbp.operations.record
   (:require [clj-odbp
              [constants :as constants]
+             [sessions :as session]
              [utils :refer [decode encode]]]
-            [clj-odbp.serialize.binary.record :refer [serialize-record]]
             [clj-odbp.deserialize.binary.record :refer [deserialize-record]]
+            [clj-odbp.serialize.binary.record :refer [serialize-record]]
             [clj-odbp.specs.record :as specs])
   (:import java.io.DataInputStream))
 
@@ -24,10 +39,12 @@
 
 (defn record-load-response
   [^DataInputStream in]
-  (-> (decode
-       in
-       specs/record-load-response)
-      deserialize-record))
+  (let [response (decode in specs/record-load-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    (deserialize-record response)))
 
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request
@@ -47,9 +64,12 @@
 
 (defn record-create-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-create-response))
+  (let [response (decode in specs/record-create-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    response))
 
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
@@ -72,9 +92,12 @@
 
 (defn record-update-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-update-response))
+  (let [response (decode in specs/record-update-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    response))
 
 ;; REQUEST_RECORD_DELETE
 (defn record-delete-request
@@ -93,6 +116,9 @@
 
 (defn record-delete-response
   [^DataInputStream in]
-  (decode
-   in
-   specs/record-delete-response))
+  (let [response (decode in specs/record-delete-response)
+        session (select-keys response [:session-id :token])]
+    (when-not (empty? (:token session))
+      (session/reset-session! :db)
+      (session/put-session! session :db))
+    response))
