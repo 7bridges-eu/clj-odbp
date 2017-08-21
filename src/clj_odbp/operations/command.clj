@@ -39,23 +39,16 @@
   [params]
   (if (empty? params)
     ""
-    (let [params-len (count params)
-          indexes (take params-len (iterate inc 0))
-          indexes-v (vec (map str indexes))
-          params-map (zipmap indexes-v params)
-          oem-params (serialize/orient-embedded-map params-map)
-          orient-document (serialize/orient-embedded {"params" oem-params})]
-      (.serialize orient-document))))
+    (let [oem-params (serialize/orient-embedded-map params)]
+      (serialize/serialize-record {"params" oem-params}))))
 
 ;; REQUEST_COMMAND > SELECT
 (defn select-request
   [connection command
-   {:keys [non-text-limit fetch-plan]
-    :or {non-text-limit 20 fetch-plan "*:0"}}]
+   {:keys [params non-text-limit fetch-plan]
+    :or {params {} non-text-limit 20 fetch-plan "*:0"}}]
   (let [session-id (:session-id connection)
         token (:token connection)
-        query (first command)
-        params (rest command)
         serialized-params (serialize-params params)]
     (encode
      specs/select-request
@@ -63,11 +56,11 @@
       [:session-id session-id]
       [:token token]
       [:mode constants/request-command-sync-mode]
-      [:payload-length (get-query-payload-length query
+      [:payload-length (get-query-payload-length command
                                                  fetch-plan
                                                  serialized-params)]
       [:class-name constants/request-command-query]
-      [:text query]
+      [:text command]
       [:non-text-limit non-text-limit]
       [:fetch-plan fetch-plan]
       [:serialized-params serialized-params]])))
