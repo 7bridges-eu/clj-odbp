@@ -345,18 +345,19 @@
   ([value]
    (serialize value 0))
   ([value offset]
-   (let [size (count value)
+   (let [version (vector (get value :_version (byte 0)))
+         size (count value)
          size-varint (v/varint-unsigned size)
          class (get value :_class "")
          serialized-class (serialize class)
          serialized-class-size (count serialized-class)
          first-elem-pos (dec (+ offset serialized-class-size))
-         structure (record-map->structure value first-elem-pos)
+         structure (record-map->structure (dissoc value :_class) first-elem-pos)
          key-order [:field-name :position :type]
          serialized-headers (serialize-headers structure key-order)
          end-headers [(byte 0)]
          serialized-data (serialize-data structure)]
-     (-> (concat serialized-class serialized-headers
+     (-> (concat version serialized-class serialized-headers
                  end-headers serialized-data)
          flatten
          vec))))
