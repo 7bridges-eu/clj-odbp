@@ -43,7 +43,7 @@
       (serialize/serialize-record {"params" oem-params}))))
 
 ;; REQUEST_COMMAND > SELECT
-(defn select-request
+(defn query-request
   [connection command
    {:keys [params non-text-limit fetch-plan]
     :or {params {} non-text-limit 20 fetch-plan "*:0"}}]
@@ -51,7 +51,7 @@
         token (:token connection)
         serialized-params (serialize-params params)]
     (encode
-     specs/select-request
+     specs/query-request
      [[:operation 41]
       [:session-id session-id]
       [:token token]
@@ -65,7 +65,7 @@
       [:fetch-plan fetch-plan]
       [:serialized-params serialized-params]])))
 
-(defn- select-list-response
+(defn- query-list-response
   [^DataInputStream in]
   (let [list-size (d/int-type in)]
     (reduce
@@ -77,9 +77,9 @@
      []
      (range list-size))))
 
-(defn select-response
+(defn query-response
   [^DataInputStream in]
   (let [generic-response (decode in specs/sync-generic-response)
         result-type (:result-type generic-response)]
     (case result-type
-      \l (select-list-response in))))
+      \l (query-list-response in))))

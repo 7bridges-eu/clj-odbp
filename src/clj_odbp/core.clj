@@ -95,7 +95,12 @@
   record/record-delete-request
   record/record-delete-response)
 
-(defcommand select-command
+(defcommand query-command
   [connection query & opts]
-  command/select-request
-  command/select-response)
+  command/query-request
+  command/query-response)
+
+;; (defcommand execute-command
+;;   [connection command & opts]
+;;   command/insert-request
+;;   command/select-response)
