@@ -23,162 +23,10 @@
   (getDataType [value])
   (serialize [value] [value offset]))
 
-(defn short-type
-  [value]
-  (v/varint-unsigned value))
-
-(extend-type java.lang.Short
-  OrientType
-  (getDataType [value]
-    (byte 2))
-  (serialize
-    ([value] (short-type value))
-    ([value offset] (serialize value))))
-
-(defn integer-type
-  [value]
-  (v/varint-unsigned value))
-
-(extend-type java.lang.Integer
-  OrientType
-  (getDataType [value]
-    (byte 1))
-  (serialize
-    ([value] (integer-type value))
-    ([value offset] (serialize value))))
-
-(defn long-type
-  [value]
-  (v/varint-unsigned value))
-
-(extend-type java.lang.Long
-  OrientType
-  (getDataType [value]
-    (byte 3))
-  (serialize
-    ([value] (long-type value))
-    ([value offset] (serialize value))))
-
-(defn byte-type
-  [value]
-  [value])
-
-(extend-type java.lang.Byte
-  OrientType
-  (getDataType [value]
-    (byte 17))
-  (serialize
-    ([value] (byte-type value))
-    ([value offset] (serialize value))))
-
-(defn boolean-type
-  [value]
-  (if value
-    [(byte 1)]
-    [(byte 0)]))
-
-(extend-type java.lang.Boolean
-  OrientType
-  (getDataType [value]
-    (byte 0))
-  (serialize
-    ([value] (boolean-type value))
-    ([value offset] (serialize value))))
-
-(defn float-type
-  [value]
-  (-> (java.nio.ByteBuffer/allocate 4)
-      (.putFloat value)
-      .array
-      vec))
-
-(extend-type java.lang.Float
-  OrientType
-  (getDataType [value]
-    (byte 4))
-  (serialize
-    ([value] (float-type value))
-    ([value offset] (serialize value))))
-
-(defn double-type
-  [value]
-  (-> (java.nio.ByteBuffer/allocate 8)
-      (.putDouble value)
-      .array
-      vec))
-
-(extend-type java.lang.Double
-  OrientType
-  (getDataType [value]
-    (byte 5))
-  (serialize
-    ([value] (double-type value))
-    ([value offset] (serialize value))))
-
-(defn bigdec-type
-  [value]
-  (let [scale (i/int32 (.scale value))
-        serialized-value (-> value
-                             .unscaledValue
-                             .toByteArray
-                             vec)
-        value-size (i/int32 (count serialized-value))]
-    (vec (concat scale value-size serialized-value))))
-
-(extend-type java.math.BigDecimal
-  OrientType
-  (getDataType [value]
-    (byte 21))
-  (serialize
-    ([value] (bigdec-type value))
-    ([value offset] (serialize value))))
-
-(defn string-type
-  [value]
-  (let [bytes (.getBytes value "UTF-8")]
-    (c/bytes-type bytes)))
-
-(extend-type java.lang.String
-  OrientType
-  (getDataType [value]
-    (byte 7))
-  (serialize
-    ([value] (string-type value))
-    ([value offset] (serialize value))))
 
 (defn keyword-type
   [value]
   (string-type (name value)))
-
-(extend-type clojure.lang.Keyword
-  OrientType
-  (getDataType [value]
-    (byte 7))
-  (serialize
-    ([value] (keyword-type value))
-    ([value offset] (serialize value))))
-
-(defn coll-type
-  [value]
-  (map serialize value))
-
-(extend-type clojure.lang.PersistentList
-  OrientType
-  (serialize
-    ([value] (coll-type value))
-    ([value offset] (serialize value))))
-
-(extend-type clojure.lang.PersistentVector
-  OrientType
-  (serialize
-    ([value] (coll-type value))
-    ([value offset] (serialize value))))
-
-(extend-type clojure.lang.PersistentHashSet
-  OrientType
-  (serialize
-    ([value] (coll-type value))
-    ([value offset] (serialize value))))
 
 (defn map-type
   [value]
@@ -186,12 +34,6 @@
        vec
        flatten
        (map serialize)))
-
-(extend-type clojure.lang.PersistentArrayMap
-  OrientType
-  (serialize
-    ([value] (map-type value))
-    ([value offset] (serialize value))))
 
 (deftype OrientInt32 [value]
   OrientType
@@ -214,32 +56,6 @@
 (defn orient-int64
   [value]
   (->OrientInt64 value))
-
-(deftype OrientDateTime [value]
-  OrientType
-  (getDataType [this]
-    (byte 6))
-  (serialize [this]
-    (long-type (.getTime value)))
-  (serialize [this offset]
-    (serialize this)))
-
-(defn orient-date-time
-  [value]
-  (->OrientDateTime value))
-
-(deftype OrientBinary [value]
-  OrientType
-  (getDataType [this]
-    (byte 8))
-  (serialize [this]
-    (c/bytes-type value))
-  (serialize [this offset]
-    (serialize this)))
-
-(defn orient-binary
-  [value]
-  (->OrientBinary value))
 
 (defn serialize-any
   [value]
