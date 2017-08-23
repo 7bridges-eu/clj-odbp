@@ -13,12 +13,7 @@
 ;; limitations under the License.
 
 (ns clj-odbp.serialize.binary.record
-  (:require [clj-odbp.constants :as const]
-            [clj-odbp.serialize.binary
-             [common :as c]
-             [int :as i]
-             [otypes :as ot]
-             [varint :as v]]))
+  (:require [clj-odbp.serialize.binary.otypes :as ot]))
 
 (defn serialize-record
   "Serialize `record` for OrientDB. `record` must be a Clojure map."
