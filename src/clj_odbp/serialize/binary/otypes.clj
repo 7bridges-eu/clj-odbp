@@ -369,6 +369,12 @@
        (rest-elem record-map)
        positions->orient-int32))
 
+(defn remove-meta-data
+  [v]
+  (->> (keys v)
+       (filter #(clojure.string/starts-with? (name %) "_"))
+       (apply dissoc v)))
+
 (defmethod serialize :embedded-record-type
   ([value]
    (serialize value 0))
@@ -380,7 +386,8 @@
          serialized-class (serialize class)
          serialized-class-size (count serialized-class)
          first-elem-pos (+ offset serialized-class-size)
-         structure (record-map->structure (dissoc value :_class) first-elem-pos)
+         plain-record (remove-meta-data value)
+         structure (record-map->structure plain-record first-elem-pos)
          key-order [:field-name :position :type]
          serialized-headers (serialize-headers structure key-order)
          end-headers [(byte 0)]

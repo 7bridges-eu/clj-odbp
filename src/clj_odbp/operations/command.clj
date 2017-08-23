@@ -35,12 +35,14 @@
      4 (count fetch-plan)
      (get-bytes-type-length serialized-params)))
 
+(def ^:const params-serializer
+  (get-method t/serialize :embedded-record-type))
+
 (defn serialize-params
   [params]
   (if (empty? params)
     ""
-    (let [oem-params (t/serialize params)]
-      (t/serialize {:_version 0 "params" oem-params}))))
+    (params-serializer {"params" params} 0)))
 
 ;; REQUEST_COMMAND > SELECT
 (defn query-request
