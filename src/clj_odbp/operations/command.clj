@@ -17,7 +17,7 @@
              [constants :as constants]
              [utils :refer [encode decode]]]
             [clj-odbp.specs.command :as specs]
-            [clj-odbp.serialize.binary.record :as serialize]
+            [clj-odbp.serialize.binary.otypes :as t]
             [clj-odbp.deserialize.binary.record :as deserialize]
             [clj-odbp.deserialize.otype :as d])
   (:import java.io.DataInputStream))
@@ -39,8 +39,8 @@
   [params]
   (if (empty? params)
     ""
-    (let [oem-params (serialize/orient-embedded-map params)]
-      (serialize/serialize-record {"params" oem-params}))))
+    (let [oem-params (t/serialize params)]
+      (t/serialize {:_version 0 "params" oem-params}))))
 
 ;; REQUEST_COMMAND > SELECT
 (defn select-request

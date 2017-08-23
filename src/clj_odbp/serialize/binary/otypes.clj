@@ -54,7 +54,8 @@
   [r]
   (when (map? r)
     (or (contains? r :_class)
-        (contains? r "@type"))))
+        (contains? r "@type")
+        (contains? r :_version))))
 
 (defn get-type [v]
   (cond
