@@ -171,7 +171,8 @@
         class-name (read-class-name buffer)
         headers (read-headers buffer)
         add-class (fn [m] (if-not (empty? class-name)
-                           (assoc m :_class class-name)))]
+                           (assoc m :_class class-name)
+                           m))]
     (conj (add-class {}) (read-record headers buffer))))
 
 (defmethod deserialize :embedded-list-orient-type
