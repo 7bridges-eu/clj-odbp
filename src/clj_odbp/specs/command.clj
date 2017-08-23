@@ -33,6 +33,7 @@
 (def execute-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :mode s/byte-type
    :payload-length s/int-type
    :class-name s/string-type
@@ -46,6 +47,7 @@
 (def script-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :mode s/byte-type
    :payload-length s/int-type
    :class-name s/string-type

@@ -100,7 +100,7 @@
   command/query-request
   command/query-response)
 
-;; (defcommand execute-command
-;;   [connection command & opts]
-;;   command/insert-request
-;;   command/select-response)
+(defcommand execute-command
+  [connection command & opts]
+  command/execute-request
+  command/query-response)

@@ -35,6 +35,12 @@
      4 (count fetch-plan)
      (get-bytes-type-length serialized-params)))
 
+(defn get-execute-payload-length
+  [command serialized-params]
+  (+ 4 (count constants/request-command-execute)
+     4 (count command)
+     (get-bytes-type-length serialized-params)))
+
 (def ^:const params-serializer
   (get-method t/serialize :embedded-record-type))
 
@@ -44,11 +50,11 @@
     ""
     (params-serializer {"params" params} 0)))
 
-;; REQUEST_COMMAND > SELECT
+;; REQUEST_COMMAND > QUERY
 (defn query-request
   [connection command
    {:keys [params non-text-limit fetch-plan]
-    :or {params {} non-text-limit 20 fetch-plan "*:0"}}]
+    :or {params {} non-text-limit -1 fetch-plan "*:0"}}]
   (let [session-id (:session-id connection)
         token (:token connection)
         serialized-params (serialize-params params)]
@@ -85,3 +91,25 @@
         result-type (:result-type generic-response)]
     (case result-type
       \l (query-list-response in))))
+
+;; REQUEST_COMMAND > EXECUTE
+(defn execute-request
+  [connection command
+   {:keys [params] :or {params {}}}]
+  (let [session-id (:session-id connection)
+        token (:token connection)
+        serialized-params (serialize-params params)]
+    (encode
+     specs/execute-request
+     [[:operation 41]
+      [:session-id session-id]
+      [:token token]
+      [:mode constants/request-command-sync-mode]
+      [:payload-length (get-execute-payload-length command
+                                                   serialized-params)]
+      [:class-name constants/request-command-execute]
+      [:text command]
+      [:has-simple-params false]
+      [:simple-params []]
+      [:has-complex-params false]
+      [:complex-params []]])))
