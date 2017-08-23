@@ -25,6 +25,9 @@
 (def odatetime
   (format-date "dd/MM/YYYY hh:mm:ss" "19/07/2017 10:30:00"))
 
+(def odatetime-result
+  (t/serialize (.getTime odatetime)))
+
 (def oemb {:_class "User" :name "Test"})
 
 (def oemap {:test "1"})
@@ -56,8 +59,8 @@
              (t/serialize [1 2 3]) => [6 23 1 2 1 4 1 6])
        (fact "Map - map {:name 'test'} should return [2 7 8 110 97 109 101 0 0 0 12 7 8 116 101 115 116]"
              (t/serialize {:name "test"}) => [2 7 8 110 97 109 101 0 0 0 12 7 8 116 101 115 116])
-       (fact "DateTime - odatetime should return [128 231 156 232 171 86]"
-             (t/serialize odatetime) => [128 231 156 232 171 86])
+       (fact "DateTime - odatetime should return odatetime-result"
+             (t/serialize odatetime) => odatetime-result)
        (fact "Embedded record - oemb should return [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 8 84 101 115 116]"
              (t/serialize oemb) => [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7 0 8 84 101 115 116])
        (fact "Embedded list - (12 13 14) should return [6 23 1 24 1 26 1 28]"
