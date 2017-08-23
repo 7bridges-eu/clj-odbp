@@ -23,16 +23,4 @@
 (defn serialize-record
   "Serialize `record` for OrientDB. `record` must be a Clojure map."
   [record]
-  (let [version (vector (get record :_version (byte 0)))
-        class (get record :_class "")
-        serialized-class (ot/serialize class)
-        serialized-class-size (count serialized-class)
-        structure (ot/record-map->structure record serialized-class-size)
-        key-order [:field-name :position :type]
-        serialized-headers (ot/serialize-headers structure key-order)
-        end-headers [(byte 0)]
-        serialized-data (ot/serialize-data structure)]
-    (-> (concat version serialized-class serialized-headers
-                end-headers serialized-data)
-        flatten
-        vec)))
+  (ot/serialize record))
