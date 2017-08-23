@@ -366,7 +366,7 @@
          class (get value :_class "")
          serialized-class (serialize class)
          serialized-class-size (count serialized-class)
-         first-elem-pos (dec (+ offset serialized-class-size))
+         first-elem-pos (+ offset serialized-class-size)
          structure (record-map->structure (dissoc value :_class) first-elem-pos)
          key-order [:field-name :position :type]
          serialized-headers (serialize-headers structure key-order)
