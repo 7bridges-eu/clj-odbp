@@ -24,7 +24,7 @@
         content (:record-content record)
         buffer (b/to-buffer content)
         result {:_version version}
-        add-rid (fn [m] (if-not (and (nil? cluster) (nil? position))
-                         (assoc result :_rid (str "#" cluster ":" position))
-                         m))]
+        add-rid (fn [m] (if (and (nil? cluster) (nil? position))
+                         m
+                         (assoc result :_rid (str "#" cluster ":" position))))]
     (conj (add-rid result) (call :record-orient-type buffer))))

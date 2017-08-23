@@ -170,9 +170,9 @@
   (let [version (read-version buffer)
         class-name (read-class-name buffer)
         headers (read-headers buffer)
-        add-class (fn [m] (if-not (empty? class-name)
-                           (assoc m :_class class-name)
-                           m))]
+        add-class (fn [m] (if (empty? class-name)
+                           m
+                           (assoc m :_class class-name)))]
     (conj (add-class {}) (read-record headers buffer))))
 
 (defmethod deserialize :embedded-list-orient-type
