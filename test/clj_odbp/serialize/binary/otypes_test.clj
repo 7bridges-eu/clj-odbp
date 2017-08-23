@@ -55,6 +55,8 @@
              (t/serialize "test") => [8 116 101 115 116])
        (fact "Keyword - keyword :test should return [8 116 101 115 116]"
              (t/serialize :test) => [8 116 101 115 116])
+       (fact "Binary - orient-binary [1 2 3] should return [6 1 2 3]"
+             (t/serialize (t/orient-binary [1 2 3])) => [6 1 2 3])
        (fact "Vector - [1 2 3] should return [6 23 1 2 1 4 1 6]"
              (t/serialize [1 2 3]) => [6 23 1 2 1 4 1 6])
        (fact "Map - map {:name 'test'} should return [2 7 8 110 97 109 101 0 0 0 12 7 8 116 101 115 116]"

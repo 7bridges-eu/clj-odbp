@@ -29,6 +29,13 @@
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
    :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)})
 
+(deftype OrientBinary [value])
+
+(defn orient-binary
+  [value]
+  {:pre [(vector? value)]}
+  (->OrientBinary value))
+
 (defn link?
   [v]
   (when (string? v)
@@ -69,7 +76,7 @@
     (instance? java.math.BigDecimal v) :decimal-type
     (instance? java.util.Date v) :datetime-type
     (keyword? v) :keyword-type
-    ;; (instance? OrientBinary v) :binary-type
+    (instance? OrientBinary v) :binary-type
     (link? v) :link-type
     (string? v) :string-type
     (link-list? v) :link-list-type
@@ -149,6 +156,12 @@
 (defmethod serialize :keyword-type
   ([value]
    (serialize (name value)))
+  ([value offset]
+   (serialize value)))
+
+(defmethod serialize :binary-type
+  ([value]
+   (c/bytes-type (.value value)))
   ([value offset]
    (serialize value)))
 
