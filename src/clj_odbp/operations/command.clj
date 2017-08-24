@@ -39,7 +39,8 @@
   [command serialized-params]
   (+ 4 (count constants/request-command-execute)
      4 (count command)
-     (get-bytes-type-length serialized-params)))
+     1 (get-bytes-type-length serialized-params)
+     1))
 
 (def ^:const params-serializer
   (get-method t/serialize :embedded-record-type))
@@ -85,12 +86,21 @@
      []
      (range list-size))))
 
+(defn- query-single-response
+  [^DataInputStream in]
+  (let [boh (d/short-type in)]
+    (-> (decode in specs/record-response)
+        deserialize/deserialize-record)))
+
 (defn query-response
   [^DataInputStream in]
   (let [generic-response (decode in specs/sync-generic-response)
         result-type (:result-type generic-response)]
     (case result-type
-      \l (query-list-response in))))
+      \l (query-list-response in)
+      \s (query-list-response in)
+      \r (query-single-response in)
+      \w (query-single-response in))))
 
 ;; REQUEST_COMMAND > EXECUTE
 (defn execute-request
@@ -109,7 +119,7 @@
                                                    serialized-params)]
       [:class-name constants/request-command-execute]
       [:text command]
-      [:has-simple-params false]
-      [:simple-params []]
+      [:has-simple-params (not (empty? serialized-params))]
+      [:simple-params serialized-params]
       [:has-complex-params false]
       [:complex-params []]])))
