@@ -35,6 +35,13 @@
      4 (count fetch-plan)
      (get-bytes-type-length serialized-params)))
 
+(defn get-execute-payload-length
+  [command serialized-params]
+  (+ 4 (count constants/request-command-execute)
+     4 (count command)
+     1 (get-bytes-type-length serialized-params)
+     1))
+
 (def ^:const params-serializer
   (get-method t/serialize :embedded-record-type))
 
@@ -44,16 +51,16 @@
     ""
     (params-serializer {"params" params} 0)))
 
-;; REQUEST_COMMAND > SELECT
-(defn select-request
+;; REQUEST_COMMAND > QUERY
+(defn query-request
   [connection command
    {:keys [params non-text-limit fetch-plan]
-    :or {params {} non-text-limit 20 fetch-plan "*:0"}}]
+    :or {params {} non-text-limit -1 fetch-plan "*:0"}}]
   (let [session-id (:session-id connection)
         token (:token connection)
         serialized-params (serialize-params params)]
     (encode
-     specs/select-request
+     specs/query-request
      [[:operation 41]
       [:session-id session-id]
       [:token token]
@@ -67,7 +74,7 @@
       [:fetch-plan fetch-plan]
       [:serialized-params serialized-params]])))
 
-(defn- select-list-response
+(defn- query-list-response
   [^DataInputStream in]
   (let [list-size (d/int-type in)]
     (reduce
@@ -79,9 +86,40 @@
      []
      (range list-size))))
 
-(defn select-response
+(defn- query-single-response
+  [^DataInputStream in]
+  (let [boh (d/short-type in)]
+    (-> (decode in specs/record-response)
+        deserialize/deserialize-record)))
+
+(defn query-response
   [^DataInputStream in]
   (let [generic-response (decode in specs/sync-generic-response)
         result-type (:result-type generic-response)]
     (case result-type
-      \l (select-list-response in))))
+      \l (query-list-response in)
+      \s (query-list-response in)
+      \r (query-single-response in)
+      \w (query-single-response in))))
+
+;; REQUEST_COMMAND > EXECUTE
+(defn execute-request
+  [connection command
+   {:keys [params] :or {params {}}}]
+  (let [session-id (:session-id connection)
+        token (:token connection)
+        serialized-params (serialize-params params)]
+    (encode
+     specs/execute-request
+     [[:operation 41]
+      [:session-id session-id]
+      [:token token]
+      [:mode constants/request-command-sync-mode]
+      [:payload-length (get-execute-payload-length command
+                                                   serialized-params)]
+      [:class-name constants/request-command-execute]
+      [:text command]
+      [:has-simple-params (not (empty? serialized-params))]
+      [:simple-params serialized-params]
+      [:has-complex-params false]
+      [:complex-params []]])))

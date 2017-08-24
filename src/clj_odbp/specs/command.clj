@@ -17,7 +17,7 @@
             [clj-odbp.serialize.otype :as s]))
 
 ;; REQUEST_COMMAND > SELECT
-(def select-request
+(def query-request
   {:operation s/byte-type
    :session-id s/int-type
    :token s/bytes-type
@@ -30,9 +30,10 @@
    :serialized-params s/bytes-type})
 
 ;; REQUEST_COMMAND > SQL Command
-(def command-request
+(def execute-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :mode s/byte-type
    :payload-length s/int-type
    :class-name s/string-type
@@ -46,6 +47,7 @@
 (def script-request
   {:operation s/byte-type
    :session-id s/int-type
+   :token s/bytes-type
    :mode s/byte-type
    :payload-length s/int-type
    :class-name s/string-type

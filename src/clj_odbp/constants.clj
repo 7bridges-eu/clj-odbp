@@ -20,6 +20,7 @@
 
 (def ^:const request-command-sync-mode (byte \s))
 (def ^:const request-command-query "q")
+(def ^:const request-command-execute "c")
 
 ;; version byte + 1 (size:varint of Class)
 (def ^:const fixed-header-int 5)
