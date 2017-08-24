@@ -41,11 +41,12 @@
 
 (defn decode
   [^DataInputStream in spec]
-  (reduce-kv
-   (fn [result field-name f]
-     (assoc result field-name (f in)))
-   {}
-   spec))
+  (persistent!
+   (reduce-kv
+    (fn [result field-name f]
+      (assoc! result field-name (f in)))
+    (transient {})
+    spec)))
 
 (defn take-upto
   "Returns a lazy sequence of successive items from coll up to and including
