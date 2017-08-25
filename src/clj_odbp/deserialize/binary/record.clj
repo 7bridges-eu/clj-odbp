@@ -17,6 +17,12 @@
             [clj-odbp.deserialize.binary.buffer :as b]))
 
 (defn deserialize-record
+  "Deserialize `record` into a clojure.lang.PersistentArrayMap. e.g.:
+
+  (deserialize-record
+   {:record-content [0 8 85 115 101 114 8 110 97 109 101 0 0 0 17 7
+                     0 8 84 101 115 116]}) =>
+  {:_version 0, :_class \"User\", :name \"Test\"}"
   [record]
   (let [cluster (get record :record-cluster nil)
         position (get record :record-position nil)

@@ -15,7 +15,9 @@
 ;;; Taken from: https://github.com/miner/varint
 (ns clj-odbp.deserialize.binary.varint)
 
-(defn varint-unsigned-long [v]
+(defn varint-unsigned-long
+  "Transform `v` in a varint unsigned. Return a vector of bytes."
+  [v]
   (reduce
    (fn [n shift]
      (bit-or n (bit-shift-left
@@ -24,7 +26,9 @@
    0
    (range (count v))))
 
-(defn varint-signed-long [v]
+(defn varint-signed-long
+  "Transform `v` in a varint signed. Return a vector of bytes."
+  [v]
   (let [signed-long (varint-unsigned-long v)
         left-63 (bit-shift-left signed-long 63)
         right-63 (bit-shift-right left-63 63)

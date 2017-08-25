@@ -26,6 +26,7 @@
         .getInt)))
 
 (defn bytes->long
+  "Read a 64 bit long from the buffer."
   [buffer]
   (let [data (b/buffer-take! buffer 8)]
     (-> data
