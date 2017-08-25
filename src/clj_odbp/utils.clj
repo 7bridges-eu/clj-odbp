@@ -20,6 +20,7 @@
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn- validate-message
+  "Validate `message` against `spec`."
   [spec message]
   (when-not (every?
              #(contains? spec (first %))
@@ -27,6 +28,8 @@
     (throw (Exception. "The message doesn't respect the spec."))))
 
 (defn encode
+  "Encode `message` applying for each of its fields the function specified in
+  `spec.`"
   [spec message]
   (let [out (ByteArrayOutputStream.)
         stream (DataOutputStream. out)]
@@ -40,6 +43,7 @@
     out))
 
 (defn decode
+  "Decode the data stream `in` according to `spec`."
   [^DataInputStream in spec]
   (persistent!
    (reduce-kv
@@ -68,6 +72,13 @@
         (cons x (if-not (pred x) (take-upto pred (rest s)))))))))
 
 (defmacro defcommand
+  "Create a function named `command-name` that accepts the argument specified
+  in `args`. `request-handler` and `response-handler` must be functions. e.g.:
+
+  (defcommand test
+    [arg-1 arg-2]
+    request-handler-fn
+    response-handler-fn)"
   [command-name args request-handler response-handler]
   `(defn ~command-name
      [~@args]
@@ -81,6 +92,16 @@
                                :exception e#})))))
 
 (defmacro defconnection
+  "Create a function named `command-name` that accepts the argument specified
+  in `args`. `request-handler` and `response-handler` must be functions.
+  `service` is a keyword which indicates the service to which the connection
+  applies. e.g.:
+
+  (defconnection test
+    [arg-1 arg-2]
+    request-handler-fn
+    response-handler-fn
+    :db)"
   [command-name args request-handler response-handler service]
   `(defn ~command-name
      [~@args]

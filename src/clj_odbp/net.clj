@@ -23,6 +23,7 @@
          :port 2424}))
 
 (defn configure-connection
+  "Update `host` and `port` into the config atom."
   [host port]
   (swap! config assoc :host host)
   (swap! config assoc :port port))
@@ -42,6 +43,7 @@
     socket))
 
 (defn write-request
+  "Write the result of applying `command` to `args` on the `socket`."
   [^Socket socket command & args]
   (let [out (.getOutputStream socket)
         request (apply command args)]
@@ -50,6 +52,8 @@
   socket)
 
 (defn read-response
+  "Read the data in `socket` and apply `command` to it. If `socket`
+  contains an exception, it is handled by clj-odbp.deserialize.exception/handle-exception."
   [^Socket socket command]
   (let [in (DataInputStream. (.getInputStream socket))
         status (.readByte in)]
