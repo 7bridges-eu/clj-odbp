@@ -16,6 +16,9 @@
   (:require [clj-odbp.serialize.binary.varint :as v]))
 
 (defn bytes-type
+  "Serialize an array of bytes. `value` must be an array of bytes. eg:
+
+   (bytes-type (.getBytes \"test\" \"UTF-8\"))"
   [value]
   (let [size (count value)
         size-varint (v/varint-unsigned size)]
