@@ -30,8 +30,10 @@
 (def record-load-response
   {:session-id d/int-type
    :token d/bytes-type
-   :payload-status d/byte-type
-   :record-type (comp char d/byte-type)
+   :payload-status d/byte-type})
+
+(def record-load-content-response
+  {:record-type (comp char d/byte-type)
    :record-version d/int-type
    :record-content d/bytes-type})
 

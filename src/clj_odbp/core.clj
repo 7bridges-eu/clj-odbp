@@ -76,7 +76,7 @@
   db/db-reload-response)
 
 (defcommand record-load
-  [connection record-id record-position]
+  [connection rid]
   record/record-load-request
   record/record-load-response)
 

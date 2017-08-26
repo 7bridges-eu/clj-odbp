@@ -67,6 +67,12 @@
       (let [x (first s)]
         (cons x (if-not (pred x) (take-upto pred (rest s)))))))))
 
+(defn parse-rid
+  [rid]
+  {:pre [(re-matches #"#\d+:\d+" rid)]}
+  (let [[_ cluster-id record-position] (re-find #"#(\d+):(\d+)" rid)]
+    (mapv #(Integer/parseInt %) [cluster-id record-position])))
+
 (defmacro defcommand
   [command-name args request-handler response-handler]
   `(defn ~command-name
