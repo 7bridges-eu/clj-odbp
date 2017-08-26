@@ -86,7 +86,7 @@
   record/record-create-response)
 
 (defcommand record-update
-  [connection cluster-id cluster-position record-content]
+  [connection rid record-content]
   record/record-update-request
   record/record-update-response)
 

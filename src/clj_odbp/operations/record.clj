@@ -78,9 +78,10 @@
 
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
-  [connection cluster-id cluster-position record-content]
+  [connection rid record-content]
   (let [session-id (:session-id connection)
         token (:token connection)
+        [cluster-id position-id] (parse-rid rid)
         record-bytes (serialize-record record-content)]
     (encode
      specs/record-update-request
@@ -88,7 +89,7 @@
       [:session-id session-id]
       [:token token]
       [:cluster-id cluster-id]
-      [:cluster-position cluster-position]
+      [:cluster-position position-id]
       [:update-content true]
       [:record-content record-bytes]
       [:record-version -1]
