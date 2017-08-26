@@ -107,16 +107,17 @@
 
 ;; REQUEST_RECORD_DELETE
 (defn record-delete-request
-  [connection cluster-id cluster-position]
+  [connection rid]
   (let [session-id (:session-id connection)
-        token (:token connection)]
+        token (:token connection)
+        [cluster-id position-id] (parse-rid rid)]
     (encode
      specs/record-delete-request
      [[:operation 33]
       [:session-id session-id]
       [:token token]
       [:cluster-id cluster-id]
-      [:cluster-position cluster-position]
+      [:cluster-position position-id]
       [:record-version -1]
       [:mode 0]])))
 

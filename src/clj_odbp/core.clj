@@ -91,7 +91,7 @@
   record/record-update-response)
 
 (defcommand record-delete
-  [connection cluster-id cluster-position]
+  [connection rid]
   record/record-delete-request
   record/record-delete-response)
 
