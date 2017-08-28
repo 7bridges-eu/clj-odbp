@@ -20,6 +20,7 @@
              [varint :as v]]))
 
 (def orient-types
+  "Map custom orient types to their respective byte identifier."
   {:boolean-type (byte 0) :integer-type (byte 1) :short-type (byte 2)
    :long-type (byte 3) :float-type (byte 4) :double-type (byte 5)
    :datetime-type (byte 6) :string-type (byte 7) :keyword-type (byte 7)
