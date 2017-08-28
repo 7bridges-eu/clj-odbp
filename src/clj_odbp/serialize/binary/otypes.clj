@@ -37,6 +37,12 @@
   {:pre [(vector? value)]}
   (->OrientBinary value))
 
+(deftype OrientNil [value])
+
+(defn orient-nil
+  [value]
+  (->OrientNil value))
+
 (defn link?
   [v]
   (when (string? v)
@@ -67,7 +73,7 @@
 
 (defn get-type [v]
   (cond
-    (nil? v) :nil-type
+    (instance? OrientNil v) :nil-type
     (instance? Boolean v) :boolean-type
     (instance? Integer v) :integer-type
     (instance? Short v) :integer-type
@@ -94,13 +100,7 @@
 
 (defmethod serialize :nil-type
   ([value]
-   [(get-type value) -1])
-  ([value offset]
-   (serialize value)))
-
-(defmethod serialize :nil-type
-  ([value]
-   [(get-type value) -1])
+   [(byte (.value value)) (byte -1)])
   ([value offset]
    (serialize value)))
 
@@ -316,7 +316,9 @@
    (fn [acc hk]
      (if (= hk :position)
        (conj acc (get header hk))
-       (conj acc (serialize (get header hk)))))
+       (let [position (:position header)]
+         (if-not (= position 0)
+           (conj acc (serialize (get header hk)))))))
    []
    key-order))
 
@@ -376,7 +378,7 @@
         acc
         {:key-type (get orient-types (get-type k))
          :field-name k
-         :type (get orient-types (get-type v))
+         :type (get orient-types type-v)
          :value v
          :position pos
          :serialized-value (serialize v pos)})))

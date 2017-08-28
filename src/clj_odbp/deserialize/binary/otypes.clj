@@ -147,7 +147,8 @@
                (conj headers
                      {:field-name field-name
                       :field-position field-position
-                      :data-type (nth otype-list data-type)}))))))
+                      :data-type (nth otype-list data-type)
+                      :nil? (= 0 field-position)}))))))
 
 (defn- read-record
   [headers content]
@@ -155,11 +156,14 @@
    (fn [record header]
      (let [{key :field-name
             position :field-position
-            otype :data-type} header]
+            otype :data-type
+            is-nil :nil?} header]
        (assoc
         record
         (keyword key)
-        (call otype content position))))
+        (if (true? is-nil)
+          (s/orient-nil (.indexOf otype-list otype))
+          (call otype content position)))))
    {}
    headers))
 
