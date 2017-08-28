@@ -98,6 +98,12 @@
   ([value offset]
    (serialize value)))
 
+(defmethod serialize :nil-type
+  ([value]
+   [(get-type value) -1])
+  ([value offset]
+   (serialize value)))
+
 (defmethod serialize :boolean-type
   ([value]
    (if value
