@@ -17,9 +17,9 @@
              [constants :as constants]
              [utils :refer [encode decode]]]
             [clj-odbp.specs.command :as specs]
-            [clj-odbp.serialize.binary.otypes :as t]
+            [clj-odbp.serialize.binary.types :as t]
             [clj-odbp.deserialize.binary.record :as deserialize]
-            [clj-odbp.deserialize.otype :as d])
+            [clj-odbp.deserialize.network-types :as d])
   (:import java.io.DataInputStream))
 
 (defn get-bytes-type-length [bytes-type]

@@ -12,8 +12,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.deserialize.otype
-  (import [java.io DataInputStream]))
+(ns clj-odbp.deserialize.network-types
+  (:import [java.io DataInputStream]))
 
 (defn bool-type
   "Read a byte from the input stream and return a boolean. (1=true, 0=false)"

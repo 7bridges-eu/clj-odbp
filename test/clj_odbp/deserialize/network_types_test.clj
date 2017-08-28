@@ -12,8 +12,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.deserialize.otype-test
-  (:require [clj-odbp.deserialize.otype :as d]
+(ns clj-odbp.deserialize.network-types-test
+  (:require [clj-odbp.deserialize.network-types :as d]
             [midje.sweet :refer :all])
   (:import [java.io ByteArrayInputStream DataInputStream]))
 

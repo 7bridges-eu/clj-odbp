@@ -12,7 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.serialize.otype
+(ns clj-odbp.serialize.network-types
   (import
    [java.io ByteArrayOutputStream DataOutputStream]))
 
