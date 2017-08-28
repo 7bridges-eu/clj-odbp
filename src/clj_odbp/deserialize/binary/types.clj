@@ -15,8 +15,7 @@
 (ns clj-odbp.deserialize.binary.types
   (:require [clj-odbp.deserialize.binary.varint :as v]
             [clj-odbp.deserialize.binary.buffer :as b]
-            [clj-odbp.deserialize.binary.utils :as u]
-            [clj-odbp.custom-types :as t])
+            [clj-odbp.deserialize.binary.utils :as u])
   (:import [java.nio ByteBuffer]
            [java.math BigInteger BigDecimal]))
 
@@ -163,7 +162,7 @@
         record
         (keyword key)
         (if (true? is-nil)
-          (t/orient-nil (.indexOf otype-list otype))
+          nil
           (call otype content position)))))
    {}
    headers))
