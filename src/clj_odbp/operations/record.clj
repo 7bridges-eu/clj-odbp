@@ -86,7 +86,7 @@
       [:cluster-position cluster-position]
       [:update-content true]
       [:record-content record-bytes]
-      [:record-version -1]
+      [:record-version (:_version record-content)]
       [:record-type constants/record-type-document]
       [:mode 0]])))
 
