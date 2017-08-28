@@ -12,11 +12,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.deserialize.binary.otypes
+(ns clj-odbp.deserialize.binary.types
   (:require [clj-odbp.deserialize.binary.varint :as v]
             [clj-odbp.deserialize.binary.buffer :as b]
             [clj-odbp.deserialize.binary.utils :as u]
-            [clj-odbp.serialize.binary.otypes :as s])
+            [clj-odbp.custom-types :as t])
   (:import [java.nio ByteBuffer]
            [java.math BigInteger BigDecimal]))
 
@@ -163,7 +163,7 @@
         record
         (keyword key)
         (if (true? is-nil)
-          (s/orient-nil (.indexOf otype-list otype))
+          (t/orient-nil (.indexOf otype-list otype))
           (call otype content position)))))
    {}
    headers))

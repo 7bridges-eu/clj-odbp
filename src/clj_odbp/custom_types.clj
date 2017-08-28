@@ -12,10 +12,17 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.serialize.binary.record
-  (:require [clj-odbp.serialize.binary.types :as ot]))
+(ns clj-odbp.custom-types)
 
-(defn serialize-record
-  "Serialize `record` for OrientDB. `record` must be a Clojure map."
-  [record]
-  (ot/serialize record))
+(deftype OrientBinary [value])
+
+(defn orient-binary
+  [value]
+  {:pre [(vector? value)]}
+  (->OrientBinary value))
+
+(deftype OrientNil [value])
+
+(defn orient-nil
+  [value]
+  (->OrientNil value))

@@ -13,8 +13,8 @@
 ;; limitations under the License.
 
 (ns clj-odbp.specs.record
-  (:require [clj-odbp.deserialize.otype :as d]
-            [clj-odbp.serialize.otype :as s]))
+  (:require [clj-odbp.deserialize.network-types :as d]
+            [clj-odbp.serialize.network-types :as s]))
 
 ;; REQUEST_RECORD_LOAD
 (def record-load-request

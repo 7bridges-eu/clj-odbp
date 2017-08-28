@@ -12,12 +12,13 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.serialize.binary.otypes
+(ns clj-odbp.serialize.binary.types
   (:require [clj-odbp.constants :as const]
             [clj-odbp.serialize.binary
              [common :as c]
              [int :as i]
-             [varint :as v]]))
+             [varint :as v]])
+  (:import [clj_odbp.custom_types OrientBinary OrientNil]))
 
 (def orient-types
   {:boolean-type (byte 0) :integer-type (byte 1) :short-type (byte 2)
@@ -29,19 +30,6 @@
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
    :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)
    :nil-type (byte 23)})
-
-(deftype OrientBinary [value])
-
-(defn orient-binary
-  [value]
-  {:pre [(vector? value)]}
-  (->OrientBinary value))
-
-(deftype OrientNil [value])
-
-(defn orient-nil
-  [value]
-  (->OrientNil value))
 
 (defn link?
   [v]
