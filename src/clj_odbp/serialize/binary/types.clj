@@ -17,8 +17,7 @@
             [clj-odbp.serialize.binary
              [common :as c]
              [int :as i]
-             [varint :as v]])
-  (:import [clj_odbp.custom_types OrientBinary OrientNil]))
+             [varint :as v]]))
 
 (def orient-types
   {:boolean-type (byte 0) :integer-type (byte 1) :short-type (byte 2)
@@ -29,7 +28,7 @@
    :embedded-map-type (byte 12) :link-type (byte 13) :link-list-type (byte 14)
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
    :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)
-   :nil-type (byte 23)})
+   :nil-type (byte 0)})
 
 (defn link?
   [v]
@@ -59,9 +58,16 @@
         (contains? r "@type")
         (contains? r :_version))))
 
+(deftype OrientBinary [value])
+
+(defn orient-binary
+  [value]
+  {:pre [(vector? value)]}
+  (->OrientBinary value))
+
 (defn get-type [v]
   (cond
-    (instance? OrientNil v) :nil-type
+    (nil? v) :nil-type
     (instance? Boolean v) :boolean-type
     (instance? Integer v) :integer-type
     (instance? Short v) :integer-type
@@ -88,7 +94,7 @@
 
 (defmethod serialize :nil-type
   ([value]
-   [(byte (.value value)) (byte -1)])
+   [])
   ([value offset]
    (serialize value)))
 
@@ -305,7 +311,7 @@
      (if (= hk :position)
        (conj acc (get header hk))
        (let [position (:position header)]
-         (if-not (= position 0)
+         (when-not (= position 0)
            (conj acc (serialize (get header hk)))))))
    []
    key-order))
