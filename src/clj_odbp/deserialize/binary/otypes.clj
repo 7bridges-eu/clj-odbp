@@ -15,7 +15,8 @@
 (ns clj-odbp.deserialize.binary.otypes
   (:require [clj-odbp.deserialize.binary.varint :as v]
             [clj-odbp.deserialize.binary.buffer :as b]
-            [clj-odbp.deserialize.binary.utils :as u])
+            [clj-odbp.deserialize.binary.utils :as u]
+            [clj-odbp.serialize.binary.otypes :as s])
   (:import [java.nio ByteBuffer]
            [java.math BigInteger BigDecimal]))
 
