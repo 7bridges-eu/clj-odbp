@@ -76,7 +76,7 @@
   db/db-reload-response)
 
 (defcommand record-load
-  [connection record-id record-position]
+  [connection rid]
   record/record-load-request
   record/record-load-response)
 
@@ -86,12 +86,12 @@
   record/record-create-response)
 
 (defcommand record-update
-  [connection cluster-id cluster-position record-content]
+  [connection rid record-content]
   record/record-update-request
   record/record-update-response)
 
 (defcommand record-delete
-  [connection cluster-id cluster-position]
+  [connection rid]
   record/record-delete-request
   record/record-delete-response)
 
