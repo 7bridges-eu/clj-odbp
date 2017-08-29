@@ -12,8 +12,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.serialize.binary.otypes-test
-  (:require [clj-odbp.serialize.binary.otypes :as t]
+(ns clj-odbp.serialize.binary.types-test
+  (:require [clj-odbp.serialize.binary.types :as t]
             [midje.sweet :refer :all])
   (:import [java.text SimpleDateFormat]))
 

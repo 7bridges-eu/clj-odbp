@@ -16,7 +16,8 @@
   (:require [clj-odbp
              [net :as net]
              [sessions :as sessions]]
-            [clj-odbp.deserialize.exception :as ex])
+            [clj-odbp.deserialize.exception :as ex]
+            [taoensso.timbre :as log])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn- validate-message
@@ -71,6 +72,19 @@
       (let [x (first s)]
         (cons x (if-not (pred x) (take-upto pred (rest s)))))))))
 
+(defn parse-rid
+  "Parse a RID in string format and returns a vector with cluster-id and
+  record-position."
+  [rid]
+  {:pre [(re-matches #"#\d+:\d+" rid)]}
+  (let [[_ cluster-id record-position] (re-find #"#(\d+):(\d+)" rid)]
+    (mapv #(Integer/parseInt %) [cluster-id record-position])))
+
+(defn compose-rid
+  "Given a cluster-id and a record-position returns a RID in string format."
+  [cluster-id record-position]
+  (str "#" cluster-id ":" record-position))
+
 (defmacro defcommand
   "Create a function named `command-name` that accepts the argument specified
   in `args`. `request-handler` and `response-handler` must be functions. e.g.:
@@ -82,6 +96,8 @@
   [command-name args request-handler response-handler]
   `(defn ~command-name
      [~@args]
+     (log/debugf "Called %s with arguments: %s"
+                 ~command-name ~@(remove '#{&} args))
      (try
        (with-open [s# (net/create-socket)]
          (-> s#
@@ -105,6 +121,8 @@
   [command-name args request-handler response-handler service]
   `(defn ~command-name
      [~@args]
+     (log/debugf "Called %s with arguments: %s"
+                 ~command-name ~@(remove '#{&} args))
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
        (try
