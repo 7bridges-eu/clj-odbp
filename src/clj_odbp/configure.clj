@@ -17,17 +17,26 @@
             [taoensso.timbre.appenders.core :as appenders]))
 
 (def config
-  "Initial configuration map to set up the connection to OrientDB server."
+  "Initial configuration map to set up the connection to OrientDB server and
+  the logging system."
   (atom {:host "localhost"
          :port 2424
-         :log-file "log/clj_odbp.log"}))
+         :log-file "log/clj_odbp.log"
+         :log-level :fatal}))
+
+(defn configure-timbre
+  "Set up timbre using the values in `config`."
+  []
+  (log/merge-config!
+   {:level (:log-level @config)
+    :appenders {:spit (appenders/spit-appender {:fname (:log-file @config)})}}))
 
 (defn configure-driver
   "Reset global `config` with the contents of `m`. e.g.:
 
   (configure-driver {:host \"test\"}) => {:host \"test\" :port 2424}"
   [m]
-  (reset! config (merge @config m)))
+  (reset! config (merge @config m))
+  (configure-timbre))
 
-(log/merge-config!
- {:appenders {:spit (appenders/spit-appender {:fname (:log-file @config)})}})
+(configure-timbre)
