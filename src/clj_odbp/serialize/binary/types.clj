@@ -20,6 +20,7 @@
              [varint :as v]]))
 
 (def orient-types
+  "Map custom orient types to their respective byte identifier."
   {:boolean-type (byte 0) :integer-type (byte 1) :short-type (byte 2)
    :long-type (byte 3) :float-type (byte 4) :double-type (byte 5)
    :datetime-type (byte 6) :string-type (byte 7) :keyword-type (byte 7)
@@ -31,27 +32,34 @@
    :nil-type (byte 0)})
 
 (defn link?
+  "Check if `v` is a valid OrientDB link. e.g.: \"#21:1\""
   [v]
   (when (string? v)
     (re-matches #"#\d+:\d+" v)))
 
 (defn link-list?
+  "Check if `l` is a valid OrienDB link list. e.g.: [\"#21:1\" \"#21:2\"]"
   [l]
   (when (sequential? l)
     (every? link? l)))
 
 (defn link-set?
+  "Check if `s` is a valid OrientDB link set. e.g.: #{\"#21:1\" \"#21:2\"}"
   [s]
   (when (set? s)
     (every? link? s)))
 
 (defn link-map?
+  "Check if `m` is a valid OrientDB link map. e.g.: {\"test\" \"#21:2\"}"
   [m]
   (when (map? m)
     (let [values (vals m)]
       (every? link? values))))
 
 (defn embedded-record?
+  "Check if `r` is a valid OrientDB embedded record. eg:
+
+  {:_class \"User\" :name \"Test\"}"
   [r]
   (when (map? r)
     (or (contains? r :_class)
@@ -65,7 +73,11 @@
   {:pre [(vector? value)]}
   (->OrientBinary value))
 
-(defn get-type [v]
+(defn get-type
+  "Return a keyword the identifies the type of `v.` e.g.
+
+  (get-type true) => :boolean-type"
+  [v]
   (cond
     (nil? v) :nil-type
     (instance? Boolean v) :boolean-type
@@ -90,7 +102,11 @@
     (map? v) :embedded-map-type
     :else :custom-type))
 
-(defmulti serialize (fn [value & offset] (get-type value)))
+(defmulti serialize
+  "Serialize `value` based on its type.
+  It optionally accepts an `offset` which will be used to calculate the position
+  of `value` from the beginning of the record."
+  (fn [value & offset] (get-type value)))
 
 (defmethod serialize :nil-type
   ([value]
@@ -203,6 +219,8 @@
    (serialize value)))
 
 (defn serialize-key-value
+  "Serialize a key-value according to OrientDB specification.
+   See: http://orientdb.com/docs/last/Record-Schemaless-Binary-Serialization.html#linkmap"
   [k v]
   (let [key-type [(get orient-types (get-type k))]
         key-value (serialize k)
@@ -218,6 +236,10 @@
    (serialize value)))
 
 (defn serialize-list-item
+  "Serialize `value` in a vector of bytes with the byte representing its type
+  coming first. e.g.:
+
+  (serialize-list-item true) => [0 1]"
   [value]
   (let [t [(get orient-types (get-type value))]
         v (serialize value)]
@@ -244,6 +266,11 @@
    (serialize value)))
 
 (defn get-structure
+  "Transform the record `record-map` into a custom structure. eg.:
+
+  (get-structure {:_class \"User\" :name \"Test\"}) =>
+  [{:key-type 7, :field-name :_class, :position 0, :type 7, :value \"User\"}
+   {:key-type 7, :field-name :name, :position 0, :type 7, :value \"Test\"}]"
   [record-map]
   (reduce
    (fn [acc k]
@@ -257,6 +284,9 @@
    (keys record-map)))
 
 (defn header-size
+  "Calculate the total `headers` size. `fixed-header-int` is needed to
+  distinguish the calculation of the header size of a record from that of an
+  embedded map."
   [headers fixed-header-int]
   (+ 1                                  ; closing header
      (reduce
@@ -266,6 +296,7 @@
       headers)))
 
 (defn serialize-structure-values
+  "Serialize the values inside `structure` according to their type."
   [structure]
   (map
    (fn [s]
@@ -274,6 +305,8 @@
    structure))
 
 (defn oemap-positions
+  "Calculate the position of the values in `structure`, offsetting the first
+  value with `offset.`"
   [structure offset]
   (let [hsize (header-size
                (map :field-name structure) const/fixed-oemap-header-int)]
@@ -290,14 +323,21 @@
      structure)))
 
 (defn orient-int32
+  "Convert `value` in an int32. e.g.: (orient-int32 1) => [0 0 0 1]"
   [value]
   (i/int32 (int value)))
 
 (defn positions->orient-int32
+  "Convert the positions in `structure` in int32."
   [structure]
   (map #(update % :position orient-int32) structure))
 
 (defn oemap->structure
+  "Trasform the embedded map `data-map` into a structure. e.g.:
+
+  (oemap->structure {:test 1} 0) =>
+  ({:key-type 7, :field-name :test, :position [0 0 0 12], :type 1, :value 1,
+    :serialized-value [2]})"
   [data-map offset]
   (-> (get-structure data-map)
       serialize-structure-values
@@ -305,6 +345,7 @@
       positions->orient-int32))
 
 (defn serialize-elements
+  "Serialize the elements in `header` returning a vector sorted by `key-order`."
   [header key-order]
   (reduce
    (fn [acc hk]
@@ -317,12 +358,15 @@
    key-order))
 
 (defn serialize-headers
+  "Serialize the elements in `structure` returning a sequence sorted by
+  `key-order`."
   [structure key-order]
   (mapcat
    #(serialize-elements % key-order)
    structure))
 
 (defn serialize-data
+  "Retrieve the :serialized-value inside `structure`."
   [structure]
   (->> structure
        (map :serialized-value)))
@@ -342,6 +386,7 @@
          vec))))
 
 (defn first-elem
+  "Determine the structure of the first element of `record-map`."
   [record-map offset]
   (let [f (first record-map)
         k (first f)
@@ -358,6 +403,7 @@
                  (+ 1 offset hsize))}))
 
 (defn rest-elem
+  "Determine the structure of all but the first element of `record-map`."
   [record-map first-elem]
   (reduce
    (fn [acc [k v]]
@@ -380,12 +426,20 @@
    (rest record-map)))
 
 (defn record-map->structure
+  "Transform the record `record-map` into a structure. e.g.:
+
+  (record-map->structure {:_class \"User\" :name \"Test\"} 0) =>
+  ({:key-type 7, :field-name :_class, :type 7, :value \"User\",
+    :serialized-value [8 85 115 101 114], :position [0 0 0 24]}
+   {:key-type 7, :field-name :name, :type 7, :value \"Test\",
+    :position [0 0 0 29], :serialized-value [8 84 101 115 116]})"
   [record-map offset]
   (->> (first-elem record-map offset)
        (rest-elem record-map)
        positions->orient-int32))
 
 (defn remove-meta-data
+  "Remove from `v` the entries whose keyword name starts with \"_\"."
   [v]
   (->> (keys v)
        (filter #(clojure.string/starts-with? (name %) "_"))

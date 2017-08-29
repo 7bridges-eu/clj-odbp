@@ -43,7 +43,9 @@
         create-exception
         throw)))
 
-(defmulti manage-exception :exception-type)
+(defmulti manage-exception
+  "Manage the exception according to its type."
+  :exception-type)
 
 (defmethod manage-exception :default [e]
   (throw (:exception e)))
