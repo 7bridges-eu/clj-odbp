@@ -44,8 +44,8 @@ user> (odbp/connect-server "<username>" "<password>")
 Create a new database:
 
 ``` clojure
-(let [connection (odbp/connect-server "<username>" "<password>")]
-  (odbp/db-create connection "test-db"))
+user> (let [connection (odbp/connect-server "<username>" "<password>")]
+        (odbp/db-create connection "test-db"))
 ```
 
 Check if a database exists:
@@ -62,12 +62,14 @@ user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
         (odbp/execute-command connection "create class Test extends V"))
 ```
 
-Connecto to a database and create a record:
+Connect to a database and create a record:
 
 ``` clojure
 user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
         (odbp/record-create connection {:_class "Test" :text "test property"}))
 ```
+
+For further details check [API documentation]().
 
 ## License
 
