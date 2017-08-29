@@ -13,9 +13,12 @@
 ;; limitations under the License.
 
 (ns clj-odbp.serialize.binary.record
-  (:require [clj-odbp.serialize.binary.types :as ot]))
+  (:require [clj-odbp.serialize.binary.types :as ot]
+            [taoensso.timbre :as log]))
 
 (defn serialize-record
   "Serialize `record` for OrientDB. `record` must be a Clojure map."
   [record]
-  (ot/serialize record))
+  (let [serialized-record (ot/serialize record)]
+    (log/debugf "Binary record content: %s" serialized-record)
+    serialized-record))
