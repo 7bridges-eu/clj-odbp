@@ -22,7 +22,8 @@
   (atom {:host "localhost"
          :port 2424
          :log-file "log/clj_odbp.log"
-         :log-level :fatal}))
+         :log-level :fatal
+         :log-rotation-frequency :daily}))
 
 (defn configure-timbre
   "Set up timbre using the values in `config`."
@@ -31,7 +32,8 @@
    {:level (:log-level @config)
     :appenders
     {:spit (appender/rolling-appender
-            {:path (:log-file @config) :pattern :daily})}}))
+            {:path (:log-file @config)
+             :pattern (:log-rotation-frequency @config)})}}))
 
 (defn configure-driver
   "Reset global `config` with the contents of `m`. e.g.:
