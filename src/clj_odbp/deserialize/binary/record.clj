@@ -14,7 +14,8 @@
 
 (ns clj-odbp.deserialize.binary.record
   (:require [clj-odbp.deserialize.binary.types :refer [otype-list call]]
-            [clj-odbp.deserialize.binary.buffer :as b]))
+            [clj-odbp.deserialize.binary.buffer :as b]
+            [taoensso.timbre :as log]))
 
 (defn deserialize-record
   [record]
@@ -27,4 +28,5 @@
         add-rid (fn [m] (if (and (nil? cluster) (nil? position))
                          m
                          (assoc result :_rid (str "#" cluster ":" position))))]
+    (log/debugf "Binary record content: %s" content)
     (conj (add-rid result) (call :record-orient-type buffer))))
