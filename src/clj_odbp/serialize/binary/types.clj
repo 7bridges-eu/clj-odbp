@@ -66,6 +66,13 @@
         (contains? r "@type")
         (contains? r :_version))))
 
+(deftype OrientBinary [value])
+
+(defn orient-binary
+  [value]
+  {:pre [(vector? value)]}
+  (->OrientBinary value))
+
 (defn get-type
   "Return a keyword the identifies the type of `v.` e.g.
 
