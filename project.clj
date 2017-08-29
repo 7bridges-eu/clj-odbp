@@ -1,6 +1,6 @@
 (defproject org.clojars.7bridges/clj-odbp "0.1.0"
   :description "A Clojure driver for OrientDB binary protocol"
-  :url "http://github.com/7bridgeseu/clj-odbp"
+  :url "http://github.com/7bridges-eu/clj-odbp"
   :license {:name "Apache License 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0.html"}
   :dependencies [[com.taoensso/timbre "4.10.0"]
