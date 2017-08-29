@@ -68,10 +68,17 @@
         (cons x (if-not (pred x) (take-upto pred (rest s)))))))))
 
 (defn parse-rid
+  "Parse a RID in string format and returns a vector with cluster-id and
+  record-position."
   [rid]
   {:pre [(re-matches #"#\d+:\d+" rid)]}
   (let [[_ cluster-id record-position] (re-find #"#(\d+):(\d+)" rid)]
     (mapv #(Integer/parseInt %) [cluster-id record-position])))
+
+(defn compose-rid
+  "Given a cluster-id and a record-position returns a RID in string format."
+  [cluster-id record-position]
+  (str "#" cluster-id ":" record-position))
 
 (defmacro defcommand
   [command-name args request-handler response-handler]

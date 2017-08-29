@@ -16,7 +16,7 @@
   (:require [clj-odbp
              [constants :as constants]
              [sessions :as session]
-             [utils :refer [decode encode parse-rid]]]
+             [utils :refer [decode encode parse-rid compose-rid]]]
             [clj-odbp.deserialize.binary.record :refer [deserialize-record]]
             [clj-odbp.serialize.binary.record :refer [serialize-record]]
             [clj-odbp.specs.record :as specs])
@@ -26,14 +26,14 @@
   [connection rid]
   (let [session-id (:session-id connection)
         token (:token connection)
-        [cluster-id position-id] (parse-rid rid)]
+        [cluster-id record-position] (parse-rid rid)]
     (encode
      specs/record-load-request
      [[:operation 30]
       [:session-id session-id]
       [:token token]
       [:cluster-id cluster-id]
-      [:cluster-position position-id]
+      [:record-position record-position]
       [:fetch-plan "*:0"]
       [:ignore-cache false]
       [:load-tombstone false]])))
@@ -70,11 +70,16 @@
 (defn record-create-response
   [^DataInputStream in]
   (let [response (decode in specs/record-create-response)
-        session (select-keys response [:session-id :token])]
+        session (select-keys response [:session-id :token])
+        rid (apply compose-rid (vals (select-keys response
+                                                  [:cluster-id :record-position])))
+        version (:record-version response)]
     (when-not (empty? (:token session))
       (session/reset-session! :db)
       (session/put-session! session :db))
-    response))
+    (merge response
+           {:_rid rid
+            :_version version})))
 
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
@@ -89,7 +94,7 @@
       [:session-id session-id]
       [:token token]
       [:cluster-id cluster-id]
-      [:cluster-position position-id]
+      [:record-position position-id]
       [:update-content true]
       [:record-content record-bytes]
       [:record-version -1]
@@ -110,14 +115,14 @@
   [connection rid]
   (let [session-id (:session-id connection)
         token (:token connection)
-        [cluster-id position-id] (parse-rid rid)]
+        [cluster-id record-position] (parse-rid rid)]
     (encode
      specs/record-delete-request
      [[:operation 33]
       [:session-id session-id]
       [:token token]
       [:cluster-id cluster-id]
-      [:cluster-position position-id]
+      [:record-position record-position]
       [:record-version -1]
       [:mode 0]])))
 
