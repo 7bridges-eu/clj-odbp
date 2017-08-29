@@ -12,8 +12,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.deserialize.binary.otypes-test
-  (:require [clj-odbp.deserialize.binary.otypes :as t]
+(ns clj-odbp.deserialize.binary.types-test
+  (:require [clj-odbp.deserialize.binary.types :as t]
             [clj-odbp.deserialize.binary.buffer :as b]
             [midje.sweet :refer :all]))
 

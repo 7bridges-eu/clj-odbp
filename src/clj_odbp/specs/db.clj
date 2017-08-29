@@ -13,8 +13,8 @@
 ;; limitations under the License.
 
 (ns clj-odbp.specs.db
-  (:require [clj-odbp.deserialize.otype :as d]
-            [clj-odbp.serialize.otype :as s]))
+  (:require [clj-odbp.deserialize.network-types :as d]
+            [clj-odbp.serialize.network-types :as s]))
 
 ;; REQUEST_SHUTDOWN
 (def shutdown-request

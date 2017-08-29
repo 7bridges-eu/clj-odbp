@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (ns clj-odbp.deserialize.exception
-  (:require [clj-odbp.deserialize.otype :as ot]
+  (:require [clj-odbp.deserialize.network-types :as ot]
             [clj-odbp.sessions :as s]
             [clojure.string :as string]))
 

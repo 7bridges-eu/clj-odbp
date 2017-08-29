@@ -12,7 +12,7 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.serialize.binary.otypes
+(ns clj-odbp.serialize.binary.types
   (:require [clj-odbp.constants :as const]
             [clj-odbp.serialize.binary
              [common :as c]
@@ -27,14 +27,8 @@
    :embedded-list-type (byte 10) :embedded-set-type (byte 11)
    :embedded-map-type (byte 12) :link-type (byte 13) :link-list-type (byte 14)
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
-   :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)})
-
-(deftype OrientBinary [value])
-
-(defn orient-binary
-  [value]
-  {:pre [(vector? value)]}
-  (->OrientBinary value))
+   :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)
+   :nil-type (byte 0)})
 
 (defn link?
   [v]
@@ -64,8 +58,16 @@
         (contains? r "@type")
         (contains? r :_version))))
 
+(deftype OrientBinary [value])
+
+(defn orient-binary
+  [value]
+  {:pre [(vector? value)]}
+  (->OrientBinary value))
+
 (defn get-type [v]
   (cond
+    (nil? v) :nil-type
     (instance? Boolean v) :boolean-type
     (instance? Integer v) :integer-type
     (instance? Short v) :integer-type
@@ -89,6 +91,12 @@
     :else :custom-type))
 
 (defmulti serialize (fn [value & offset] (get-type value)))
+
+(defmethod serialize :nil-type
+  ([value]
+   [])
+  ([value offset]
+   (serialize value)))
 
 (defmethod serialize :boolean-type
   ([value]
@@ -302,7 +310,9 @@
    (fn [acc hk]
      (if (= hk :position)
        (conj acc (get header hk))
-       (conj acc (serialize (get header hk)))))
+       (let [position (:position header)]
+         (when-not (= position 0)
+           (conj acc (serialize (get header hk)))))))
    []
    key-order))
 
@@ -336,13 +346,16 @@
   (let [f (first record-map)
         k (first f)
         v (second f)
-        hsize (header-size (keys record-map) const/fixed-header-int)]
+        hsize (header-size (keys record-map) const/fixed-header-int)
+        type-v (get-type v)]
     {:key-type (get orient-types (get-type k))
      :field-name k
-     :type (get orient-types (get-type v))
+     :type (get orient-types type-v)
      :value v
      :serialized-value (serialize v (+ 1 offset hsize))
-     :position (+ 1 offset hsize)}))
+     :position (if (= :nil-type type-v)
+                 0
+                 (+ 1 offset hsize))}))
 
 (defn rest-elem
   [record-map first-elem]
@@ -351,12 +364,15 @@
      (let [last-elem (last acc)
            serialized-elem (:serialized-value last-elem)
            size-le (count serialized-elem)
-           pos (+ size-le (:position last-elem))]
+           type-v (get-type v)
+           pos (if (= :nil-type type-v)
+                 0
+                 (+ size-le (:position last-elem)))]
        (conj
         acc
         {:key-type (get orient-types (get-type k))
          :field-name k
-         :type (get orient-types (get-type v))
+         :type (get orient-types type-v)
          :value v
          :position pos
          :serialized-value (serialize v pos)})))
