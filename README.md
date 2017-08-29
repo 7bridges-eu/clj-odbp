@@ -1,3 +1,7 @@
+<a href="https://7bridges.eu" title="7bridges.eu s.r.l.">
+<img src="https://7bridges.eu/img/logo-inline.png" alt="7bridges clj-odbp"
+width="500px" height="122px"/></a>
+
 # clj-odbp
 
 A Clojure driver for OrientDB binary protocol.
