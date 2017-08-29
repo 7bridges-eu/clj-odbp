@@ -16,7 +16,8 @@
   (:require [clj-odbp
              [net :as net]
              [sessions :as sessions]]
-            [clj-odbp.deserialize.exception :as ex])
+            [clj-odbp.deserialize.exception :as ex]
+            [taoensso.timbre :as log])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn- validate-message

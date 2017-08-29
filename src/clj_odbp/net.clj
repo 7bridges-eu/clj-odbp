@@ -39,6 +39,7 @@
   [^Socket socket command & args]
   (let [out (.getOutputStream socket)
         request (apply command args)]
+    (log/debugf "request: %s" (vec (.toByteArray request)))
     (.writeTo request out)
     (.flush out))
   socket)
@@ -48,5 +49,7 @@
   (let [in (DataInputStream. (.getInputStream socket))
         status (.readByte in)]
     (if (= 0 status)
-      (command in)
+      (let [response (command in)]
+        (log/debugf "response: %s" response)
+        response)
       (e/handle-exception in))))

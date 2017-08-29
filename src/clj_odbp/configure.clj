@@ -14,7 +14,7 @@
 
 (ns clj-odbp.configure
   (:require [taoensso.timbre :as log]
-            [taoensso.timbre.appenders.core :as appenders]))
+            [taoensso.timbre.appenders.3rd-party.rolling :as appender]))
 
 (def config
   "Initial configuration map to set up the connection to OrientDB server and
@@ -29,7 +29,9 @@
   []
   (log/merge-config!
    {:level (:log-level @config)
-    :appenders {:spit (appenders/spit-appender {:fname (:log-file @config)})}}))
+    :appenders
+    {:spit (appender/rolling-appender
+            {:path (:log-file @config) :pattern :daily})}}))
 
 (defn configure-driver
   "Reset global `config` with the contents of `m`. e.g.:
