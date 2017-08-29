@@ -72,6 +72,8 @@
   [command-name args request-handler response-handler]
   `(defn ~command-name
      [~@args]
+     (log/debugf "Called %s with arguments: %s"
+                 ~command-name ~@(remove '#{&} args))
      (try
        (with-open [s# (net/create-socket)]
          (-> s#
@@ -85,6 +87,8 @@
   [command-name args request-handler response-handler service]
   `(defn ~command-name
      [~@args]
+     (log/debugf "Called %s with arguments: %s"
+                 ~command-name ~@(remove '#{&} args))
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
        (try
