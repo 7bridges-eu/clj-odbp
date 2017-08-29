@@ -77,6 +77,33 @@ user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
 
 For further details check [API documentation]().
 
+### Types
+
+The following table shows how Clojure types maps to OrientDB types and
+viceversa.
+
+| OrientDB      | Clojure                                                     |
+| :----         | :----                                                       |
+| boolean       | `true`, `false`                                             |
+| integer       | `(int 42)`                                                  |
+| short         | `(short 42)`                                                |
+| long          | `42`                                                        |
+| float         | `(float 42.5)`                                              |
+| double        | `42.5`                                                      |
+| decimal       | `(bigdec 42.5)`                                             |
+| string        | `"foo"`                                                     |
+| binary        | `(clj-odbp.serialize.binary.types/orient-binary [100 101])` |
+| date          | not supported                                               |
+| datetime      | `(java.util.Date.)`                                         |
+| embedded      | `{:_version 0 :_class "Test" :name "foo"}`                  |
+| embedded list | `[0 "foo" 1]`                                               |
+| embedded set  | `#{0 "foo" 1}`                                              |
+| embedded map  | `{:name "foo" :age 42}`                                     |
+| link          | `"#20:1"`                                                   |
+| link list     | `["#20:1" "#20:2"]`                                         |
+| link set      | `#{"#20:1" "#20:2"}`                                        |
+| link map      | `{"rid" "#20:1"}`                                           |
+
 ## License
 
 Copyright © 2017 7bridges s.r.l.
