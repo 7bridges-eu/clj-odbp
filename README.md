@@ -79,8 +79,7 @@ For further details check [API documentation]().
 
 ### Types
 
-The following table shows how Clojure types maps to OrientDB types and
-viceversa.
+The following table shows how OrientDB types map to Clojure types and viceversa.
 
 | OrientDB      | Clojure                                                     |
 | :----         | :----                                                       |
