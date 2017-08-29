@@ -1,2 +1,2 @@
-(change-defaults :emitter 'midje-junit-formatter.core
+(change-defaults :emitter 'midje.emission.plugins.junit
                  :print-level :print-facts)
