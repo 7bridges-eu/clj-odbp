@@ -4,7 +4,7 @@
 width="500px" height="122px"/></a>
 </p>
 
-# clj-odbp
+# clj-odbp [![Build Status](https://travis-ci.org/7bridges-eu/clj-odbp.svg?branch=master)](https://travis-ci.org/7bridges-eu/clj-odbp)
 
 A Clojure driver for [OrientDB](http://orientdb.com/orientdb/) binary protocol.
 
