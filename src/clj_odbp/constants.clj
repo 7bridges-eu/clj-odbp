@@ -14,6 +14,8 @@
 
 (ns clj-odbp.constants)
 
+(def ^:const serialization-version [0])
+
 (def ^:const storage-type-plocal "plocal")
 
 (def ^:const record-type-document (byte \d))
