@@ -6,7 +6,7 @@ width="500px" height="122px"/></a>
 
 # clj-odbp
 
-A Clojure driver for OrientDB binary protocol.
+A Clojure driver for [OrientDB](http://orientdb.com/orientdb/) binary protocol.
 
 ## Installation
 
