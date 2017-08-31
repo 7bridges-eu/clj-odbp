@@ -449,8 +449,7 @@
   ([value]
    (serialize value 0))
   ([value offset]
-   (let [version (vector (get value :_version (byte 0)))
-         size (count value)
+   (let [size (count value)
          size-varint (v/varint-unsigned size)
          class (get value :_class "")
          serialized-class (serialize class)
@@ -462,7 +461,8 @@
          serialized-headers (serialize-headers structure key-order)
          end-headers [(byte 0)]
          serialized-data (serialize-data structure)]
-     (-> (concat version serialized-class serialized-headers
+     (-> (concat const/serialization-version
+                 serialized-class serialized-headers
                  end-headers serialized-data)
          flatten
          vec))))

@@ -97,7 +97,7 @@
       [:record-position position-id]
       [:update-content true]
       [:record-content record-bytes]
-      [:record-version (:_version record-content)]
+      [:record-version (get record-content :_version -1)]
       [:record-type constants/record-type-document]
       [:mode 0]])))
 
