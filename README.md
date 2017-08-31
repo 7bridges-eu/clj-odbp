@@ -75,7 +75,7 @@ user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
         (odbp/record-create connection {:_class "Test" :text "test property"}))
 ```
 
-For further details check [API documentation]().
+For further details check [API documentation](https://7bridges-eu.github.io/clj-odbp/).
 
 ### Types
 
