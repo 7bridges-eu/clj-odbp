@@ -292,11 +292,44 @@
         BigInteger.
         (BigDecimal. scale))))
 
+(defn- read-ridbag-uuids
+  [buffer has-uuids m]
+  (if (true? has-uuids)
+    (let [uuid-low (u/bytes->long buffer)
+          uuid-high (u/bytes->long buffer)]
+      (assoc m :uuid-low uuid-low)
+      (assoc m :uuid-high uuid-high))
+    m))
+
+(defn- deserialize-embedded-ridbag
+  [buffer m]
+  (let [size (u/bytes->integer buffer)]
+    (reduce
+     (fn [a _]
+       (let [cluster-id (u/bytes->short buffer)
+             record-position (u/bytes->long buffer)
+             rid (str "#" cluster-id ":" record-position)]
+         (conj a rid)))
+     []
+     (range size))))
+
+(defn- deserialize-tree-ridbag
+  [buffer m]
+  m)
+
 (defmethod deserialize :link-bag-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [config (call :byte-orient-type buffer)
+        is-embedded (bit-test config 0)
+        has-uuids (bit-test config 1)
+        deserializer (if (true? is-embedded)
+                       deserialize-embedded-ridbag
+                       deserialize-tree-ridbag)]
+    (->> {}
+         (read-ridbag-uuids buffer has-uuids)
+         (deserializer buffer))))
 
 (defmethod deserialize :any-orient-type
   [{:keys [buffer position] :or {position nil}}]
