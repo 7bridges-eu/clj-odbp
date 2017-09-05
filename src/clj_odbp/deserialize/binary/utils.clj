@@ -16,6 +16,15 @@
   (:require [clj-odbp.deserialize.binary.buffer :as b])
   (:import [java.nio ByteBuffer]))
 
+(defn bytes->short
+  "Read a 16 bit integer from the buffer."
+  [buffer]
+  (let [data (b/buffer-take! buffer 2)]
+    (-> data
+        byte-array
+        ByteBuffer/wrap
+        .getShort)))
+
 (defn bytes->integer
   "Read a 32 bit integer from the buffer."
   [buffer]
