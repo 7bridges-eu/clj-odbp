@@ -15,9 +15,9 @@
 (ns clj-odbp.operations.db
   (:require [clj-odbp
              [constants :as consts]
-             [sessions :as sessions]
              [utils :refer [decode encode]]]
-            [clj-odbp.specs.db :as specs])
+            [clj-odbp.network.sessions :as sessions]
+            [clj-odbp.operations.specs.db :as specs])
   (:import java.io.DataInputStream))
 
 ;; REQUEST_SHUTDOWN

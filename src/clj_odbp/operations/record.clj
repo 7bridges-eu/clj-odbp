@@ -15,11 +15,11 @@
 (ns clj-odbp.operations.record
   (:require [clj-odbp
              [constants :as constants]
-             [sessions :as session]
              [utils :refer [decode encode parse-rid compose-rid]]]
-            [clj-odbp.deserialize.binary.record :refer [deserialize-record]]
-            [clj-odbp.serialize.binary.record :refer [serialize-record]]
-            [clj-odbp.specs.record :as specs])
+            [clj-odbp.network.sessions :as session]
+            [clj-odbp.binary.deserialize.record :refer [deserialize-record]]
+            [clj-odbp.binary.serialize.record :refer [serialize-record]]
+            [clj-odbp.operations.specs.record :as specs])
   (:import java.io.DataInputStream))
 
 (defn record-load-request

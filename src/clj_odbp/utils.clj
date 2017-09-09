@@ -13,10 +13,10 @@
 ;; limitations under the License.
 
 (ns clj-odbp.utils
-  (:require [clj-odbp
-             [net :as net]
-             [sessions :as sessions]]
-            [clj-odbp.deserialize.exception :as ex]
+  (:require [clj-odbp.network
+             [socket :as s]
+             [sessions :as sessions]
+             [exception :as ex]]
             [taoensso.timbre :as log])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
@@ -99,10 +99,10 @@
      (log/debugf "Called %s with arguments: %s"
                  ~command-name ~@(remove '#{&} args))
      (try
-       (with-open [s# (net/create-socket)]
+       (with-open [s# (s/create-socket)]
          (-> s#
-             (net/write-request ~request-handler ~@(remove '#{&} args))
-             (net/read-response ~response-handler)))
+             (s/write-request ~request-handler ~@(remove '#{&} args))
+             (s/read-response ~response-handler)))
        (catch Exception e#
          (ex/manage-exception {:exception-type (:type (ex-data e#))
                                :exception e#})))))
@@ -126,10 +126,10 @@
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
        (try
-         (with-open [s# (net/create-socket)]
+         (with-open [s# (s/create-socket)]
            (-> s#
-               (net/write-request ~request-handler ~@(remove '#{&} args))
-               (net/read-response ~response-handler)
+               (s/write-request ~request-handler ~@(remove '#{&} args))
+               (s/read-response ~response-handler)
                (select-keys [:session-id :token])
                (sessions/put-session! ~service))
            (sessions/read-session ~service))

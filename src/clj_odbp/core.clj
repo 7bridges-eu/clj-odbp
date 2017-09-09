@@ -14,8 +14,8 @@
 
 (ns clj-odbp.core
   (:require [clj-odbp
-             [net :as net]
              [utils :refer [defcommand defconnection]]]
+            [clj-odbp.network.socket :as s]
             [clj-odbp.operations
              [command :as command]
              [db :as db]
@@ -45,9 +45,9 @@
 
 (defn db-close
   []
-  (with-open [socket (net/create-socket)]
+  (with-open [socket (s/create-socket)]
     (-> socket
-        (net/write-request db/db-close-request))
+        (s/write-request db/db-close-request))
     {}))
 
 (defcommand db-exist
