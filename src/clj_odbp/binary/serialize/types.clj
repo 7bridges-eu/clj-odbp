@@ -15,9 +15,9 @@
 (ns clj-odbp.binary.serialize.types
   (:require [clj-odbp.constants :as const]
             [clj-odbp.binary.serialize
-             [common :as c]
              [int :as i]
-             [varint :as v]]))
+             [varint :as v]]
+            [clj-odbp.binary.common :as c]))
 
 (def orient-types
   "Map custom orient types to their respective byte identifier."
@@ -30,6 +30,20 @@
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
    :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)
    :nil-type (byte 0)})
+
+(defn- bytes-type
+  "Serialize an array of bytes. `value` must be an array of bytes. eg:
+
+   (bytes-type (.getBytes \"test\" \"UTF-8\"))"
+  [value]
+  (let [size (count value)
+        size-varint (v/varint-unsigned size)]
+    (into size-varint value)))
+
+(defn orient-binary?
+  "Check if `v` is a OrientDB binary type."
+  [v]
+  (instance? clj_odbp.binary.common.OrientBinary v))
 
 (defn link?
   "Check if `v` is a valid OrientDB link. e.g.: \"#21:1\""
@@ -66,13 +80,6 @@
         (contains? r "@type")
         (contains? r :_version))))
 
-(deftype OrientBinary [value])
-
-(defn orient-binary
-  [value]
-  {:pre [(vector? value)]}
-  (->OrientBinary value))
-
 (defn get-type
   "Return a keyword the identifies the type of `v.` e.g.
 
@@ -90,7 +97,7 @@
     (instance? java.math.BigDecimal v) :decimal-type
     (instance? java.util.Date v) :datetime-type
     (keyword? v) :keyword-type
-    (instance? OrientBinary v) :binary-type
+    (orient-binary? v) :binary-type
     (link? v) :link-type
     (string? v) :string-type
     (link-list? v) :link-list-type
@@ -173,7 +180,7 @@
 (defmethod serialize :string-type
   ([value]
    (let [bytes (.getBytes value "UTF-8")]
-     (c/bytes-type bytes)))
+     (bytes-type bytes)))
   ([value offset]
    (serialize value)))
 
@@ -185,7 +192,7 @@
 
 (defmethod serialize :binary-type
   ([value]
-   (c/bytes-type (.value value)))
+   (bytes-type (.value value)))
   ([value offset]
    (serialize value)))
 

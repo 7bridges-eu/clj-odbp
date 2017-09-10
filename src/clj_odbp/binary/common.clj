@@ -12,12 +12,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.binary.serialize.common-test
-  (:require [clj-odbp.binary.serialize.common :as c]
-            [midje.sweet :refer :all])
-  (:import [java.io ByteArrayOutputStream DataOutputStream]))
+(ns clj-odbp.binary.common)
 
-(facts "Common binary serialization utilities"
-       (fact "Bytes - bytes [116 101 115 116] should return [8 116 101 115 116]"
-             (vec (c/bytes-type (byte-array [116 101 115 116]))) =>
-             [8 116 101 115 116]))
+(deftype OrientBinary [value])
+
+(defn orient-binary
+  [value]
+  {:pre [(vector? value)]}
+  (->OrientBinary value))
