@@ -20,13 +20,10 @@
             [taoensso.timbre :as log])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
-(defn- validate-message
+(defn valid-message?
   "Validate `message` against `spec`."
   [spec message]
-  (when-not (every?
-             #(contains? spec (first %))
-             message)
-    (throw (Exception. "The message doesn't respect the spec."))))
+  (every? #(contains? spec (first %)) message))
 
 (defn encode
   "Encode `message` applying for each of its fields the function specified in
@@ -34,13 +31,14 @@
   [spec message]
   (let [out (ByteArrayOutputStream.)
         stream (DataOutputStream. out)]
-    (validate-message spec message)
-    (doseq [[field-name value] message
-            :let [function (get spec field-name)]]
-      (try
-        (apply function [stream value])
-        (catch Exception e
-          (throw (Exception. (str (.getMessage e) " writing " field-name))))))
+    (if (valid-message? spec message)
+      (doseq [[field-name value] message
+              :let [function (get spec field-name)]]
+        (try
+          (apply function [stream value])
+          (catch Exception e
+            (throw (Exception. (str (.getMessage e) " writing " field-name))))))
+      (throw (Exception. "The message doesn't respect the spec.")))
     out))
 
 (defn decode

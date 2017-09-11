@@ -41,7 +41,7 @@
     (into size-varint value)))
 
 (defn orient-binary?
-  "Check if `v` is a OrientDB binary type."
+  "Check if `v` is an OrientDB binary type."
   [v]
   (instance? clj_odbp.binary.common.OrientBinary v))
 
