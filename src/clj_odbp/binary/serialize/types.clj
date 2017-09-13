@@ -192,7 +192,7 @@
 
 (defmethod serialize :binary-type
   ([value]
-   (bytes-type (.value value)))
+   (bytes-type (c/get-value value)))
   ([value offset]
    (serialize value)))
 

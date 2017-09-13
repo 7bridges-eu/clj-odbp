@@ -14,9 +14,31 @@
 
 (ns clj-odbp.binary.common)
 
-(deftype OrientBinary [value])
+(deftype OrientBinary [value]
+  Object
+  (equals [this o]
+    (if (instance? OrientBinary o)
+      (= (.value this) (.value o))
+      false)))
 
 (defn orient-binary
   [value]
   {:pre [(vector? value)]}
   (->OrientBinary value))
+
+(deftype OrientORidBag [value]
+  Object
+  (equals [this o]
+    (if (instance? OrientORidBag o)
+      (= (.value this) (.value o))
+      false)))
+
+(defn orient-orid-bag
+  [value]
+  (->OrientORidBag value))
+
+(defmulti get-value class)
+(defmethod get-value OrientBinary [v]
+  (.value v))
+(defmethod get-value OrientORidBag [v]
+  (.value v))

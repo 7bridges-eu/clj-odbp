@@ -15,7 +15,8 @@
 (ns clj-odbp.binary.deserialize.types
   (:require [clj-odbp.binary.deserialize.varint :as v]
             [clj-odbp.binary.deserialize.buffer :as b]
-            [clj-odbp.binary.deserialize.utils :as u])
+            [clj-odbp.binary.deserialize.utils :as u]
+            [clj-odbp.binary.common :as c])
   (:import [java.nio ByteBuffer]
            [java.math BigInteger BigDecimal]))
 
@@ -115,7 +116,7 @@
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)]
-    (b/buffer-take! buffer size)))
+    (c/orient-binary (b/buffer-take! buffer size))))
 
 ;; Record deserialization
 (defn- string-type
@@ -304,14 +305,15 @@
 (defn- deserialize-embedded-ridbag
   [buffer m]
   (let [size (u/bytes->integer buffer)]
-    (reduce
-     (fn [a _]
-       (let [cluster-id (u/bytes->short buffer)
-             record-position (u/bytes->long buffer)
-             rid (str "#" cluster-id ":" record-position)]
-         (conj a rid)))
-     []
-     (range size))))
+    (c/orient-orid-bag
+     (reduce
+      (fn [a _]
+        (let [cluster-id (u/bytes->short buffer)
+              record-position (u/bytes->long buffer)
+              rid (str "#" cluster-id ":" record-position)]
+          (conj a rid)))
+      []
+      (range size)))))
 
 (defn- deserialize-tree-ridbag
   [buffer m]
