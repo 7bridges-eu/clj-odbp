@@ -16,8 +16,7 @@
   (:require [clj-odbp.constants :as const]
             [clj-odbp.binary.serialize
              [int :as i]
-             [varint :as v]]
-            [clj-odbp.binary.common :as c]))
+             [varint :as v]]))
 
 (def orient-types
   "Map custom orient types to their respective byte identifier."
@@ -29,7 +28,7 @@
    :embedded-map-type (byte 12) :link-type (byte 13) :link-list-type (byte 14)
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
    :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)
-   :nil-type (byte 0)})
+   :nil-type (byte 0) :ridbag-type (byte 22) :ridtree-type (byte 22)})
 
 (defn- bytes-type
   "Serialize an array of bytes. `value` must be an array of bytes. eg:
@@ -40,10 +39,23 @@
         size-varint (v/varint-unsigned size)]
     (into size-varint value)))
 
-(defn orient-binary?
+(defn obinary?
   "Check if `v` is an OrientDB binary type."
   [v]
-  (instance? clj_odbp.binary.common.OrientBinary v))
+  (when (map? v)
+    (contains? v :_obinary)))
+
+(defn oridbag?
+  "Check if `v` is an OrientDB RidBag embedded type."
+  [v]
+  (when (map? v)
+    (contains? v :_oridbag)))
+
+(defn oridtree?
+  "Check if `v` is an OrientDB RidBag tree type."
+  [v]
+  (when (map? v)
+    (contains? v :_oridtree)))
 
 (defn link?
   "Check if `v` is a valid OrientDB link. e.g.: \"#21:1\""
@@ -97,7 +109,9 @@
     (instance? java.math.BigDecimal v) :decimal-type
     (instance? java.util.Date v) :datetime-type
     (keyword? v) :keyword-type
-    (orient-binary? v) :binary-type
+    (obinary? v) :binary-type
+    (oridbag? v) :ridbag-type
+    (oridtree? v) :ridtree-type
     (link? v) :link-type
     (string? v) :string-type
     (link-list? v) :link-list-type
@@ -192,7 +206,7 @@
 
 (defmethod serialize :binary-type
   ([value]
-   (bytes-type (c/get-value value)))
+   (bytes-type (get-in value [:_obinary :value])))
   ([value offset]
    (serialize value)))
 
