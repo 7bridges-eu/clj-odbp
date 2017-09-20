@@ -152,10 +152,39 @@
                                                     3 "#6:7"})
        (fact "ORidBag - Embedded ORid Bag"
              (t/call :link-bag-orient-type
-                     (b/to-buffer [1
+                     (b/to-buffer [3
+                                   0 0 0 0 0 0 0 1
+                                   0 0 0 0 0 0 0 2
                                    0 0 0 1
                                    0 2
-                                   0 0 0 0 0 0 0 3])) => {:_oridbag {:bag ["#2:3"]}})
+                                   0 0 0 0 0 0 0 3])) => {:_oridbag {:uuid-low 1
+                                                                     :uuid-high 2
+                                                                     :bag ["#2:3"]}})
+       (fact "ORidBag - Tree ORid Bag"
+             (t/call :link-bag-orient-type
+                     (b/to-buffer [2
+                                   0 0 0 0 0 0 0 1
+                                   0 0 0 0 0 0 0 2
+                                   0 0 0 0 0 0 0 3
+                                   0 0 0 0 0 0 0 4
+                                   0 0 0 5
+                                   0 0 0 2
+                                   0 6
+                                   0 0 0 0 0 0 0 7
+                                   0
+                                   0 0 0 8
+                                   0 9
+                                   0 0 0 0 0 0 0 10
+                                   1
+                                   0 0 0 11])) => {:_oridtree {:uuid-low 1
+                                                               :uuid-high 2
+                                                               :filed-id 3
+                                                               :page-index 4
+                                                               :page-offset 5
+                                                               :changes [{:cluster-id 6 :record-position 7
+                                                                          :change-type 0 :change 8}
+                                                                         {:cluster-id 9 :record-position 10
+                                                                          :change-type 1 :change 11}]}})
        (fact "Decimal - BigDecimal 0"
              (t/call :decimal-orient-type
                      (b/to-buffer [0 0 0 0

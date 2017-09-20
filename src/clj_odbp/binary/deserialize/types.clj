@@ -297,27 +297,55 @@
   (if (true? has-uuids)
     (let [uuid-low (u/bytes->long buffer)
           uuid-high (u/bytes->long buffer)]
-      (assoc m :uuid-low uuid-low)
-      (assoc m :uuid-high uuid-high))
+      (-> m
+          (assoc :uuid-low uuid-low)
+          (assoc :uuid-high uuid-high)))
     m))
+
+(defn- read-ridbag
+  [buffer size]
+  (reduce
+   (fn [a _]
+     (let [cluster-id (u/bytes->short buffer)
+           record-position (u/bytes->long buffer)
+           rid (str "#" cluster-id ":" record-position)]
+       (conj a rid)))
+   []
+   (range size)))
 
 (defn- deserialize-embedded-ridbag
   [buffer m]
   (let [size (u/bytes->integer buffer)]
-    (->> (reduce
-          (fn [a _]
-            (let [cluster-id (u/bytes->short buffer)
-                  record-position (u/bytes->long buffer)
-                  rid (str "#" cluster-id ":" record-position)]
-              (conj a rid)))
-          []
-          (range size))
-         (assoc m :bag)
-         (hash-map :_oridbag))))
+    {:_oridbag (-> m
+                   (assoc :bag (read-ridbag buffer size)))}))
+
+(defn- read-rid-changes
+  [buffer size]
+  (reduce
+   (fn [a _]
+     (let [cluster-id (u/bytes->short buffer)
+           record-position (u/bytes->long buffer)
+           change-type (call :byte-orient-type buffer)
+           change (u/bytes->integer buffer)]
+       (conj a {:cluster-id cluster-id
+                :record-position record-position
+                :change-type change-type
+                :change change})))
+   []
+   (range size)))
 
 (defn- deserialize-tree-ridbag
   [buffer m]
-  )
+  (let [filed-id (u/bytes->long buffer)
+        page-index (u/bytes->long buffer)
+        page-offset (u/bytes->integer buffer)
+        change-size (u/bytes->integer buffer)]
+    {:_oridtree
+     (-> m
+         (assoc :filed-id filed-id)
+         (assoc :page-index page-index)
+         (assoc :page-offset page-offset)
+         (assoc :changes (read-rid-changes buffer change-size)))}))
 
 (defmethod deserialize :link-bag-orient-type
   [{:keys [buffer position] :or {position nil}}]
