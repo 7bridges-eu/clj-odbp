@@ -244,11 +244,10 @@
   ([value]
    (let [ridbag (:_oridbag value)
          config (serialize (byte 1))
-         bag (:bag ridbag)
-         size (count bag)]
+         bag (:bag ridbag)]
      (vec (concat
            config
-           (i/int32 size)
+           (i/int32 (count bag))
            (reduce
             (fn [a rid]
               (let [[cluster-id record-position] (u/parse-rid rid)]
@@ -262,7 +261,24 @@
 
 (defmethod serialize :ridtree-type
   ([value]
-   ())
+   (let [ridtree (:_oridtree value)
+         config (serialize (byte 0))
+         {filed-id :filed-id page-index :page-index
+          page-offset :page-offset changes :changes} ridtree]
+     (vec (concat config
+                  (i/int64 filed-id) (i/int64 page-index)
+                  (i/int32 page-offset) (i/int32 (count changes))
+                  (reduce
+                   (fn [a change]
+                     (let [{cluster-id :cluster-id record-position :record-position
+                            change-type :change-type change-int :change} change]
+                       (concat a
+                               (i/int16 cluster-id)
+                               (i/int64 record-position)
+                               (serialize (byte change-type))
+                               (i/int32 change-int))))
+                   []
+                   changes)))))
   ([value offset]
    (serialize value)))
 
