@@ -115,7 +115,7 @@
   (when position
     (b/buffer-set-position! buffer position))
   (let [size (call :integer-orient-type buffer)]
-    (b/buffer-take! buffer size)))
+    {:_obinary {:value (b/buffer-take! buffer size)}}))
 
 ;; Record deserialization
 (defn- string-type
@@ -292,11 +292,74 @@
         BigInteger.
         (BigDecimal. scale))))
 
+(defn- read-ridbag-uuids
+  [buffer has-uuids m]
+  (if (true? has-uuids)
+    (let [uuid-low (u/bytes->long buffer)
+          uuid-high (u/bytes->long buffer)]
+      (-> m
+          (assoc :uuid-low uuid-low)
+          (assoc :uuid-high uuid-high)))
+    m))
+
+(defn- read-ridbag
+  [buffer size]
+  (reduce
+   (fn [a _]
+     (let [cluster-id (u/bytes->short buffer)
+           record-position (u/bytes->long buffer)
+           rid (str "#" cluster-id ":" record-position)]
+       (conj a rid)))
+   []
+   (range size)))
+
+(defn- deserialize-embedded-ridbag
+  [buffer m]
+  (let [size (u/bytes->integer buffer)]
+    {:_oridbag (-> m
+                   (assoc :bag (read-ridbag buffer size)))}))
+
+(defn- read-rid-changes
+  [buffer size]
+  (reduce
+   (fn [a _]
+     (let [cluster-id (u/bytes->short buffer)
+           record-position (u/bytes->long buffer)
+           change-type (call :byte-orient-type buffer)
+           change (u/bytes->integer buffer)]
+       (conj a {:cluster-id cluster-id
+                :record-position record-position
+                :change-type change-type
+                :change change})))
+   []
+   (range size)))
+
+(defn- deserialize-tree-ridbag
+  [buffer m]
+  (let [filed-id (u/bytes->long buffer)
+        page-index (u/bytes->long buffer)
+        page-offset (u/bytes->integer buffer)
+        change-size (u/bytes->integer buffer)]
+    {:_oridtree
+     (-> m
+         (assoc :filed-id filed-id)
+         (assoc :page-index page-index)
+         (assoc :page-offset page-offset)
+         (assoc :changes (read-rid-changes buffer change-size)))}))
+
 (defmethod deserialize :link-bag-orient-type
   [{:keys [buffer position] :or {position nil}}]
   (when position
     (b/buffer-set-position! buffer position))
-  nil)
+  (let [config (call :byte-orient-type buffer)
+        is-embedded (bit-test config 0)
+        has-uuids (bit-test config 1)
+        deserializer (if (true? is-embedded)
+                       deserialize-embedded-ridbag
+                       deserialize-tree-ridbag)]
+    (->> {}
+         (read-ridbag-uuids buffer has-uuids)
+         (deserializer buffer))))
 
 (defmethod deserialize :any-orient-type
   [{:keys [buffer position] :or {position nil}}]

@@ -15,6 +15,14 @@
 (ns clj-odbp.binary.serialize.int
   (:import [java.nio ByteBuffer]))
 
+(defn int16
+  "Serialize an int16. Return a byte-array."
+  [n]
+  (-> (ByteBuffer/allocate 2)
+      (.putShort n)
+      .array
+      vec))
+
 (defn int32
   "Serialize an int32. Return a byte-array."
   [n]

@@ -32,6 +32,14 @@
 
 (def oemap {:test "1"})
 
+(def oridtree {:_oridtree {:uuid-low 1 :uuid-high 2
+                           :filed-id 3 :page-index 4
+                           :page-offset 5
+                           :changes [{:cluster-id 6 :record-position 7
+                                      :change-type 0 :change 8}
+                                     {:cluster-id 9 :record-position 10
+                                      :change-type 1 :change 11}]}})
+
 (facts "Serialization of single types and record"
        (fact "Short - short 1 should return [2]"
              (t/serialize (short 1)) => [2])
@@ -56,7 +64,7 @@
        (fact "Keyword - keyword :test should return [8 116 101 115 116]"
              (t/serialize :test) => [8 116 101 115 116])
        (fact "Binary - orient-binary [1 2 3] should return [6 1 2 3]"
-             (t/serialize (t/orient-binary [1 2 3])) => [6 1 2 3])
+             (t/serialize {:_obinary {:value [1 2 3]}}) => [6 1 2 3])
        (fact "Vector - [1 2 3] should return [6 23 1 2 1 4 1 6]"
              (t/serialize [1 2 3]) => [6 23 1 2 1 4 1 6])
        (fact "Map - map {:name 'test'} should return [2 7 8 110 97 109 101 0 0 0 12 7 8 116 101 115 116]"
@@ -79,5 +87,11 @@
              (just [4 66 2 68 2] :in-any-order))
        (fact "Link map - {'test' #33:1} should return [2 7 8 116 101 115 116 66 2]"
              (t/serialize {"test" "#33:1"}) => [2 7 8 116 101 115 116 66 2])
+       (fact "RidBag - serialize embedded ORigBag"
+             (t/serialize {:_oridbag {:uuid-low 1 :uuid-high 2 :bag ["#2:3" "#4:5"]}})
+             => [1 0 0 0 2 0 2 0 0 0 0 0 0 0 3 0 4 0 0 0 0 0 0 0 5])
+       (fact "RidTree - serialize ORidTree"
+             (t/serialize oridtree) => [0 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 4 0 0 0 5 0 0 0 2 0 6 0
+                                        0 0 0 0 0 0 7 0 0 0 0 8 0 9 0 0 0 0 0 0 0 10 1 0 0 0 11])
        (fact "Embedded map - oemap should return [2 7 8 116 101 115 116 0 0 0 12 7 2 49]"
              (t/serialize oemap) => [2 7 8 116 101 115 116 0 0 0 12 7 2 49]))

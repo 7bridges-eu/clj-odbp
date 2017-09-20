@@ -15,9 +15,9 @@
 (ns clj-odbp.binary.serialize.types
   (:require [clj-odbp.constants :as const]
             [clj-odbp.binary.serialize
-             [common :as c]
              [int :as i]
-             [varint :as v]]))
+             [varint :as v]]
+            [clj-odbp.utils :as u]))
 
 (def orient-types
   "Map custom orient types to their respective byte identifier."
@@ -29,7 +29,34 @@
    :embedded-map-type (byte 12) :link-type (byte 13) :link-list-type (byte 14)
    :link-set-type (byte 15) :link-map-type (byte 16) :byte-type (byte 17)
    :custom-type (byte 20) :decimal-type (byte 21) :any-type (byte 23)
-   :nil-type (byte 0)})
+   :nil-type (byte 0) :ridbag-type (byte 22) :ridtree-type (byte 22)})
+
+(defn- bytes-type
+  "Serialize an array of bytes. `value` must be an array of bytes. eg:
+
+   (bytes-type (.getBytes \"test\" \"UTF-8\"))"
+  [value]
+  (let [size (count value)
+        size-varint (v/varint-unsigned size)]
+    (into size-varint value)))
+
+(defn obinary?
+  "Check if `v` is an OrientDB binary type."
+  [v]
+  (when (map? v)
+    (contains? v :_obinary)))
+
+(defn oridbag?
+  "Check if `v` is an OrientDB RidBag embedded type."
+  [v]
+  (when (map? v)
+    (contains? v :_oridbag)))
+
+(defn oridtree?
+  "Check if `v` is an OrientDB RidBag tree type."
+  [v]
+  (when (map? v)
+    (contains? v :_oridtree)))
 
 (defn link?
   "Check if `v` is a valid OrientDB link. e.g.: \"#21:1\""
@@ -66,13 +93,6 @@
         (contains? r "@type")
         (contains? r :_version))))
 
-(deftype OrientBinary [value])
-
-(defn orient-binary
-  [value]
-  {:pre [(vector? value)]}
-  (->OrientBinary value))
-
 (defn get-type
   "Return a keyword the identifies the type of `v.` e.g.
 
@@ -90,7 +110,9 @@
     (instance? java.math.BigDecimal v) :decimal-type
     (instance? java.util.Date v) :datetime-type
     (keyword? v) :keyword-type
-    (instance? OrientBinary v) :binary-type
+    (obinary? v) :binary-type
+    (oridbag? v) :ridbag-type
+    (oridtree? v) :ridtree-type
     (link? v) :link-type
     (string? v) :string-type
     (link-list? v) :link-list-type
@@ -173,7 +195,7 @@
 (defmethod serialize :string-type
   ([value]
    (let [bytes (.getBytes value "UTF-8")]
-     (c/bytes-type bytes)))
+     (bytes-type bytes)))
   ([value offset]
    (serialize value)))
 
@@ -185,7 +207,7 @@
 
 (defmethod serialize :binary-type
   ([value]
-   (c/bytes-type (.value value)))
+   (bytes-type (get-in value [:_obinary :value])))
   ([value offset]
    (serialize value)))
 
@@ -215,6 +237,48 @@
          size-varint (v/varint-unsigned size)
          serialized-items (mapcat serialize value)]
      (vec (concat size-varint serialized-items))))
+  ([value offset]
+   (serialize value)))
+
+(defmethod serialize :ridbag-type
+  ([value]
+   (let [ridbag (:_oridbag value)
+         config (serialize (byte 1))
+         bag (:bag ridbag)]
+     (vec (concat
+           config
+           (i/int32 (count bag))
+           (reduce
+            (fn [a rid]
+              (let [[cluster-id record-position] (u/parse-rid rid)]
+                (concat a
+                        (i/int16 cluster-id)
+                        (i/int64 record-position))))
+            []
+            bag)))))
+  ([value offset]
+   (serialize value)))
+
+(defmethod serialize :ridtree-type
+  ([value]
+   (let [ridtree (:_oridtree value)
+         config (serialize (byte 0))
+         {filed-id :filed-id page-index :page-index
+          page-offset :page-offset changes :changes} ridtree]
+     (vec (concat config
+                  (i/int64 filed-id) (i/int64 page-index)
+                  (i/int32 page-offset) (i/int32 (count changes))
+                  (reduce
+                   (fn [a change]
+                     (let [{cluster-id :cluster-id record-position :record-position
+                            change-type :change-type change-int :change} change]
+                       (concat a
+                               (i/int16 cluster-id)
+                               (i/int64 record-position)
+                               (serialize (byte change-type))
+                               (i/int32 change-int))))
+                   []
+                   changes)))))
   ([value offset]
    (serialize value)))
 
