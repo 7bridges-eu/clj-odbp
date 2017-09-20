@@ -16,7 +16,8 @@
   (:require [clj-odbp.constants :as const]
             [clj-odbp.binary.serialize
              [int :as i]
-             [varint :as v]]))
+             [varint :as v]]
+            [clj-odbp.utils :as u]))
 
 (def orient-types
   "Map custom orient types to their respective byte identifier."
@@ -236,6 +237,32 @@
          size-varint (v/varint-unsigned size)
          serialized-items (mapcat serialize value)]
      (vec (concat size-varint serialized-items))))
+  ([value offset]
+   (serialize value)))
+
+(defmethod serialize :ridbag-type
+  ([value]
+   (let [ridbag (:_oridbag value)
+         config (serialize (byte 1))
+         bag (:bag ridbag)
+         size (count bag)]
+     (vec (concat
+           config
+           (i/int32 size)
+           (reduce
+            (fn [a rid]
+              (let [[cluster-id record-position] (u/parse-rid rid)]
+                (concat a
+                        (i/int16 cluster-id)
+                        (i/int64 record-position))))
+            []
+            bag)))))
+  ([value offset]
+   (serialize value)))
+
+(defmethod serialize :ridtree-type
+  ([value]
+   ())
   ([value offset]
    (serialize value)))
 

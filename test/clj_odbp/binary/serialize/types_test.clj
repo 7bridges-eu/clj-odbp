@@ -79,5 +79,7 @@
              (just [4 66 2 68 2] :in-any-order))
        (fact "Link map - {'test' #33:1} should return [2 7 8 116 101 115 116 66 2]"
              (t/serialize {"test" "#33:1"}) => [2 7 8 116 101 115 116 66 2])
+       (fact "RidBag - serialize embedded ORigBag"
+             (t/serialize {:_oridbag {:uuid-low 1 :uuid-high 2 :bag ["#2:3" "#4:5"]}}) => [1 0 0 0 2 0 2 0 0 0 0 0 0 0 3 0 4 0 0 0 0 0 0 0 5])
        (fact "Embedded map - oemap should return [2 7 8 116 101 115 116 0 0 0 12 7 2 49]"
              (t/serialize oemap) => [2 7 8 116 101 115 116 0 0 0 12 7 2 49]))
