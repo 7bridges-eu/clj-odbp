@@ -14,11 +14,11 @@
 
 (ns clj-odbp.binary.serialize.record
   (:require [clj-odbp.binary.serialize.types :as ot]
-            [taoensso.timbre :as log]))
+            [clj-odbp.logger :refer [log debug]]))
 
 (defn serialize-record
   "Serialize `record` for OrientDB. `record` must be a Clojure map."
   [record]
   (let [serialized-record (ot/serialize record)]
-    (log/debugf "Binary record content: %s" serialized-record)
+    (debug log ::serialize-record (str "Binary record content: " serialized-record))
     serialized-record))
