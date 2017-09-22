@@ -15,7 +15,7 @@
 (ns clj-odbp.binary.deserialize.record
   (:require [clj-odbp.binary.deserialize.types :refer [otype-list call]]
             [clj-odbp.binary.deserialize.buffer :as b]
-            [taoensso.timbre :as log]))
+            [clj-odbp.logger :refer [log debug]]))
 
 (defn deserialize-record
   "Deserialize `record` into a clojure.lang.PersistentArrayMap. e.g.:
@@ -34,5 +34,5 @@
         add-rid (fn [m] (if (and (nil? cluster) (nil? position))
                          m
                          (assoc result :_rid (str "#" cluster ":" position))))]
-    (log/debugf "Binary record content: %s" content)
+    (debug log ::deserialize-record (str "Binary record content: " content))
     (conj (add-rid result) (call :record-orient-type buffer))))

@@ -15,7 +15,7 @@
 (ns clj-odbp.network.socket
   (:require [clj-odbp.configure :as c]
             [clj-odbp.network.exception :as e]
-            [taoensso.timbre :as log])
+            [clj-odbp.logger :refer [log debug]])
   (:import java.io.DataInputStream
            java.net.Socket))
 
@@ -40,7 +40,7 @@
   [^Socket socket command & args]
   (let [out (.getOutputStream socket)
         request (apply command args)]
-    (log/debugf "request: %s" (vec (.toByteArray request)))
+    (debug log ::write-request "request: %s" (vec (.toByteArray request)))
     (.writeTo request out)
     (.flush out))
   socket)
@@ -53,6 +53,6 @@
         status (.readByte in)]
     (if (= 0 status)
       (let [response (command in)]
-        (log/debugf "response: %s" response)
+        (debug log ::read-response "response: %s" response)
         response)
       (e/handle-exception in))))

@@ -17,7 +17,7 @@
              [socket :as s]
              [sessions :as sessions]
              [exception :as ex]]
-            [taoensso.timbre :as log])
+            [clj-odbp.logger :refer [log debug]])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn valid-message?
@@ -94,8 +94,10 @@
   [command-name args request-handler response-handler]
   `(defn ~command-name
      [~@args]
-     (log/debugf "Called %s with arguments: %s"
-                 ~command-name ~@(remove '#{&} args))
+     (debug log
+            (keyword ~command-name)
+            "Called %s with arguments: %s"
+            ~command-name ~@(remove '#{&} args))
      (try
        (with-open [s# (s/create-socket)]
          (-> s#
@@ -119,8 +121,10 @@
   [command-name args request-handler response-handler service]
   `(defn ~command-name
      [~@args]
-     (log/debugf "Called %s with arguments: %s"
-                 ~command-name ~@(remove '#{&} args))
+     (debug log
+            (keyword ~command-name)
+            "Called %s with arguments: %s"
+            ~command-name ~@(remove '#{&} args))
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
        (try
