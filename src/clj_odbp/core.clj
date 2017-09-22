@@ -21,22 +21,20 @@
              [db :as db]
              [record :as record]]))
 
-(defconnection connect-server
+(defcommand connect-server
   [username password]
   db/connect-request
-  db/connect-response
-  :server)
+  db/connect-response)
 
 (defcommand shutdown-server
   [username password]
   db/shutdown-request
   db/shutdown-response)
 
-(defconnection db-open
+(defcommand db-open
   [db-name username password]
   db/db-open-request
-  db/db-open-response
-  :db)
+  db/db-open-response)
 
 (defcommand db-create
   [connection db-name & opts]
