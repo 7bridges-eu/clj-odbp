@@ -15,22 +15,29 @@
 (ns clj-odbp.network.exception
   (:require [clj-odbp.network.read :as r]
             [clj-odbp.network.sessions :as s]
-            [clojure.string :as string]))
+            [clojure.string :as string])
+  (:import [java.io ByteArrayInputStream ObjectInputStream]))
 
 (defn deserialize-exception
   "De-serialize OrientDB exception from DataInputStream `in`."
   [in]
   (let [ex-class (r/string-type in)
-        ex-message (r/string-type in)]
-    {:class ex-class :message ex-message}))
+        ex-message (r/string-type in)
+        useless (r/byte-type in)
+        ex-serialized (r/bytes-type in)]
+    {:class ex-class
+     :message ex-message
+     :serialized ex-serialized}))
 
 (defn create-exception
   "Create an ExceptionInfo based on the class of the OrientDB exception."
   [m]
-  (let [fully-qualified-name (:class m)
-        message (:message m)
-        class-name (last (string/split fully-qualified-name #"\."))]
-    (ex-info message {:type (keyword class-name)})))
+  (let [serialized-exception (:serialized m)]
+    (-> serialized-exception
+        byte-array
+        ByteArrayInputStream.
+        ObjectInputStream.
+        .readObject)))
 
 (defn handle-exception
   "De-serialize an OrientDB exception in DataInputStream `in` and throw it."
