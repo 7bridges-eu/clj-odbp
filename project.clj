@@ -4,7 +4,6 @@
   :license {:name "Apache License 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0.html"}
   :dependencies [[org.clojure/clojure "1.8.0"]
-                 [org.clojure/tools.logging "0.4.0"]
                  [midje "1.8.3"]]
   :plugins [[lein-cloverage "1.0.9"]
             [lein-codox "0.10.3"]
