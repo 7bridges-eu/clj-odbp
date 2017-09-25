@@ -12,19 +12,12 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.configure)
+(ns clj-odbp.binary.serialize.varint-test
+  (:require [clj-odbp.binary.serialize.varint :as v]
+            [midje.sweet :refer :all]))
 
-(def config
-  "Initial configuration map to set up the connection to OrientDB server and
-  the logging system."
-  (atom {:host "localhost"
-         :port 2424
-         :log-file "log/clj_odbp.log"
-         :log-level :fatal}))
-
-(defn configure-driver
-  "Reset global `config` with the contents of `m`. e.g.:
-
-  (configure-driver {:host \"test\"}) => {:host \"test\" :port 2424}"
-  [m]
-  (reset! config (merge @config m)))
+(facts "Serialization of varint type"
+       (fact "varint - long '300' should return '[172 2]'"
+             (v/varint-signed 300) => [172 2])
+       (fact "varint - long '300' should return '[216 4]'"
+             (v/varint-unsigned 300) => [216 4]))

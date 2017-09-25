@@ -12,19 +12,12 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.configure)
+(ns clj-odbp.binary.serialize.int-test
+  (:require [clj-odbp.binary.serialize.int :as i]
+            [midje.sweet :refer :all]))
 
-(def config
-  "Initial configuration map to set up the connection to OrientDB server and
-  the logging system."
-  (atom {:host "localhost"
-         :port 2424
-         :log-file "log/clj_odbp.log"
-         :log-level :fatal}))
-
-(defn configure-driver
-  "Reset global `config` with the contents of `m`. e.g.:
-
-  (configure-driver {:host \"test\"}) => {:host \"test\" :port 2424}"
-  [m]
-  (reset! config (merge @config m)))
+(facts "Serialization of int32 and int64"
+       (fact "int32 - int 10 should return '[0 0 0 10]'"
+             (vec (i/int32 (int 10))) => [0 0 0 10])
+       (fact "int64 - long 300 should return '[0 0 0 0 0 0 1 44]'"
+             (vec (i/int64 300)) => [0 0 0 0 0 0 1 44]))

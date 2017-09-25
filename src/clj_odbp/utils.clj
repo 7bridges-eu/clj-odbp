@@ -13,20 +13,17 @@
 ;; limitations under the License.
 
 (ns clj-odbp.utils
-  (:require [clj-odbp
-             [net :as net]
-             [sessions :as sessions]]
-            [clj-odbp.deserialize.exception :as ex]
-            [taoensso.timbre :as log])
+  (:require [clj-odbp.network
+             [socket :as s]
+             [sessions :as sessions]
+             [exception :as ex]]
+            [clj-odbp.logger :refer [log debug]])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
-(defn- validate-message
+(defn valid-message?
   "Validate `message` against `spec`."
   [spec message]
-  (when-not (every?
-             #(contains? spec (first %))
-             message)
-    (throw (Exception. "The message doesn't respect the spec."))))
+  (every? #(contains? spec (first %)) message))
 
 (defn encode
   "Encode `message` applying for each of its fields the function specified in
@@ -34,13 +31,14 @@
   [spec message]
   (let [out (ByteArrayOutputStream.)
         stream (DataOutputStream. out)]
-    (validate-message spec message)
-    (doseq [[field-name value] message
-            :let [function (get spec field-name)]]
-      (try
-        (apply function [stream value])
-        (catch Exception e
-          (throw (Exception. (str (.getMessage e) " writing " field-name))))))
+    (if (valid-message? spec message)
+      (doseq [[field-name value] message
+              :let [function (get spec field-name)]]
+        (try
+          (apply function [stream value])
+          (catch Exception e
+            (throw (Exception. (str (.getMessage e) " writing " field-name))))))
+      (throw (Exception. "The message doesn't respect the spec.")))
     out))
 
 (defn decode
@@ -96,13 +94,15 @@
   [command-name args request-handler response-handler]
   `(defn ~command-name
      [~@args]
-     (log/debugf "Called %s with arguments: %s"
-                 ~command-name ~@(remove '#{&} args))
+     (debug log
+            (keyword ~command-name)
+            "Called %s with arguments: %s"
+            ~command-name ~@(remove '#{&} args))
      (try
-       (with-open [s# (net/create-socket)]
+       (with-open [s# (s/create-socket)]
          (-> s#
-             (net/write-request ~request-handler ~@(remove '#{&} args))
-             (net/read-response ~response-handler)))
+             (s/write-request ~request-handler ~@(remove '#{&} args))
+             (s/read-response ~response-handler)))
        (catch Exception e#
          (ex/manage-exception {:exception-type (:type (ex-data e#))
                                :exception e#})))))
@@ -121,15 +121,17 @@
   [command-name args request-handler response-handler service]
   `(defn ~command-name
      [~@args]
-     (log/debugf "Called %s with arguments: %s"
-                 ~command-name ~@(remove '#{&} args))
+     (debug log
+            (keyword ~command-name)
+            "Called %s with arguments: %s"
+            ~command-name ~@(remove '#{&} args))
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
        (try
-         (with-open [s# (net/create-socket)]
+         (with-open [s# (s/create-socket)]
            (-> s#
-               (net/write-request ~request-handler ~@(remove '#{&} args))
-               (net/read-response ~response-handler)
+               (s/write-request ~request-handler ~@(remove '#{&} args))
+               (s/read-response ~response-handler)
                (select-keys [:session-id :token])
                (sessions/put-session! ~service))
            (sessions/read-session ~service))

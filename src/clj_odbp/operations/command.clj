@@ -16,10 +16,10 @@
   (:require [clj-odbp
              [constants :as constants]
              [utils :refer [encode decode]]]
-            [clj-odbp.specs.command :as specs]
-            [clj-odbp.serialize.binary.types :as t]
-            [clj-odbp.deserialize.binary.record :as deserialize]
-            [clj-odbp.deserialize.network-types :as d])
+            [clj-odbp.operations.specs.command :as specs]
+            [clj-odbp.binary.serialize.types :as t]
+            [clj-odbp.binary.deserialize.record :as deserialize]
+            [clj-odbp.network.read :as r])
   (:import java.io.DataInputStream))
 
 (defn get-bytes-type-length [bytes-type]
@@ -49,7 +49,7 @@
   [params]
   (if (empty? params)
     ""
-    (params-serializer {"params" params} 0)))
+    (params-serializer {"parameters" params} 0)))
 
 ;; REQUEST_COMMAND > QUERY
 (defn query-request
@@ -76,10 +76,10 @@
 
 (defn- query-list-response
   [^DataInputStream in]
-  (let [list-size (d/int-type in)]
+  (let [list-size (r/int-type in)]
     (reduce
      (fn [acc n]
-       (case (d/short-type in)
+       (case (r/short-type in)
          0 (conj acc (-> (decode in specs/record-response)
                          deserialize/deserialize-record))
          (conj acc nil)))
@@ -88,7 +88,7 @@
 
 (defn- query-single-response
   [^DataInputStream in]
-  (let [boh (d/short-type in)]
+  (let [boh (r/short-type in)]
     (-> (decode in specs/record-response)
         deserialize/deserialize-record)))
 

@@ -15,7 +15,7 @@ A Clojure driver for [OrientDB](http://orientdb.com/orientdb/) binary protocol.
 Add the necessary dependency to your project:
 
 ``` clojure
-[org.clojars.7bridges/clj-odbp "0.1.0"]
+[eu.7bridges/clj-odbp "0.2.0"]
 ```
 
 ## Usage
@@ -93,7 +93,7 @@ The following table shows how OrientDB types map to Clojure types and viceversa.
 | double        | `42.5`                                                      |
 | decimal       | `(bigdec 42.5)`                                             |
 | string        | `"foo"`                                                     |
-| binary        | `(clj-odbp.serialize.binary.types/orient-binary [100 101])` |
+| binary        | `{:_obinary [100 101]}`                                     |
 | date          | not supported                                               |
 | datetime      | `(java.util.Date.)`                                         |
 | embedded      | `{:_version 0 :_class "Test" :name "foo"}`                  |
@@ -104,6 +104,8 @@ The following table shows how OrientDB types map to Clojure types and viceversa.
 | link list     | `["#20:1" "#20:2"]`                                         |
 | link set      | `#{"#20:1" "#20:2"}`                                        |
 | link map      | `{"rid" "#20:1"}`                                           |
+| ORidBag       | `{:_oridbag {:bag []}}`                                     |
+| ORidTree      | `{:_oridtree {:changes []}}`                                |
 
 ## License
 

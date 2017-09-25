@@ -12,19 +12,29 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.configure)
+(ns clj-odbp.binary.serialize.int
+  (:import [java.nio ByteBuffer]))
 
-(def config
-  "Initial configuration map to set up the connection to OrientDB server and
-  the logging system."
-  (atom {:host "localhost"
-         :port 2424
-         :log-file "log/clj_odbp.log"
-         :log-level :fatal}))
+(defn int16
+  "Serialize an int16. Return a byte-array."
+  [n]
+  (-> (ByteBuffer/allocate 2)
+      (.putShort n)
+      .array
+      vec))
 
-(defn configure-driver
-  "Reset global `config` with the contents of `m`. e.g.:
+(defn int32
+  "Serialize an int32. Return a byte-array."
+  [n]
+  (-> (ByteBuffer/allocate 4)
+      (.putInt n)
+      .array
+      vec))
 
-  (configure-driver {:host \"test\"}) => {:host \"test\" :port 2424}"
-  [m]
-  (reset! config (merge @config m)))
+(defn int64
+  "Serialize an int64. Return a byte-array."
+  [n]
+  (-> (ByteBuffer/allocate 8)
+      (.putLong n)
+      .array
+      vec))

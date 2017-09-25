@@ -12,19 +12,13 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns clj-odbp.configure)
+(ns clj-odbp.binary.serialize.record
+  (:require [clj-odbp.binary.serialize.types :as ot]
+            [clj-odbp.logger :refer [log debug]]))
 
-(def config
-  "Initial configuration map to set up the connection to OrientDB server and
-  the logging system."
-  (atom {:host "localhost"
-         :port 2424
-         :log-file "log/clj_odbp.log"
-         :log-level :fatal}))
-
-(defn configure-driver
-  "Reset global `config` with the contents of `m`. e.g.:
-
-  (configure-driver {:host \"test\"}) => {:host \"test\" :port 2424}"
-  [m]
-  (reset! config (merge @config m)))
+(defn serialize-record
+  "Serialize `record` for OrientDB. `record` must be a Clojure map."
+  [record]
+  (let [serialized-record (ot/serialize record)]
+    (debug log ::serialize-record (str "Binary record content: " serialized-record))
+    serialized-record))
