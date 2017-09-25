@@ -49,7 +49,7 @@
   [params]
   (if (empty? params)
     ""
-    (params-serializer {"params" params} 0)))
+    (params-serializer {"parameters" params} 0)))
 
 ;; REQUEST_COMMAND > QUERY
 (defn query-request
