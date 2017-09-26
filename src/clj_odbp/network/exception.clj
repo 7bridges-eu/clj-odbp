@@ -13,38 +13,33 @@
 ;; limitations under the License.
 
 (ns clj-odbp.network.exception
-  (:require [clj-odbp.network.read :as r]
-            [clj-odbp.network.sessions :as s]
-            [clojure.string :as string])
+  (:require [clj-odbp.network.read :as r])
   (:import [java.io ByteArrayInputStream ObjectInputStream]))
 
 (defn deserialize-exception
   "De-serialize OrientDB exception from DataInputStream `in`."
   [in]
-  (let [ex-class (r/string-type in)
-        ex-message (r/string-type in)
-        useless (r/byte-type in)
-        ex-serialized (r/bytes-type in)]
-    {:class ex-class
-     :message ex-message
-     :serialized ex-serialized}))
+  (loop [status (r/byte-type in)
+         causes []]
+    (if (zero? status)
+      causes
+      (let [class (r/string-type in)
+            message (r/string-type in)]
+        (recur (r/byte-type in)
+               (conj causes {:class class
+                             :message message}))))))
 
 (defn create-exception
   "Create an ExceptionInfo based on the class of the OrientDB exception."
-  [m]
-  (let [serialized-exception (:serialized m)]
-    (-> serialized-exception
-        byte-array
-        ByteArrayInputStream.
-        ObjectInputStream.
-        .readObject)))
+  [causes]
+  (ex-info "OrientDB Internal Exception"
+           {:caused causes}))
 
 (defn handle-exception
   "De-serialize an OrientDB exception in DataInputStream `in` and throw it."
   [in]
   (let [session-id (r/int-type in)
-        token (r/bytes-type in)
-        status (r/byte-type in)]
+        token (r/bytes-type in)]
     (-> in
         deserialize-exception
         create-exception

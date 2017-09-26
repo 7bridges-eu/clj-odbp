@@ -54,9 +54,7 @@
 (defn string-type
   "Read a string from the input stream. Format is (length:int)[bytes]"
   [^DataInputStream in]
-  (let [len (int-type in)
-        buffer (byte-array len)]
-    (.read in buffer 0 len)
+  (let [buffer (bytes-type in)]
     (apply str (map char buffer))))
 
 (defn strings-type
