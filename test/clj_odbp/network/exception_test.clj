@@ -26,12 +26,13 @@
 
 (facts
  (fact
-  "deserialize-exception should return a map: {:class ex-class :message ex-message :serialized serialized-exception}"
+  "deserialize-exception should return a vector: [{:class class :message message}]"
   (let [in (let [ex-class (.getBytes "error")
                  ex-message (.getBytes "test")]
-             (provide-input (concat [0 0 0 5]
+             (provide-input (concat [1]
+                                    [0 0 0 5]
                                     ex-class
                                     [0 0 0 4]
                                     ex-message
-                                    [0 0 0 0 0])))]
-    (e/deserialize-exception in) => {:class "error" :message "test" :serialized []})))
+                                    [0])))]
+    (e/deserialize-exception in)) => [{:class "error" :message "test"}]))
