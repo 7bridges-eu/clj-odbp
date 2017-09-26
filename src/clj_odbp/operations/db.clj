@@ -17,7 +17,8 @@
              [constants :as consts]
              [utils :refer [decode encode]]]
             [clj-odbp.network.sessions :as sessions]
-            [clj-odbp.operations.specs.db :as specs])
+            [clj-odbp.operations.specs.db :as specs]
+            [clj-odbp.constants :as const])
   (:import java.io.DataInputStream))
 
 ;; REQUEST_SHUTDOWN
@@ -41,11 +42,11 @@
    specs/connect-request
    [[:operation 2]
     [:session-id -1]
-    [:driver-name "clj-odbp"]
-    [:driver-version "0.0.1"]
-    [:protocol-version 36]
+    [:driver-name const/driver-name]
+    [:driver-version const/driver-version]
+    [:protocol-version const/protocol-version]
     [:client-id ""]
-    [:serialization "onet_ser_v0"]
+    [:serialization const/serialization-name]
     [:token-session true]
     [:support-push false]
     [:collect-stats false]
@@ -65,11 +66,11 @@
    specs/db-open-request
    [[:operation 3]
     [:session-id -1]
-    [:driver-name "clj-odbp"]
-    [:driver-version "0.0.1"]
-    [:protocol-version 36]
+    [:driver-name const/driver-name]
+    [:driver-version const/driver-version]
+    [:protocol-version const/protocol-version]
     [:client-id ""]
-    [:serialization "onet_ser_v0"]
+    [:serialization const/serialization-name]
     [:token-session true]
     [:support-push false]
     [:collect-stats false]
