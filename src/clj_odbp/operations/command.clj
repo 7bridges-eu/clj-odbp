@@ -46,10 +46,10 @@
   (get-method t/serialize :embedded-record-type))
 
 (defn serialize-params
-  [params]
+  [params-name params]
   (if (empty? params)
     ""
-    (params-serializer {"parameters" params} 0)))
+    (params-serializer {params-name params} 0)))
 
 ;; REQUEST_COMMAND > QUERY
 (defn query-request
@@ -58,7 +58,7 @@
     :or {params {} non-text-limit -1 fetch-plan "*:0"}}]
   (let [session-id (:session-id connection)
         token (:token connection)
-        serialized-params (serialize-params params)]
+        serialized-params (serialize-params "params" params)]
     (encode
      specs/query-request
      [[:operation 41]
@@ -108,7 +108,7 @@
    {:keys [params] :or {params {}}}]
   (let [session-id (:session-id connection)
         token (:token connection)
-        serialized-params (serialize-params params)]
+        serialized-params (serialize-params "parameters" params)]
     (encode
      specs/execute-request
      [[:operation 41]
