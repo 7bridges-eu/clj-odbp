@@ -35,4 +35,23 @@
                                     [0 0 0 4]
                                     ex-message
                                     [0])))]
-    (e/deserialize-exception in)) => [{:class "error" :message "test"}]))
+    (e/deserialize-exception in)) => [{:class "error" :message "test"}])
+ (fact
+  "deserialize-exception should return a vector: [{:class class :message message}]"
+  (let [in (let [ex-class1 (.getBytes "error1")
+                 ex-message1 (.getBytes "test1")
+                 ex-class2 (.getBytes "error2")
+                 ex-message2 (.getBytes "test2")]
+             (provide-input (concat [1]
+                                    [0 0 0 6]
+                                    ex-class1
+                                    [0 0 0 5]
+                                    ex-message1
+                                    [1]
+                                    [0 0 0 6]
+                                    ex-class2
+                                    [0 0 0 5]
+                                    ex-message2
+                                    [0])))]
+    (e/deserialize-exception in)) => [{:class "error1" :message "test1"}
+                                      {:class "error2" :message "test2"}]))
