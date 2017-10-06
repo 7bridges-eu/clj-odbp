@@ -28,6 +28,7 @@
         socket (Socket. host port)
         reader (DataInputStream. (.getInputStream socket))
         version (.readShort reader)]
+    (debug log ::create-socket (format "Opening connection to %s:%d" host port))
     (when (> version supported-protocol-version)
       (throw (Exception.
               (str "Unsupported binary protocol version "
@@ -40,7 +41,7 @@
   [^Socket socket command & args]
   (let [out (.getOutputStream socket)
         request (apply command args)]
-    (debug log ::write-request "request: %s" (vec (.toByteArray request)))
+    (debug log ::write-request (format "request: %s" (vec (.toByteArray request))))
     (.writeTo request out)
     (.flush out))
   socket)
@@ -53,6 +54,6 @@
         status (.readByte in)]
     (if (= 0 status)
       (let [response (command in)]
-        (debug log ::read-response "response: %s" response)
+        (debug log ::read-response (format "response: %s" response))
         response)
       (e/handle-exception in))))

@@ -50,9 +50,10 @@
     (>= (get log-levels level -1)
         (get log-levels configured-level 100))))
 
-(defrecord FileLogger [file] Logger
+(defrecord FileLogger [] Logger
            (log [this message]
-             (let [datetime (.format datetime-formatter (Date.))
+             (let [file (get @config :log-file)
+                   datetime (.format datetime-formatter (Date.))
                    place (get message :place "Unknown")
                    level (get message :level :info)
                    level-string (-> level name .toUpperCase)
@@ -66,5 +67,4 @@
                        :append true)))))
 
 (def log
-  (let [log-path (get @config :log-file)]
-    (FileLogger. log-path)))
+  (FileLogger.))

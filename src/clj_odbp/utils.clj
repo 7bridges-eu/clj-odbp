@@ -95,9 +95,9 @@
   `(defn ~command-name
      [~@args]
      (debug log
-            (keyword ~command-name)
-            "Called %s with arguments: %s"
-            ~command-name ~@(remove '#{&} args))
+            (keyword (str ~command-name))
+            (format "Called %s with arguments: %s"
+                    (str ~command-name) (str ~@(remove '#{&} args))))
      (try
        (with-open [s# (s/create-socket)]
          (-> s#
@@ -123,8 +123,8 @@
      [~@args]
      (debug log
             (keyword ~command-name)
-            "Called %s with arguments: %s"
-            ~command-name ~@(remove '#{&} args))
+            (format "Called %s with arguments: %s"
+                    ~command-name ~@(remove '#{&} args)))
      (if (sessions/has-session? ~service)
        (sessions/read-session ~service)
        (try
