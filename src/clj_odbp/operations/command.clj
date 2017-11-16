@@ -97,6 +97,7 @@
   (let [generic-response (decode in specs/sync-generic-response)
         result-type (:result-type generic-response)]
     (case result-type
+      \n []
       \l (query-list-response in)
       \s (query-list-response in)
       \r (query-single-response in)

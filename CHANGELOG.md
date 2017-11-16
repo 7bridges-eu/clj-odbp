@@ -6,10 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### New features
+### Upcoming features
 
 * [#16](https://github.com/7bridges-eu/clj-odbp/issues/16) Support multiple
   connections to different db instances.
+
+## [0.2.2] - (2017-11-16)
+
+### Bugs Fixed
+
+* [#18](https://github.com/7bridges-eu/clj-odbp/issues/18) Handle 'n' response
+  type in REQUEST_COMMAND
+* Fixed a couple of log messages.
 
 ## [0.2.1] - (2017-09-26)
 
