@@ -15,7 +15,7 @@ A Clojure driver for [OrientDB](http://orientdb.com/orientdb/) binary protocol.
 Add the necessary dependency to your project:
 
 ``` clojure
-[eu.7bridges/clj-odbp "0.2.2-SNAPSHOT"]
+[eu.7bridges/clj-odbp "0.2.2"]
 ```
 
 ## Usage
