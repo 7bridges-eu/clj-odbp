@@ -8,7 +8,7 @@ width="500px" height="122px"/></a>
 
 A Clojure driver for [OrientDB](http://orientdb.com/orientdb/) binary protocol.
 
-[![Build Status](https://travis-ci.org/7bridges-eu/clj-odbp.svg?branch=master)](https://travis-ci.org/7bridges-eu/clj-odbp) [![Clojars Project](https://img.shields.io/clojars/v/eu.7bridges/clj-odbp.svg)](https://clojars.org/eu.7bridges/clj-odbp)
+[![Build Status](https://travis-ci.org/7bridges-eu/clj-odbp.svg?branch=master)](https://travis-ci.org/7bridges-eu/clj-odbp) [![Clojars Project](https://img.shields.io/clojars/v/eu.7bridges/clj-odbp.svg)](https://clojars.org/eu.7bridges/clj-odbp) [![Dependencies Status](https://versions.deps.co/7bridges-eu/clj-odbp/status.svg)](https://versions.deps.co/7bridges-eu/clj-odbp)
 
 ## Installation
 
