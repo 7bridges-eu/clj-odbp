@@ -42,6 +42,14 @@
      1 (get-bytes-type-length serialized-params)
      1))
 
+(defn get-script-payload-length
+  [language command serialized-params]
+  (+ 4 (count constants/request-command-script)
+     4 (count language)
+     4 (count command)
+     1 (get-bytes-type-length serialized-params)
+     1))
+
 (def ^:const params-serializer
   (get-method t/serialize :embedded-record-type))
 
@@ -119,6 +127,30 @@
       [:payload-length (get-execute-payload-length command
                                                    serialized-params)]
       [:class-name constants/request-command-execute]
+      [:text command]
+      [:has-simple-params (not (empty? serialized-params))]
+      [:simple-params serialized-params]
+      [:has-complex-params false]
+      [:complex-params []]])))
+
+;; REQUEST_COMMAND > SCRIPT
+(defn script-request
+  [connection command language
+   {:keys [params] :or {params {}}}]
+  (let [session-id (:session-id connection)
+        token (:token connection)
+        serialized-params (serialize-params "parameters" params)]
+    (encode
+     specs/script-request
+     [[:operation 41]
+      [:session-id session-id]
+      [:token token]
+      [:mode constants/request-command-sync-mode]
+      [:payload-length (get-script-payload-length language
+                                                  command
+                                                  serialized-params)]
+      [:class-name constants/request-command-script]
+      [:language language]
       [:text command]
       [:has-simple-params (not (empty? serialized-params))]
       [:simple-params serialized-params]

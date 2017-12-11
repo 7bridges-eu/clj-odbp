@@ -102,3 +102,8 @@
   [connection command & opts]
   command/execute-request
   command/query-response)
+
+(defcommand execute-script
+  [connection command language & opts]
+  command/script-request
+  command/query-response)
