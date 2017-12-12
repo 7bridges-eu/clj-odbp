@@ -79,6 +79,37 @@ user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
 
 For further details check [API documentation](https://7bridges-eu.github.io/clj-odbp/).
 
+### Transactions
+
+You can use OrientDB transactions through `clj-odbp.core/execute-script`:
+
+``` clojure
+user> (require '[clj-odbp.core :as odbp])
+user> (require ’[clj-odbp.constants :as db-const])
+user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")
+            script "BEGIN\n
+                    let account = CREATE VERTEX Account SET name = 'Luke'\n
+                    let city = SELECT FROM City WHERE name = 'London' LOCK RECORD\n
+                    let e = CREATE EDGE Lives FROM $account TO $city\n
+                    COMMIT\n
+                    return $e"]
+        (odbp/execute-script connection script db-const/language-sql))
+```
+
+Queries for `clj-odbp.core/execute-script` can be parametrized:
+
+``` clojure
+user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")
+            script "BEGIN\n
+                    let account = CREATE VERTEX Account SET name = :account\n
+                    let city = SELECT FROM City WHERE name =  :city LOCK RECORD\n
+                    let e = CREATE EDGE Lives FROM $account TO $city\n
+                    COMMIT\n
+                    return $e"
+            params {:account "Luke" :city "London"}]
+        (odbp/execute-script connection script db-const/language-sql :params params))
+```
+
 ### Types
 
 The following table shows how OrientDB types map to Clojure types and viceversa.
