@@ -69,12 +69,12 @@ user> (require '[clj-odbp.core :as odbp])
 user> (require ’[clj-odbp.constants :as db-const])
 user> (def connection-parameters {:host "localhost" :port 2424})
 user> (with-open [session (odbp/db-open connection-parameters "test-db" "<username>" "<password>")
-            script "BEGIN\n
-                    let account = CREATE VERTEX Account SET name = 'Luke'\n
-                    let city = SELECT FROM City WHERE name = 'London' LOCK RECORD\n
-                    let e = CREATE EDGE Lives FROM $account TO $city\n
-                    COMMIT\n
-                    return $e"]
+                  script "BEGIN\n
+                          let account = CREATE VERTEX Account SET name = 'Luke'\n
+                          let city = SELECT FROM City WHERE name = 'London' LOCK RECORD\n
+                          let e = CREATE EDGE Lives FROM $account TO $city\n
+                          COMMIT\n
+                          return $e"]
         (odbp/execute-script session script db-const/language-sql))
 ```
 
@@ -82,13 +82,13 @@ Queries for `clj-odbp.core/execute-script` can be parametrized:
 
 ``` clojure
 user> (with-open [session (odbp/db-open connection-parameters "test-db" "<username>" "<password>")
-            script "BEGIN\n
-                    let account = CREATE VERTEX Account SET name = :account\n
-                    let city = SELECT FROM City WHERE name =  :city LOCK RECORD\n
-                    let e = CREATE EDGE Lives FROM $account TO $city\n
-                    COMMIT\n
-                    return $e"
-            params {:account "Luke" :city "London"}]
+                  script "BEGIN\n
+                          let account = CREATE VERTEX Account SET name = :account\n
+                          let city = SELECT FROM City WHERE name =  :city LOCK RECORD\n
+                          let e = CREATE EDGE Lives FROM $account TO $city\n
+                          COMMIT\n
+                          return $e"
+                  params {:account "Luke" :city "London"}]
         (odbp/execute-script session script db-const/language-sql :params params))
 ```
 
