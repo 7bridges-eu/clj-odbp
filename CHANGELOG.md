@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Upcoming features
 
+* [#20](https://github.com/7bridges-eu/clj-odbp/issues/20) Implementation of a
+  SQL DSL
+* [#19](https://github.com/7bridges-eu/clj-odbp/issues/19) Add support for
+  transactions
 * [#16](https://github.com/7bridges-eu/clj-odbp/issues/16) Support multiple
   connections to different db instances.
 
