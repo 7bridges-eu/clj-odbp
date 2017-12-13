@@ -13,11 +13,10 @@
 ;; limitations under the License.
 
 (ns clj-odbp.utils
-  (:require [clj-odbp.network
-             [socket :as s]
-             [sessions :as sessions]
-             [exception :as ex]]
-            [clj-odbp.logger :refer [log debug]])
+  (:require [clj-odbp.logger :refer [debug log]]
+            [clj-odbp.network.exception :as ex]
+            [clj-odbp.network.sessions :as sessions]
+            [clj-odbp.network.socket :as s])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn valid-message?
@@ -82,59 +81,3 @@
   "Given a cluster-id and a record-position returns a RID in string format."
   [cluster-id record-position]
   (str "#" cluster-id ":" record-position))
-
-(defmacro defcommand
-  "Create a function named `command-name` that accepts the argument specified
-  in `args`. `request-handler` and `response-handler` must be functions. e.g.:
-
-  (defcommand test
-    [arg-1 arg-2]
-    request-handler-fn
-    response-handler-fn)"
-  [command-name args request-handler response-handler]
-  `(defn ~command-name
-     [~@args]
-     (debug log
-            (keyword (str ~command-name))
-            (format "Called %s with arguments: %s"
-                    (str ~command-name) (str ~@(remove '#{&} args))))
-     (try
-       (with-open [s# (s/create-socket)]
-         (-> s#
-             (s/write-request ~request-handler ~@(remove '#{&} args))
-             (s/read-response ~response-handler)))
-       (catch Exception e#
-         (ex/manage-exception {:exception-type (:type (ex-data e#))
-                               :exception e#})))))
-
-(defmacro defconnection
-  "Create a function named `command-name` that accepts the argument specified
-  in `args`. `request-handler` and `response-handler` must be functions.
-  `service` is a keyword which indicates the service to which the connection
-  applies. e.g.:
-
-  (defconnection test
-    [arg-1 arg-2]
-    request-handler-fn
-    response-handler-fn
-    :db)"
-  [command-name args request-handler response-handler service]
-  `(defn ~command-name
-     [~@args]
-     (debug log
-            (keyword ~command-name)
-            (format "Called %s with arguments: %s"
-                    ~command-name ~@(remove '#{&} args)))
-     (if (sessions/has-session? ~service)
-       (sessions/read-session ~service)
-       (try
-         (with-open [s# (s/create-socket)]
-           (-> s#
-               (s/write-request ~request-handler ~@(remove '#{&} args))
-               (s/read-response ~response-handler)
-               (select-keys [:session-id :token])
-               (sessions/put-session! ~service))
-           (sessions/read-session ~service))
-         (catch Exception e#
-           (ex/manage-exception {:exception-type (:type (ex-data e#))
-                                 :exception e#}))))))

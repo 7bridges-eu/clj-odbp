@@ -13,7 +13,7 @@
 ;; limitations under the License.
 
 (ns clj-odbp.logger
-  (:require [clj-odbp.configure :refer [config]])
+  (:require [clj-odbp.configure :refer [log-config]])
   (:import [java.util Date]
            [java.text SimpleDateFormat]
            [java.util Locale]))
@@ -46,13 +46,13 @@
   (generic-log logger :warning place messages))
 
 (defn- to-log? [level]
-  (let [configured-level (get @config :log-level)]
+  (let [configured-level (get @log-config :log-level)]
     (>= (get log-levels level -1)
         (get log-levels configured-level 100))))
 
 (defrecord FileLogger [] Logger
            (log [this message]
-             (let [file (get @config :log-file)
+             (let [file (get @log-config :log-file)
                    datetime (.format datetime-formatter (Date.))
                    place (get message :place "Unknown")
                    level (get message :level :info)
