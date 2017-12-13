@@ -86,11 +86,11 @@
 
 ;; REQUEST_DB_CREATE
 (defn db-create-request
-  [connection db-name
+  [session db-name
    {:keys [db-type storage-type backup-path]
     :or {db-type "graph" storage-type "plocal" backup-path ""}}]
-  (let [session-id (:session-id connection)
-        token (:token connection)]
+  (let [session-id (:session-id session)
+        token (:token session)]
     (encode
      specs/db-create-request
      [[:operation 4]
@@ -124,9 +124,9 @@
 
 ;; REQUEST_DB_EXIST
 (defn db-exist-request
-  [connection db-name]
-  (let [session-id (:session-id connection)
-        token (:token connection)]
+  [session db-name]
+  (let [session-id (:session-id session)
+        token (:token session)]
     (encode
      specs/db-exist-request
      [[:operation 6]
@@ -146,9 +146,9 @@
 
 ;; REQUEST_DB_DROP
 (defn db-drop-request
-  [connection db-name]
-  (let [session-id (:session-id connection)
-        token (:token connection)]
+  [session db-name]
+  (let [session-id (:session-id session)
+        token (:token session)]
     (encode
      specs/db-drop-request
      [[:operation 7]
@@ -166,9 +166,9 @@
 
 ;; REQUEST_DB_SIZE
 (defn db-size-request
-  [connection]
-  (let [session-id (:session-id connection)
-        token (:token connection)]
+  [session]
+  (let [session-id (:session-id session)
+        token (:token session)]
     (encode
      specs/db-size-request
      [[:operation 8]
@@ -186,9 +186,9 @@
 
 ;; REQUEST_DB_COUNTRECORDS
 (defn db-countrecords-request
-  [connection]
-  (let [session-id (:session-id connection)
-        token (:token connection)]
+  [session]
+  (let [session-id (:session-id session)
+        token (:token session)]
     (encode
      specs/db-countrecords-request
      [[:operation 9]
@@ -206,9 +206,9 @@
 
 ;; REQUEST_DB_RELOAD
 (defn db-reload-request
-  [connection]
-  (let [session-id (:session-id connection)
-        token (:token connection)]
+  [session]
+  (let [session-id (:session-id session)
+        token (:token session)]
     (encode
      specs/db-reload-request
      [[:operation 73]

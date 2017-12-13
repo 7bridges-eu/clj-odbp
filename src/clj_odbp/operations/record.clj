@@ -23,9 +23,9 @@
   (:import java.io.DataInputStream))
 
 (defn record-load-request
-  [connection rid]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  [session rid]
+  (let [session-id (:session-id session)
+        token (:token session)
         [cluster-id record-position] (parse-rid rid)]
     (encode
      specs/record-load-request
@@ -53,9 +53,9 @@
 
 ;; REQUEST_RECORD_CREATE
 (defn record-create-request
-  [connection record-content]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  [session record-content]
+  (let [session-id (:session-id session)
+        token (:token session)
         record-bytes (serialize-record record-content)]
     (encode
      specs/record-create-request
@@ -71,8 +71,9 @@
   [^DataInputStream in]
   (let [response (decode in specs/record-create-response)
         session (select-keys response [:session-id :token])
-        rid (apply compose-rid (vals (select-keys response
-                                                  [:cluster-id :record-position])))
+        rid (->> (select-keys response [:cluster-id :record-position])
+                 vals
+                 (apply compose-rid))
         version (:record-version response)]
     (when-not (empty? (:token session))
       (session/reset-session! :db)
@@ -83,9 +84,9 @@
 
 ;; REQUEST_RECORD_UPDATE
 (defn record-update-request
-  [connection rid record-content]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  [session rid record-content]
+  (let [session-id (:session-id session)
+        token (:token session)
         [cluster-id position-id] (parse-rid rid)
         record-bytes (serialize-record record-content)]
     (encode
@@ -112,9 +113,9 @@
 
 ;; REQUEST_RECORD_DELETE
 (defn record-delete-request
-  [connection rid]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  [session rid]
+  (let [session-id (:session-id session)
+        token (:token session)
         [cluster-id record-position] (parse-rid rid)]
     (encode
      specs/record-delete-request

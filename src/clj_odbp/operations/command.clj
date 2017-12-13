@@ -61,11 +61,11 @@
 
 ;; REQUEST_COMMAND > QUERY
 (defn query-request
-  [connection command
+  [session command
    {:keys [params non-text-limit fetch-plan]
     :or {params {} non-text-limit -1 fetch-plan "*:0"}}]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  (let [session-id (:session-id session)
+        token (:token session)
         serialized-params (serialize-params "params" params)]
     (encode
      specs/query-request
@@ -113,10 +113,10 @@
 
 ;; REQUEST_COMMAND > EXECUTE
 (defn execute-request
-  [connection command
+  [session command
    {:keys [params] :or {params {}}}]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  (let [session-id (:session-id session)
+        token (:token session)
         serialized-params (serialize-params "parameters" params)]
     (encode
      specs/execute-request
@@ -135,10 +135,10 @@
 
 ;; REQUEST_COMMAND > SCRIPT
 (defn script-request
-  [connection command language
+  [session command language
    {:keys [params] :or {params {}}}]
-  (let [session-id (:session-id connection)
-        token (:token connection)
+  (let [session-id (:session-id session)
+        token (:token session)
         serialized-params (serialize-params "parameters" params)]
     (encode
      specs/script-request
