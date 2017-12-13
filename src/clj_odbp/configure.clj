@@ -14,17 +14,15 @@
 
 (ns clj-odbp.configure)
 
-(def config
-  "Initial configuration map to set up the connection to OrientDB server and
-  the logging system."
-  (atom {:host "localhost"
-         :port 2424
-         :log-file "log/clj_odbp.log"
+(def log-config
+  "Initial configuration map to set up the logging system."
+  (atom {:log-file "log/clj_odbp.log"
          :log-level :fatal}))
 
-(defn configure-driver
-  "Reset global `config` with the contents of `m`. e.g.:
+(defn configure-log
+  "Reset global `log-config` with the contents of `m`. e.g.:
 
-  (configure-driver {:host \"test\"}) => {:host \"test\" :port 2424}"
+  (configure-log {:log-level :debug}) => {:log-file \"log/clj_odbp.log
+                                          :log-level :debug}"
   [m]
-  (reset! config (merge @config m)))
+  (reset! log-config (merge @log-config m)))

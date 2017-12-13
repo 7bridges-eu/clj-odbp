@@ -23,9 +23,8 @@
 
 (defn create-socket
   "Connect to the OrientDB server and check the version."
-  []
-  (let [{:keys [host port]} @c/config
-        socket (Socket. host port)
+  [host port]
+  (let [socket (Socket. host port)
         reader (DataInputStream. (.getInputStream socket))
         version (.readShort reader)]
     (debug log ::create-socket (format "Opening connection to %s:%d" host port))

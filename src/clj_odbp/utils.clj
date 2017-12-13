@@ -13,11 +13,10 @@
 ;; limitations under the License.
 
 (ns clj-odbp.utils
-  (:require [clj-odbp.network
-             [socket :as s]
-             [sessions :as sessions]
-             [exception :as ex]]
-            [clj-odbp.logger :refer [log debug]])
+  (:require [clj-odbp.logger :refer [debug log]]
+            [clj-odbp.network.exception :as ex]
+            [clj-odbp.network.sessions :as sessions]
+            [clj-odbp.network.socket :as s])
   (:import [java.io ByteArrayOutputStream DataInputStream DataOutputStream]))
 
 (defn valid-message?

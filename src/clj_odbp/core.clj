@@ -13,16 +13,14 @@
 ;; limitations under the License.
 
 (ns clj-odbp.core
-  (:require [clj-odbp
-             [utils :refer [defcommand defconnection]]]
-            [clj-odbp.network.socket :as s]
-            [clj-odbp.operations
-             [command :as command]
-             [db :as db]
-             [record :as record]]))
+  (:require [clj-odbp.network.socket :as s]
+            [clj-odbp.operations.command :as command]
+            [clj-odbp.operations.db :as db]
+            [clj-odbp.operations.record :as record]
+            [clj-odbp.session :refer [defcommand defsession]]))
 
-(defcommand connect-server
-  [username password]
+(defsession connect-server
+  [connection-params username password]
   db/connect-request
   db/connect-response)
 
@@ -31,13 +29,13 @@
   db/shutdown-request
   db/shutdown-response)
 
-(defcommand db-open
-  [db-name username password]
+(defsession db-open
+  [connection-parameters db-name username password]
   db/db-open-request
   db/db-open-response)
 
 (defcommand db-create
-  [connection db-name & opts]
+  [session db-name & opts]
   db/db-create-request
   db/db-create-response)
 
@@ -49,61 +47,61 @@
     {}))
 
 (defcommand db-exist
-  [connection db-name]
+  [session db-name]
   db/db-exist-request
   db/db-exist-response)
 
 (defcommand db-drop
-  [connection db-name]
+  [session db-name]
   db/db-drop-request
   db/db-drop-response)
 
 (defcommand db-size
-  [connection]
+  [session]
   db/db-size-request
   db/db-size-response)
 
 (defcommand db-countrecords
-  [connection]
+  [session]
   db/db-countrecords-request
   db/db-countrecords-response)
 
 (defcommand db-reload
-  [connection]
+  [session]
   db/db-reload-request
   db/db-reload-response)
 
 (defcommand record-load
-  [connection rid]
+  [session rid]
   record/record-load-request
   record/record-load-response)
 
 (defcommand record-create
-  [connection record-content]
+  [session record-content]
   record/record-create-request
   record/record-create-response)
 
 (defcommand record-update
-  [connection rid record-content]
+  [session rid record-content]
   record/record-update-request
   record/record-update-response)
 
 (defcommand record-delete
-  [connection rid]
+  [session rid]
   record/record-delete-request
   record/record-delete-response)
 
 (defcommand query-command
-  [connection query & opts]
+  [session query & opts]
   command/query-request
   command/query-response)
 
 (defcommand execute-command
-  [connection command & opts]
+  [session command & opts]
   command/execute-request
   command/query-response)
 
 (defcommand execute-script
-  [connection command language & opts]
+  [session command language & opts]
   command/script-request
   command/query-response)
