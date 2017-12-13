@@ -20,26 +20,6 @@ Add the necessary dependency to your project:
 
 ## Usage
 
-### Driver configuration
-
-`clj-odbp` comes with default settings with regard to OrientDB connection
-and logging.
-
-``` clojure
-user> (require '[clj-odbp.configure :as c])
-user> @c/config
-;; => {:log-level :fatal, :log-file "log/clj_odbp.log", :port 2424, :host "localhost", :log-rotation-frequency :daily}
-```
-
-To change the default settings, you need to use
-`clj-odbp.configure/configure-driver`.
-
-``` clojure
-user> (c/configure-driver {:host "my-orientdb-server" :log-level :debug})
-user> @c/config
-;; => {:log-level :debug, :log-file "log/clj_odbp.log", :port 2424, :host "my-orientdb-server", :log-rotation-frequency :daily}
-```
-
 ### Driver usage
 
 Connect to an OrientDB server:
@@ -52,29 +32,29 @@ user> (odbp/connect-server "<username>" "<password>")
 Create a new database:
 
 ``` clojure
-user> (let [connection (odbp/connect-server "<username>" "<password>")]
-        (odbp/db-create connection "test-db"))
+user> (let [session (odbp/connect-server "<username>" "<password>")]
+        (odbp/db-create session "test-db"))
 ```
 
 Check if a database exists:
 
 ``` clojure
-user> (let [connection (odbp/connect-server "<username>" "<password>")]
-        (odbp/db-exist connection "test-db"))
+user> (let [session (odbp/connect-server "<username>" "<password>")]
+        (odbp/db-exist session "test-db"))
 ```
 
 Connect to a database and create a vertex:
 
 ``` clojure
-user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
-        (odbp/execute-command connection "create class Test extends V"))
+user> (let [session (odbp/db-open "test-db" "<username>" "<password>")]
+        (odbp/execute-command session "create class Test extends V"))
 ```
 
 Connect to a database and create a record:
 
 ``` clojure
-user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")]
-        (odbp/record-create connection {:_class "Test" :text "test property"}))
+user> (let [session (odbp/db-open "test-db" "<username>" "<password>")]
+        (odbp/record-create session {:_class "Test" :text "test property"}))
 ```
 
 For further details check [API documentation](https://7bridges-eu.github.io/clj-odbp/).
@@ -86,20 +66,20 @@ You can use OrientDB transactions through `clj-odbp.core/execute-script`:
 ``` clojure
 user> (require '[clj-odbp.core :as odbp])
 user> (require ’[clj-odbp.constants :as db-const])
-user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")
+user> (let [session (odbp/db-open "test-db" "<username>" "<password>")
             script "BEGIN\n
                     let account = CREATE VERTEX Account SET name = 'Luke'\n
                     let city = SELECT FROM City WHERE name = 'London' LOCK RECORD\n
                     let e = CREATE EDGE Lives FROM $account TO $city\n
                     COMMIT\n
                     return $e"]
-        (odbp/execute-script connection script db-const/language-sql))
+        (odbp/execute-script session script db-const/language-sql))
 ```
 
 Queries for `clj-odbp.core/execute-script` can be parametrized:
 
 ``` clojure
-user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")
+user> (let [session (odbp/db-open "test-db" "<username>" "<password>")
             script "BEGIN\n
                     let account = CREATE VERTEX Account SET name = :account\n
                     let city = SELECT FROM City WHERE name =  :city LOCK RECORD\n
@@ -107,7 +87,26 @@ user> (let [connection (odbp/db-open "test-db" "<username>" "<password>")
                     COMMIT\n
                     return $e"
             params {:account "Luke" :city "London"}]
-        (odbp/execute-script connection script db-const/language-sql :params params))
+        (odbp/execute-script session script db-const/language-sql :params params))
+```
+
+### Log configuration
+
+`clj-odbp` comes with default settings with regard to logging.
+
+``` clojure
+user> (require '[clj-odbp.configure :as c])
+user> @c/log-config
+;; => {:log-level :fatal, :log-file "log/clj_odbp.log"}
+```
+
+To change the default settings, you need to use
+`clj-odbp.configure/configure-log`.
+
+``` clojure
+user> (c/configure-log {:log-level :debug})
+user> @c/log-config
+;; => {:log-level :debug, :log-file "log/clj_odbp.log"}
 ```
 
 ### Types
