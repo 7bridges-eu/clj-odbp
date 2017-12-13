@@ -26,34 +26,35 @@ Connect to an OrientDB server:
 
 ``` clojure
 user> (require '[clj-odbp.core :as odbp])
-user> (odbp/connect-server "<username>" "<password>")
+user> (def connection-parameters {:host "localhost" :port 2424})
+user> (odbp/connect-server connection-parameters "<username>" "<password>")
 ```
 
 Create a new database:
 
 ``` clojure
-user> (let [session (odbp/connect-server "<username>" "<password>")]
+user> (with-open [session (odbp/connect-server connection-parameters "<username>" "<password>")]
         (odbp/db-create session "test-db"))
 ```
 
 Check if a database exists:
 
 ``` clojure
-user> (let [session (odbp/connect-server "<username>" "<password>")]
+user> (with-open [session (odbp/connect-server connection-parameters "<username>" "<password>")]
         (odbp/db-exist session "test-db"))
 ```
 
 Connect to a database and create a vertex:
 
 ``` clojure
-user> (let [session (odbp/db-open "test-db" "<username>" "<password>")]
+user> (with-open [session (odbp/db-open connection-parameters "test-db" "<username>" "<password>")]
         (odbp/execute-command session "create class Test extends V"))
 ```
 
 Connect to a database and create a record:
 
 ``` clojure
-user> (let [session (odbp/db-open "test-db" "<username>" "<password>")]
+user> (with-open [session (odbp/db-open connection-parameters "test-db" "<username>" "<password>")]
         (odbp/record-create session {:_class "Test" :text "test property"}))
 ```
 
@@ -66,7 +67,8 @@ You can use OrientDB transactions through `clj-odbp.core/execute-script`:
 ``` clojure
 user> (require '[clj-odbp.core :as odbp])
 user> (require ’[clj-odbp.constants :as db-const])
-user> (let [session (odbp/db-open "test-db" "<username>" "<password>")
+user> (def connection-parameters {:host "localhost" :port 2424})
+user> (with-open [session (odbp/db-open connection-parameters "test-db" "<username>" "<password>")
             script "BEGIN\n
                     let account = CREATE VERTEX Account SET name = 'Luke'\n
                     let city = SELECT FROM City WHERE name = 'London' LOCK RECORD\n
