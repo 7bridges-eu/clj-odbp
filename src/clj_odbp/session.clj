@@ -15,10 +15,7 @@
 (ns clj-odbp.session
   (:require [clj-odbp.logger :refer [debug log]]
             [clj-odbp.network.exception :as ex]
-            [clj-odbp.network.socket :as s]
-            [clj-odbp.operations.command :as command]
-            [clj-odbp.operations.db :as db]
-            [clj-odbp.operations.record :as record]))
+            [clj-odbp.network.socket :as s]))
 
 (defprotocol Session
   "A closable Session."
