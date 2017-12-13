@@ -81,7 +81,7 @@ user> (with-open [session (odbp/db-open connection-parameters "test-db" "<userna
 Queries for `clj-odbp.core/execute-script` can be parametrized:
 
 ``` clojure
-user> (let [session (odbp/db-open "test-db" "<username>" "<password>")
+user> (with-open [session (odbp/db-open connection-parameters "test-db" "<username>" "<password>")
             script "BEGIN\n
                     let account = CREATE VERTEX Account SET name = :account\n
                     let city = SELECT FROM City WHERE name =  :city LOCK RECORD\n
