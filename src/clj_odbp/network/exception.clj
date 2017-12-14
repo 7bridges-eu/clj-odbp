@@ -35,11 +35,20 @@
   (ex-info "OrientDB Internal Exception"
            {:caused causes}))
 
-(defn handle-exception
+(defn handle-command-exception
   "De-serialize an OrientDB exception in DataInputStream `in` and throw it."
   [in]
   (let [session-id (r/int-type in)
         token (r/bytes-type in)]
+    (-> in
+        deserialize-exception
+        create-exception
+        throw)))
+
+(defn handle-session-exception
+  "De-serialize an OrientDB exception in DataInputStream `in` and throw it."
+  [in]
+  (let [session-id (r/int-type in)]
     (-> in
         deserialize-exception
         create-exception

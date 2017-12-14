@@ -46,13 +46,13 @@
   socket)
 
 (defn read-response
-  "Read the data in `socket` and apply `command` to it. If `socket`
-  contains an exception, it is handled by clj-odbp.deserialize.exception/handle-exception."
-  [^Socket socket command]
+  "Read the data in `socket` and apply `command` to it. If `socket` contains an
+  exception, it is handled by `handle-exception-fn`."
+  [^Socket socket command handle-exception-fn]
   (let [in (DataInputStream. (.getInputStream socket))
         status (.readByte in)]
     (if (= 0 status)
       (let [response (command in)]
         (debug log ::read-response (format "response: %s" response))
         response)
-      (e/handle-exception in))))
+      (handle-exception-fn in))))

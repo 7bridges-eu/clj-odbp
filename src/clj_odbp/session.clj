@@ -55,7 +55,7 @@
              socket# (s/create-socket host# port#)
              s# (-> socket#
                     (s/write-request ~request-fn ~@(remove '#{&} (rest args)))
-                    (s/read-response ~response-fn))
+                    (s/read-response ~response-fn ex/handle-session-exception))
              {session-id# :session-id token# :token} s#]
          (->OrientSession socket# session-id# token#))
        (catch Exception e#
@@ -83,7 +83,7 @@
              auth# (select-keys session# [:session-id :token])]
          (-> socket#
              (s/write-request ~request-fn auth# ~@(remove '#{&} (rest args)))
-             (s/read-response ~response-fn)))
+             (s/read-response ~response-fn ex/handle-command-exception)))
        (catch Exception e#
          (ex/manage-exception {:exception-type (:type (ex-data e#))
                                :exception e#})))))
