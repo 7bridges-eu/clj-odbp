@@ -13,8 +13,7 @@
 ;; limitations under the License.
 
 (ns clj-odbp.network.write
-  (import
-   [java.io ByteArrayOutputStream DataOutputStream]))
+  (:import [java.io ByteArrayOutputStream DataOutputStream]))
 
 (defn bool-type
   "Write a boolean in form of a byte (0/1) and return the stream."
