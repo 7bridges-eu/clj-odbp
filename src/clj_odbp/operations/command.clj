@@ -19,7 +19,8 @@
             [clj-odbp.operations.specs.command :as specs]
             [clj-odbp.binary.serialize.types :as t]
             [clj-odbp.binary.deserialize.record :as deserialize]
-            [clj-odbp.network.read :as r])
+            [clj-odbp.network.read :as r]
+            [clj-odbp.logger :refer [log debug]])
   (:import java.io.DataInputStream))
 
 (defn get-bytes-type-length [bytes-type]
@@ -67,6 +68,7 @@
   (let [session-id (:session-id session)
         token (:token session)
         serialized-params (serialize-params "params" params)]
+    (debug log ::query-request (str "Binary parameters content: " serialized-params))
     (encode
      specs/query-request
      [[:operation 41]
@@ -118,6 +120,7 @@
   (let [session-id (:session-id session)
         token (:token session)
         serialized-params (serialize-params "parameters" params)]
+    (debug log ::execute-request (str "Binary parameters content: " serialized-params))
     (encode
      specs/execute-request
      [[:operation 41]
@@ -140,6 +143,7 @@
   (let [session-id (:session-id session)
         token (:token session)
         serialized-params (serialize-params "parameters" params)]
+    (debug log ::script-request (str "Binary parameters content: " serialized-params))
     (encode
      specs/script-request
      [[:operation 41]
