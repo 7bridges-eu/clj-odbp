@@ -20,17 +20,36 @@
      ([~@args]
       (~name {} ~@args))
      ([m# ~@args]
-      (merge m# ~body))))
+      (-> m#
+          ~body))))
 
-(defstmt insert [class fields]
-  (assoc {} :insert
-         {:class class
-          :fields (utils/collify fields)}))
-
-(defstmt select [fields]
-  (assoc {} :select
+(defstmt SELECT [fields]
+  (assoc :select
          (utils/collify fields)))
 
-(defstmt from [table]
-  (assoc {} :from
-         table))
+(defstmt INSERT [class]
+  (assoc :insert class))
+
+(defstmt UPDATE [class]
+  (assoc :update class))
+
+(defstmt SET [fields]
+  (assoc :set fields))
+
+(defstmt VALUES [fields]
+  (assoc :values fields))
+
+(defstmt FROM [table]
+  (assoc :from table))
+
+(defstmt WHERE [conditions]
+  (assoc :where [conditions]))
+
+(defn AND [& conditions]
+  (apply vector :AND conditions))
+
+(defn OR [& conditions]
+  (apply vector :OR conditions))
+
+(defn EQ [field value]
+  [:EQ field value])

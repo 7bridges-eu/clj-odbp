@@ -12,13 +12,14 @@
 ;; limitations under the License.
 
 (ns clj-odbp.dsl.format
-  (:require [clj-odbp.dsl.utils :as utils]))
+  (:require [clj-odbp.dsl.utils :as utils]
+            [clojure.string :as str]
+            [clojure.data.json :as json]))
 
 (def statements-order
   {:select [:select :from :where]
-   :update [:update :set :where]
-   :insert-set [:insert-set :set]
-   :insert-from [:insert-from :from]})
+   :update [:update :set :values :where]
+   :insert [:insert :set]})
 
 (defn- build-sql-with-order [m order]
   (->> (reduce
@@ -39,19 +40,18 @@
     (contains? m :update)
     (build-sql-with-order m (:update statements-order))
 
-    (contains? m :insert-from)
-    (build-sql-with-order m (:insert-from statements-order))
+    (contains? m :insert)
+    (build-sql-with-order m (:insert statements-order))
 
-    (contains? m :insert-set)
-    (build-sql-with-order m (:insert-set statements-order))))
+    :else
+    (throw "No complete statement found.")))
 
 (defmulti ->sql-str key)
 
 (defn- create-sql-elements [m]
   (reduce
    (fn [a e]
-     (assoc a (key e)
-            (->sql-str e)))
+     (assoc a (key e) (->sql-str e)))
    {}
    m))
 
@@ -61,15 +61,23 @@
        build-sql))
 
 (defmethod ->sql-str :insert [data]
-  (let [{class :class fields :fields} (second data)]
-    (->> (utils/join-comma fields)
-         utils/add-parens
-         (str "INSERT INTO " class " "))))
+  (let [class (second data)]
+    (str "INSERT INTO " class)))
+
+(defmethod ->sql-str :set [data]
+  (let [fields (second data)]
+    (->> fields
+         utils/map-to-fields-set
+         (str "SET "))))
 
 (defmethod ->sql-str :select [data]
   (let [fields (second data)]
     (->> (utils/join-comma fields)
          (str "SELECT "))))
+
+(defmethod ->sql-str :update [data]
+  (let [class (second data)]
+    (str "UPDATE " class)))
 
 (defmethod ->sql-str :from [data]
   (let [table (second data)]
@@ -79,3 +87,40 @@
 
       (map? table)
       (str "FROM (" (->sql table) ")"))))
+
+(defn- reduce-conditions [conditions]
+  (reduce
+   (fn [a condition]
+     (let [type (first condition)
+           params (rest condition)]
+       (conj a (->sql-str (utils/map-entry type params)))))
+   []
+   conditions))
+
+(defmethod ->sql-str :where [data]
+  (let [conditions (second data)]
+    (->> conditions
+         reduce-conditions
+         (apply str)
+         (str "WHERE "))))
+
+(defmethod ->sql-str :AND [data]
+  (let [conditions (second data)]
+    (->> conditions
+         reduce-conditions
+         (interpose " AND ")
+         (apply str)
+         utils/add-parens)))
+
+(defmethod ->sql-str :OR [data]
+  (let [conditions (second data)]
+    (->> conditions
+         reduce-conditions
+         (interpose " OR ")
+         (apply str)
+         utils/add-parens)))
+
+(defmethod ->sql-str :EQ [data]
+  (let [[field value] (second data)]
+    (-> (str field " = " (json/json-str value))
+        utils/add-parens)))
