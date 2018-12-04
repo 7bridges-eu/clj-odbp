@@ -15,7 +15,7 @@
 (ns clj-odbp.constants)
 
 (def ^:const driver-name "clj-odbp")
-(def ^:const driver-version "0.2.2")
+(def ^:const driver-version "0.2.3")
 (def ^:const protocol-version 36)
 (def ^:const serialization-name "onet_ser_v0")
 

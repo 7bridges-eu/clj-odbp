@@ -11,9 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * [#16](https://github.com/7bridges-eu/clj-odbp/issues/16) Support multiple
   connections to different db instances.
 
+## [0.2.3] - (2018-12-04)
+
+### Bugs fixed
+
+* [#21](https://github.com/7bridges-eu/clj-odbp/issues/21) require clj-odbp.core
+  error
+
 ## [0.2.2] - (2017-11-16)
 
-### Bugs Fixed
+### Bugs fixed
 
 * [#18](https://github.com/7bridges-eu/clj-odbp/issues/18) Handle 'n' response
   type in REQUEST_COMMAND
