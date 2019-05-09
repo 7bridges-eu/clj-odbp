@@ -1,7 +1,6 @@
 <p align="center">
-<a href="https://7bridges.eu" title="7bridges.eu s.r.l.">
-<img src="https://7bridges.eu/img/logo-inline.png" alt="7bridges clj-odbp"
-width="500px" height="122px"/></a>
+    <img src="https://github.com/7bridges-eu/clj-odbp/blob/master/resources/logo.png" alt="7bridges clj-odbp"
+    width="500px" height="122px"/>
 </p>
 
 # clj-odbp
