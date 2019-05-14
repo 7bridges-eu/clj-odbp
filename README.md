@@ -1,5 +1,5 @@
 <p align="center">
-    <strong>This project is no longer maintained, because we no longer interested in OrientDB.</strong>
+    <strong>This project is no longer maintained, because we are no longer interested in OrientDB.</strong>
 </p>
 
 <p align="center">
