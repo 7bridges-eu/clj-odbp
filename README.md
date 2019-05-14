@@ -1,3 +1,5 @@
+**This project is no longer maintened, because we no longer use OrientDB.**
+
 <p align="center">
     <img src="https://github.com/7bridges-eu/clj-odbp/blob/master/resources/logo.png" alt="7bridges clj-odbp"
     width="500px" height="122px"/>
